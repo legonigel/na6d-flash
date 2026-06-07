@@ -624,6 +624,35 @@ async function connectDFU() {
         dfuDevice.logError = logError;
         dfuDevice.logProgress = logProgress;
         
+        if (isRuntimeMode) {
+            logWarning("Device is in DFU Runtime mode (normal configuration). Automatically rebooting cable into DFU bootloader mode...");
+            await dfuDevice.detach();
+            logSuccess("Detach command sent successfully. Rebooting...");
+            
+            // Close interface
+            await dfuDevice.close();
+            logInfo("DFU runtime interface closed.");
+            
+            // Wait for disconnect
+            try {
+                await dfuDevice.waitDisconnected(5000);
+                logSuccess("Device disconnected.");
+            } catch (err) {
+                logWarning("Timeout waiting for disconnect.");
+            }
+            
+            dfuDevice = null;
+            
+            // Wait 2.5 seconds for reboot and USB enumeration
+            logInfo("Waiting for DFU bootloader to enumerate...");
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            
+            // Re-trigger connection!
+            if (btn) btn.disabled = false;
+            await connectDFU();
+            return;
+        }
+        
         document.querySelector("#dfu-status").textContent = "Connected";
         document.querySelector("#dfu-status").className = "status-connected";
         if (btn) {
@@ -635,27 +664,13 @@ async function connectDFU() {
             `Device: ${dfuDevice.device_.productName || "Unknown"}\n` +
             `Manufacturer: ${dfuDevice.device_.manufacturerName || "Unknown"}\n` +
             `Serial: ${dfuDevice.device_.serialNumber || "Unknown"}\n` +
-            `Mode: ${isRuntimeMode ? "Runtime (Configuration Mode)" : "DFU (Flashing Mode)"}\n` +
+            `Mode: DFU (Flashing Mode)\n` +
             (memorySummary ? `${memorySummary}\n` : "");
             
-        const detachBtn = document.querySelector("#btn-detach-dfu");
-        if (isRuntimeMode) {
-            logWarning("Device is in DFU Runtime mode (normal configuration). Click 'Enter Flashing Mode (Detach)' to reboot the cable to DFU bootloader mode.");
-            if (detachBtn) {
-                detachBtn.style.display = "block";
-                detachBtn.disabled = false;
-            }
-            enableDFUControls(false); // Keep flash/upload disabled since we aren't in DFU bootloader mode
-        } else {
-            if (detachBtn) {
-                detachBtn.style.display = "none";
-                detachBtn.disabled = true;
-            }
-            enableDFUControls(true);
-            const firmwareSelect = document.querySelector("#firmware-select");
-            if (firmwareSelect && firmwareSelect.value !== "custom") {
-                await loadServerFirmware(firmwareSelect.value);
-            }
+        enableDFUControls(true);
+        const firmwareSelect = document.querySelector("#firmware-select");
+        if (firmwareSelect && firmwareSelect.value !== "custom") {
+            await loadServerFirmware(firmwareSelect.value);
         }
         logSuccess("DFU Interface opened successfully.");
     } catch (err) {
@@ -680,13 +695,6 @@ function disconnectDFU() {
             btn.disabled = false;
         }
         document.querySelector("#dfu-device-info").textContent = "";
-        
-        const detachBtn = document.querySelector("#btn-detach-dfu");
-        if (detachBtn) {
-            detachBtn.disabled = true;
-            detachBtn.style.display = "none";
-        }
-        
         enableDFUControls(false);
     };
 
@@ -706,36 +714,8 @@ function disconnectDFU() {
     }
 }
 
-async function detachDevice() {
-    if (!dfuDevice) return;
-    const btn = document.querySelector("#btn-detach-dfu");
-    if (btn) btn.disabled = true;
-    try {
-        logInfo("Sending DFU detach command to reboot device into DFU mode...");
-        await dfuDevice.detach();
-        logSuccess("Detach command sent successfully. Device should reboot into DFU mode.");
-        
-        // Close interface
-        await dfuDevice.close();
-        logInfo("DFU runtime interface closed.");
-        
-        // Wait for disconnect
-        try {
-            await dfuDevice.waitDisconnected(5000);
-            logSuccess("Device disconnected.");
-        } catch (err) {
-            logWarning("Timeout waiting for disconnect.");
-        }
-        
-        disconnectDFU();
-    } catch (err) {
-        logError(`Failed to detach: ${err}`);
-        if (btn) btn.disabled = false;
-    }
-}
-
 function enableDFUControls(enable) {
-    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu):not(#btn-detach-dfu)");
+    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu)");
     controls.forEach(el => el.disabled = !enable);
     
     // Also manage the drop zone visibility and input disabled state based on selection
@@ -920,7 +900,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    document.querySelector("#btn-detach-dfu").addEventListener("click", detachDevice);
     
     // Handle DFU parameter changes
     document.querySelector("#dfu-xfer-size").addEventListener("change", (e) => {
