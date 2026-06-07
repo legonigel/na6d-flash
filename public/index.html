@@ -60,19 +60,22 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- PTT Configuration -->
-                        <div class="form-section">
-                            <div class="form-section-title">PTT Sources (IOMUX Configuration)</div>
-                            
-                            <!-- Preset helper row -->
-                            <div class="preset-row">
-                                <span style="font-size:0.75rem; color:var(--text-muted); align-self:center;">Presets:</span>
+                        <!-- Device Presets -->
+                        <div class="form-section presets-section">
+                            <div class="form-section-title" style="color: var(--text-primary); font-size: 0.95rem; border-bottom: 2px solid var(--color-charcoal); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+                                Quick Presets (Applies settings to fields below)
+                            </div>
+                            <div class="preset-row" style="margin-bottom: 0;">
                                 <button id="preset-defaults" class="btn-preset" disabled>Default Config</button>
                                 <button id="preset-chirp" class="btn-preset" disabled>CHIRP Programming (RTS+DTR)</button>
                                 <button id="preset-soundcard" class="btn-preset" disabled>Digital Modes (CM108 GPIO 1)</button>
                                 <button id="preset-asl" class="btn-preset" disabled>AllStarLink (CM108 Emulation)</button>
                             </div>
+                        </div>
+                        
+                        <!-- PTT Configuration -->
+                        <div class="form-section">
+                            <div class="form-section-title">PTT Sources (IOMUX Configuration)</div>
                             
                             <div class="form-group" style="margin-bottom: 1.5rem;">
                                 <label style="margin-bottom: 0.5rem; display: block;">PTT1 Trigger Sources (Register AIOC_IOMUX0)</label>
