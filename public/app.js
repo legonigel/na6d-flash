@@ -939,15 +939,17 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#preset-defaults").addEventListener("click", () => {
         // Load default configuration presets in the UI
         document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
-        document.querySelector("#ptt1-cm108gpio1").checked = true;
+        document.querySelector("#ptt1-cm108gpio3").checked = true;
+        document.querySelector("#ptt1-serialdtrnrts").checked = true;
+        document.querySelector("#ptt2-cm108gpio4").checked = true;
         document.querySelector("#audio-rx-gain").value = "0";
         document.querySelector("#audio-tx-boost").checked = false;
-        document.querySelector("#vcos-level").value = "0";
-        document.querySelector("#vcos-timeout").value = "0";
-        document.querySelector("#vptt-level").value = "0";
-        document.querySelector("#vptt-timeout").value = "0";
-        document.querySelector("#fox-volume").value = "0";
-        document.querySelector("#fox-wpm").value = "0";
+        document.querySelector("#vcos-level").value = "256";
+        document.querySelector("#vcos-timeout").value = "3200";
+        document.querySelector("#vptt-level").value = "16";
+        document.querySelector("#vptt-timeout").value = "320";
+        document.querySelector("#fox-volume").value = "32768";
+        document.querySelector("#fox-wpm").value = "20";
         document.querySelector("#fox-interval").value = "0";
         document.querySelector("#fox-message").value = "";
         document.querySelector("#usb-vid").value = "0x1209";
