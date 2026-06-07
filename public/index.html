@@ -1,12 +1,267 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading">Hello, World!</h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-	</body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NA6D AIOC Web Flasher & Configurator</title>
+    <meta name="description" content="Configure PTT sources, audio gain, virtual COS, and flash firmware onto the All-In-One Cable (AIOC) directly from your web browser using WebUSB and WebHID." />
+    
+    <!-- Premium Stylesheet -->
+    <link rel="stylesheet" href="index.css" />
+    
+    <!-- External libraries copied locally -->
+    <script src="dfu.js"></script>
+    <script src="dfuse.js"></script>
+    <script src="FileSaver.js"></script>
+    
+    <!-- Main App Logic -->
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Browser incompatibility banner -->
+        <div id="browser-warning" class="warning-banner" hidden>
+            Your browser does not support WebUSB or WebHID. Please use Google Chrome or Microsoft Edge.
+        </div>
+        
+        <!-- Header -->
+        <header>
+            <h1>AIOC Flasher & Configurator</h1>
+            <p>Direct browser-based firmware flashing and hardware register management for your All-In-One Cable</p>
+        </header>
+        
+        <!-- Tab navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="hid-panel" id="tab-config">Register Configuration (HID)</button>
+            <button class="tab-btn" data-tab="dfu-panel" id="tab-flash">Firmware Flashing (DFU)</button>
+        </div>
+        
+        <!-- Main Layout Grid -->
+        <div class="layout-grid">
+            
+            <!-- Left Side: Interactive Panels -->
+            <main>
+                
+                <!-- HID Panel -->
+                <div id="hid-panel" class="panel active">
+                    <div class="card glass">
+                        <div class="card-title">
+                            <span>Configuration Registers</span>
+                            <span id="hid-status" class="status-pill status-disconnected">Disconnected</span>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <button id="btn-connect-hid" class="btn btn-primary">Connect Configurator (HID)</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- PTT Configuration -->
+                        <div class="form-section">
+                            <div class="form-section-title">PTT Sources (IOMUX Configuration)</div>
+                            
+                            <!-- Preset helper row -->
+                            <div class="preset-row">
+                                <span style="font-size:0.75rem; color:var(--text-muted); align-self:center;">Presets:</span>
+                                <button id="preset-chirp" class="btn-preset" disabled>CHIRP Programming (RTS+DTR)</button>
+                                <button id="preset-soundcard" class="btn-preset" disabled>Digital Modes (CM108 GPIO 1)</button>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label style="margin-bottom: 0.5rem; display: block;">PTT1 Trigger Sources (Register AIOC_IOMUX0)</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio3" disabled /> CM108 GPIO 3</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio4" disabled /> CM108 GPIO 4</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtr" disabled /> Serial DTR</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialrts" disabled /> Serial RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtrnrts" disabled /> DTR !RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="margin-bottom: 0.5rem; display: block;">PTT2 Trigger Sources (Register AIOC_IOMUX1)</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio3" disabled /> CM108 GPIO 3</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio4" disabled /> CM108 GPIO 4</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtr" disabled /> Serial DTR</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialrts" disabled /> Serial RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtrnrts" disabled /> DTR !RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR RTS</label>
+                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Audio levels -->
+                        <div class="form-section">
+                            <div class="form-section-title">Audio Configuration</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="audio-rx-gain">RX Audio Gain (AUDIO_RX)</label>
+                                    <select id="audio-rx-gain" disabled>
+                                        <option value="0">1x Gain (0 dB)</option>
+                                        <option value="1">2x Gain (+6 dB)</option>
+                                        <option value="2">4x Gain (+12 dB)</option>
+                                        <option value="3">8x Gain (+18 dB)</option>
+                                        <option value="4">16x Gain (+24 dB)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
+                                    <label class="checkbox-item" style="font-size: 1rem;">
+                                        <input type="checkbox" id="audio-tx-boost" disabled />
+                                        Enable TX Audio Boost (+20 dB, AUDIO_TX)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Squelch and Virtual PTT Levels -->
+                        <div class="form-section">
+                            <div class="form-section-title">Virtual Levels & Timers</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="vcos-level">Virtual COS Threshold Level (VCOS_LVLCTRL)</label>
+                                    <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="vcos-timeout">Virtual COS Squelch Tail Timer (ms, VCOS_TIMCTRL)</label>
+                                    <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 1500" disabled />
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="vptt-level">Virtual PTT Threshold Level (VPTT_LVLCTRL)</label>
+                                    <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="vptt-timeout">Virtual PTT Hold Timer (ms, VPTT_TIMCTRL)</label>
+                                    <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 1000" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Standalone Foxhunt Beacon -->
+                        <div class="form-section">
+                            <div class="form-section-title">Standalone Beacon (Foxhunt Mode, v1.4+)</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
+                                    <input type="text" id="fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="fox-wpm">Morse Speed (WPM)</label>
+                                    <input type="number" id="fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
+                                    <input type="number" id="fox-interval" min="0" placeholder="e.g. 60" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
+                                    <input type="number" id="fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Registers action buttons -->
+                        <div class="actions-grid">
+                            <button id="btn-read-settings" class="btn btn-secondary" disabled>Read Settings</button>
+                            <button id="btn-write-settings" class="btn btn-secondary" disabled>Apply (RAM)</button>
+                            <button id="btn-save-settings" class="btn btn-accent" disabled>Save to Flash (Store)</button>
+                            <button id="btn-load-defaults" class="btn btn-danger" disabled>Reset Defaults</button>
+                            <button id="btn-reboot-hid" class="btn btn-danger" disabled>Reboot Cable</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DFU Panel -->
+                <div id="dfu-panel" class="panel">
+                    <div class="card glass">
+                        <div class="card-title">
+                            <span>Firmware Flasher</span>
+                            <span id="dfu-status" class="status-pill status-disconnected">Disconnected</span>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <button id="btn-connect-dfu" class="btn btn-primary">Connect Flasher (DFU)</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Connected DFU Device summary -->
+                        <div id="dfu-device-info" class="device-info-box" style="display:block;">
+                            Device not connected. Connect the cable in DFU mode to program.
+                            To enter DFU mode: Use the Configurator tab and select "Reboot Cable" while shorting DFU pads, or short the hardware DFU pins and replug.
+                        </div>
+                        
+                        <!-- DFU parameters -->
+                        <div class="form-section">
+                            <div class="form-section-title">DFU Transfer Settings</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dfu-xfer-size">Block size (bytes)</label>
+                                    <input type="number" id="dfu-xfer-size" value="1024" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="dfu-start-addr">DfuSe Start Address (hex)</label>
+                                    <input type="text" id="dfu-start-addr" value="0x08000000" pattern="0x[A-Fa-f0-9]+" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label for="dfu-upload-size">Upload Backup Size (bytes)</label>
+                                    <input type="number" id="dfu-upload-size" value="131072" min="1" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Firmware download (Write to device) -->
+                        <div class="form-section">
+                            <div class="form-section-title">Flash Firmware (Write to Cable)</div>
+                            
+                            <div class="upload-zone disabled" id="drop-zone">
+                                <span class="upload-icon">⤓</span>
+                                <div id="file-info">Drag & drop your firmware file or click to browse</div>
+                                <input type="file" id="dfu-file-input" accept=".bin" disabled />
+                            </div>
+                            
+                            <progress id="dfu-progress" value="0"></progress>
+                            
+                            <div class="form-row" style="margin-top: 1rem;">
+                                <div class="form-group">
+                                    <button id="btn-flash" class="btn btn-accent" disabled>Flash Firmware</button>
+                                </div>
+                                <div class="form-group">
+                                    <button id="btn-upload" class="btn btn-secondary" disabled>Backup (Read Firmware)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- Right Side: Real-Time Event Log Console -->
+            <aside class="console-card card glass">
+                <div class="terminal-header">
+                    <span class="terminal-title">Event Log</span>
+                    <button id="btn-clear-console" class="btn-preset" style="font-size:0.75rem;">Clear Console</button>
+                </div>
+                <div class="terminal-wrapper" id="terminal-output">
+                    <!-- Logs will append here -->
+                </div>
+            </aside>
+        </div>
+    </div>
+</body>
 </html>
