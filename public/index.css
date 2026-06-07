@@ -12,7 +12,7 @@
     --bg-base: #fff8e7;          /* Warm Cream/Beige */
     --bg-card: #ffffff;          /* Pure White for cards */
     --bg-input: #ffffff;         /* Input Background */
-    --bg-terminal: #111111;      /* Dark terminal view for logs */
+    --bg-terminal: #fffdf9;      /* Warm white terminal view for logs */
     
     --color-charcoal: #2a2b2a;   /* Deep Dark Charcoal for text and borders */
     --color-blue: #4b9ad2;       /* Sky/Steel Blue for primary buttons/accents */
@@ -619,10 +619,10 @@ progress::-moz-progress-bar {
     overflow-y: auto;
     max-height: 600px;
     min-height: 400px;
-    box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.9);
+    box-shadow: 4px 4px 0px var(--color-charcoal);
 }
 
-/* Log Levels colors - high contrast over dark terminal */
+/* Log Levels colors - high contrast over light terminal */
 .log-entry {
     margin-bottom: 0.5rem;
     line-height: 1.4;
@@ -630,31 +630,31 @@ progress::-moz-progress-bar {
 }
 
 .log-time {
-    color: #666666;
+    color: var(--text-muted);
     user-select: none;
     margin-right: 8px;
 }
 
 .log-info .log-msg {
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 .log-warning .log-msg {
-    color: #fde047; /* Yellow */
+    color: #b45309; /* Dark Amber/Orange */
 }
 
 .log-error .log-msg {
-    color: #fca5a5; /* Red */
+    color: #b91c1c; /* Dark Red */
     font-weight: 700;
 }
 
 .log-success .log-msg {
-    color: #4ade80; /* Green */
+    color: #047857; /* Dark Green */
     font-weight: 700;
 }
 
 .log-debug .log-msg {
-    color: #888888;
+    color: var(--text-muted);
 }
 
 /* Custom Scrollbar for Terminal */
@@ -663,15 +663,15 @@ progress::-moz-progress-bar {
 }
 
 .terminal-wrapper::-webkit-scrollbar-track {
-    background: #1e1e1e;
+    background: rgba(255, 248, 231, 0.4);
     border-left: var(--border-width-thin) solid var(--color-charcoal);
 }
 
 .terminal-wrapper::-webkit-scrollbar-thumb {
-    background: #444444;
-    border: 2px solid #1e1e1e;
+    background: #cbd5e1;
+    border: 2px solid #fff8e7;
 }
 
 .terminal-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #666666;
+    background: var(--color-shadow);
 }
