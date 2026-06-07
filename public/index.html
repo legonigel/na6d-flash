@@ -129,72 +129,79 @@
                         </div>
                         
                         <!-- Squelch and Virtual PTT Levels -->
-                        <div class="form-section">
-                            <div class="form-section-title">Virtual Levels & Timers</div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="vcos-level">Virtual COS Threshold Level (VCOS_LVLCTRL)</label>
-                                    <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                        <details style="margin-top: 1.5rem;">
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Virtual Levels & Timers</summary>
+                            <div style="margin-top: 1.25rem;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="vcos-level">Virtual COS Threshold Level (VCOS_LVLCTRL)</label>
+                                        <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vcos-timeout">Virtual COS Squelch Tail Timer (ms, VCOS_TIMCTRL)</label>
+                                        <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 1500" disabled />
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="vcos-timeout">Virtual COS Squelch Tail Timer (ms, VCOS_TIMCTRL)</label>
-                                    <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 1500" disabled />
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="vptt-level">Virtual PTT Threshold Level (VPTT_LVLCTRL)</label>
+                                        <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vptt-timeout">Virtual PTT Hold Timer (ms, VPTT_TIMCTRL)</label>
+                                        <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 1000" disabled />
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="vptt-level">Virtual PTT Threshold Level (VPTT_LVLCTRL)</label>
-                                    <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535" disabled />
-                                </div>
-                                <div class="form-group">
-                                    <label for="vptt-timeout">Virtual PTT Hold Timer (ms, VPTT_TIMCTRL)</label>
-                                    <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 1000" disabled />
-                                </div>
-                            </div>
-                        </div>
+                        </details>
                         
                         <!-- Standalone Foxhunt Beacon -->
-                        <div class="form-section">
-                            <div class="form-section-title">Standalone Beacon (Foxhunt Mode, v1.4+)</div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
-                                    <input type="text" id="fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
+                        <details>
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Standalone Beacon (Foxhunt Mode, v1.4+)</summary>
+                            <div style="margin-top: 1.25rem;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
+                                        <input type="text" id="fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fox-wpm">Morse Speed (WPM)</label>
+                                        <input type="number" id="fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="fox-wpm">Morse Speed (WPM)</label>
-                                    <input type="number" id="fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
+                                        <input type="number" id="fox-interval" min="0" placeholder="e.g. 60" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
+                                        <input type="number" id="fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
-                                    <input type="number" id="fox-interval" min="0" placeholder="e.g. 60" disabled />
-                                </div>
-                                <div class="form-group">
-                                    <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
-                                    <input type="number" id="fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
-                                </div>
-                            </div>
-                        </div>
+                        </details>
+
                         <!-- USB VID/PID Override -->
-                        <div class="form-section">
-                            <div class="form-section-title">USB VID/PID Override (Caution)</div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="usb-vid">Custom Vendor ID (hex, e.g. 0x1209)</label>
-                                    <input type="text" id="usb-vid" placeholder="0x1209" disabled />
+                        <details style="margin-bottom: 2rem;">
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">USB VID/PID Override (Caution)</summary>
+                            <div style="margin-top: 1.25rem;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="usb-vid">Custom Vendor ID (hex, e.g. 0x1209)</label>
+                                        <input type="text" id="usb-vid" placeholder="0x1209" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="usb-pid">Custom Product ID (hex, e.g. 0x7388)</label>
+                                        <input type="text" id="usb-pid" placeholder="0x7388" disabled />
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="usb-pid">Custom Product ID (hex, e.g. 0x7388)</label>
-                                    <input type="text" id="usb-pid" placeholder="0x7388" disabled />
-                                </div>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+                                    ⚠️ Changing USB VID/PID takes effect after reboot. If you change this, your OS/browser will detect a different device.
+                                </p>
                             </div>
-                            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
-                                ⚠️ Changing USB VID/PID takes effect after reboot. If you change this, your OS/browser will detect a different device.
-                            </p>
-                        </div>
+                        </details>
                         
                         <!-- Registers action buttons -->
                         <div class="actions-grid">
