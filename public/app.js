@@ -708,11 +708,10 @@ async function connectDFU() {
                 if (selected_device.device_.vendorId === 0x1209) {
                     warningHtml = `
                         <strong>Windows Driver Issue Detected</strong>
-                        <p>Your AIOC is in normal mode, but the browser is blocked trying to access its DFU Runtime interface.</p>
+                        <p>Your AIOC is in normal mode, but the browser is blocked trying to access its DFU Runtime interface (Interface 6).</p>
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
                         <ul>
-                            <li><strong>Option A:</strong> Switch to the <em>Device Settings (HID)</em> tab, connect via HID, and click <strong>Reboot Cable</strong>.</li>
-                            <li><strong>Option B:</strong> Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>All-In-One-Cable (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
+                            <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>All-In-One-Cable (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
                         </ul>
                     `;
                 } else {
