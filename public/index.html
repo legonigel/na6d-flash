@@ -63,6 +63,9 @@
                         <!-- Status Alert Box -->
                         <div id="hid-alert" class="alert-box" hidden></div>
                         
+                        <!-- Unsaved changes & status tracking banner -->
+                        <div id="settings-status-banner" class="alert-box" hidden></div>
+                        
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
@@ -223,9 +226,9 @@
                         <!-- Registers action buttons -->
                         <div class="actions-grid">
                             <button id="btn-read-settings" class="btn btn-secondary" disabled>Read Settings</button>
-                            <button id="btn-write-settings" class="btn btn-secondary" disabled>Apply (RAM)</button>
-                            <button id="btn-save-settings" class="btn btn-accent" disabled>Save to Flash (Store)</button>
-                            <button id="btn-load-defaults" class="btn btn-danger" disabled>Reset Defaults</button>
+                            <button id="btn-write-settings" class="btn btn-secondary" disabled>Apply Temporarily (Resets on Unplug)</button>
+                            <button id="btn-save-settings" class="btn btn-accent" disabled>Save Permanently to AIOC</button>
+                            <button id="btn-load-defaults" class="btn btn-danger" disabled>Restore Factory Defaults</button>
                             <button id="btn-reboot-hid" class="btn btn-danger" disabled>Restart AIOC</button>
                         </div>
                     </div>
@@ -242,23 +245,72 @@
                         <!-- Status Alert Box -->
                         <div id="dfu-alert" class="alert-box" hidden></div>
                         
-                        <div class="form-section">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <button id="btn-connect-dfu" class="btn btn-primary">Connect AIOC for Update</button>
+                        <!-- Step 1: Connect -->
+                        <div class="stepper-step" id="step-connect">
+                            <div class="stepper-header">
+                                <span class="stepper-badge">1</span>
+                                <span class="stepper-title">Connect your AIOC</span>
+                            </div>
+                            <div class="form-section" style="border-bottom: none; padding-bottom: 0; margin-bottom: 1rem;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <button id="btn-connect-dfu" class="btn btn-primary">Connect AIOC for Update</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Connected DFU Device summary -->
-                        <div id="dfu-device-info" class="device-info-box" style="display:block;">Device not connected. Connect the AIOC in update mode to program.
+                            <!-- Connected DFU Device summary -->
+                            <div id="dfu-device-info" class="device-info-box" style="display:block;">Device not connected. Connect the AIOC in update mode to program.
  
  <strong>How to connect:</strong>
  • <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect AIOC for Update</em> above and select your device in the browser prompt. The app will automatically restart your AIOC into update mode.
  • <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on the Configure Settings tab).</div>
+                        </div>
+
+                        <!-- Step 2: Select Firmware -->
+                        <div class="stepper-step inactive" id="step-select">
+                            <div class="stepper-header">
+                                <span class="stepper-badge">2</span>
+                                <span class="stepper-title">Select Firmware Version</span>
+                            </div>
+                            <div class="form-group firmware-select-group">
+                                <label for="firmware-select">Select Firmware Version</label>
+                                <select id="firmware-select" disabled>
+                                    <option value="firmware/aioc-v1.4.1.bin">AIOC Firmware v1.4.1 (Recommended)</option>
+                                    <option value="firmware/aioc-v1.4.0.bin">AIOC Firmware v1.4.0</option>
+                                    <option value="firmware/aioc-v1.3.0.bin">AIOC Firmware v1.3.0</option>
+                                    <option value="firmware/aioc-v1.2.0.bin">AIOC Firmware v1.2.0</option>
+                                    <option value="custom">Upload Local File...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="upload-zone disabled" id="drop-zone" hidden>
+                                <span class="upload-icon">⤓</span>
+                                <div id="file-info">Drag & drop your firmware file or click to browse</div>
+                                <input type="file" id="dfu-file-input" accept=".bin" disabled />
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Write Firmware -->
+                        <div class="stepper-step inactive" id="step-write">
+                            <div class="stepper-header">
+                                <span class="stepper-badge">3</span>
+                                <span class="stepper-title">Write Firmware to AIOC</span>
+                            </div>
+                            
+                            <progress id="dfu-progress" value="0"></progress>
+                            
+                            <div class="form-row" style="margin-top: 1rem;">
+                                <div class="form-group">
+                                    <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
+                                </div>
+                                <div class="form-group">
+                                    <button id="btn-upload" class="btn btn-secondary" disabled>Backup (Read Firmware)</button>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <!-- DFU parameters -->
-                        <div class="form-section">
+                        <!-- DFU parameters (Keep collapsed details at the bottom of the card) -->
+                        <div class="form-section" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
                             <details id="dfu-settings-details">
                                 <summary>Advanced DFU Settings</summary>
                                 <div class="form-row" style="margin-top: 1rem;">
@@ -276,39 +328,6 @@
                                     </div>
                                 </div>
                             </details>
-                        </div>
-                        
-                        <!-- Firmware download (Write to device) -->
-                        <div class="form-section">
-                            <div class="form-section-title">Update Firmware (Write to AIOC)</div>
-                            
-                            <div class="form-group firmware-select-group">
-                                <label for="firmware-select">Select Firmware Version</label>
-                                <select id="firmware-select" disabled>
-                                    <option value="firmware/aioc-v1.4.1.bin">AIOC Firmware v1.4.1 (Recommended)</option>
-                                    <option value="firmware/aioc-v1.4.0.bin">AIOC Firmware v1.4.0</option>
-                                    <option value="firmware/aioc-v1.3.0.bin">AIOC Firmware v1.3.0</option>
-                                    <option value="firmware/aioc-v1.2.0.bin">AIOC Firmware v1.2.0</option>
-                                    <option value="custom">Upload Local File...</option>
-                                </select>
-                            </div>
-                            
-                            <div class="upload-zone disabled" id="drop-zone" hidden>
-                                <span class="upload-icon">⤓</span>
-                                <div id="file-info">Drag & drop your firmware file or click to browse</div>
-                                <input type="file" id="dfu-file-input" accept=".bin" disabled />
-                            </div>
-                            
-                            <progress id="dfu-progress" value="0"></progress>
-                            
-                            <div class="form-row" style="margin-top: 1rem;">
-                                <div class="form-group">
-                                    <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
-                                </div>
-                                <div class="form-group">
-                                    <button id="btn-upload" class="btn btn-secondary" disabled>Backup (Read Firmware)</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

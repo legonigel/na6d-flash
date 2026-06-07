@@ -757,3 +757,61 @@ summary:hover {
 .firmware-select-group {
     margin-bottom: 1.5rem;
 }
+
+/* Stepper Styles for Flashing Wizard */
+.stepper-step {
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    background: var(--bg-card);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: opacity var(--transition-normal);
+}
+
+.stepper-step.inactive {
+    opacity: 0.35;
+    pointer-events: none;
+    user-select: none;
+}
+
+.stepper-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+    border-bottom: var(--border-width-thin) solid var(--color-charcoal);
+    padding-bottom: 0.5rem;
+}
+
+.stepper-badge {
+    background: var(--color-orange);
+    color: #ffffff;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    box-shadow: 2px 2px 0px var(--color-charcoal);
+    font-size: 0.95rem;
+}
+
+.stepper-step.inactive .stepper-badge {
+    background: #e2e8f0;
+    color: var(--text-muted);
+}
+
+.stepper-title {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+}
+
+/* Status Banner above Config Buttons */
+#settings-status-banner {
+    margin-bottom: 1.5rem;
+}
+

@@ -74,6 +74,22 @@ let dfuManifestationTolerant = true;
 let dfuTransferSize = 1024;
 let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 
+// Settings state status variables
+let settingsModified = false;
+let settingsAppliedTemporarily = false;
+
+function showSettingsStatus(state, msg) {
+    const banner = document.querySelector("#settings-status-banner");
+    if (!banner) return;
+    if (!state) {
+        banner.hidden = true;
+        return;
+    }
+    banner.hidden = false;
+    banner.className = `alert-box ${state}`;
+    banner.innerHTML = msg;
+}
+
 // Helper sizing function (moved to file-level scope)
 function niceSize(n) {
     if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
@@ -310,6 +326,7 @@ function disconnectHID() {
             }
             enableHIDControls(false);
             clearHIDFields();
+            showSettingsStatus(null);
         }).catch(err => {
             logError(`Error closing HID device: ${err.message}`);
             if (btn) btn.disabled = false;
@@ -408,6 +425,9 @@ async function readAllSettings() {
         originalDevicePid = pid;
         
         logSuccess("Registers loaded successfully.");
+        showSettingsStatus(null);
+        settingsModified = false;
+        settingsAppliedTemporarily = false;
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
     }
@@ -531,6 +551,14 @@ async function writeAllSettings(store = false) {
             logInfo("Saving settings to persistent Flash memory...");
             await sendHIDFeature(hidDevice, Command.STORE, 0, 0);
             logSuccess("Settings permanently saved.");
+            
+            settingsModified = false;
+            settingsAppliedTemporarily = false;
+            showSettingsStatus("success", "<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting.");
+        } else {
+            settingsModified = false;
+            settingsAppliedTemporarily = true;
+            showSettingsStatus("info", "<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently.");
         }
     } catch (err) {
         logError(`Failed writing settings: ${err.message}`);
@@ -544,6 +572,9 @@ async function loadDefaults() {
         await sendHIDFeature(hidDevice, Command.DEFAULTS, 0, 0);
         logSuccess("Factory defaults loaded. Reading registers...");
         await readAllSettings();
+        showSettingsStatus("info", "<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently.");
+        settingsModified = true;
+        settingsAppliedTemporarily = false;
     } catch (err) {
         logError(`Failed to load defaults: ${err.message}`);
     }
@@ -610,9 +641,11 @@ async function loadServerFirmware(url) {
         }
         firmwareFile = await response.arrayBuffer();
         logSuccess(`Firmware loaded: ${url.split('/').pop()} (${firmwareFile.byteLength} bytes)`);
+        document.querySelector("#step-write")?.classList.remove("inactive");
     } catch (err) {
         logError(`Failed to load firmware from server: ${err.message}`);
         firmwareFile = null;
+        document.querySelector("#step-write")?.classList.add("inactive");
     }
 }
 
@@ -824,6 +857,7 @@ async function connectDFU() {
             (memorySummary ? `${memorySummary}\n` : "");
             
         enableDFUControls(true);
+        document.querySelector("#step-select")?.classList.remove("inactive");
         const firmwareSelect = document.querySelector("#firmware-select");
         if (firmwareSelect && firmwareSelect.value !== "custom") {
             await loadServerFirmware(firmwareSelect.value);
@@ -854,6 +888,8 @@ function disconnectDFU() {
         }
         document.querySelector("#dfu-device-info").textContent = "";
         enableDFUControls(false);
+        document.querySelector("#step-select")?.classList.add("inactive");
+        document.querySelector("#step-write")?.classList.add("inactive");
     };
 
     if (dfuDevice) {
@@ -1086,6 +1122,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setConfigDetailsOpen(false);
         setActivePreset("#preset-defaults");
         logInfo("Applied preset: Default HID Configuration");
+        
+        settingsModified = true;
+        settingsAppliedTemporarily = false;
+        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
     });
 
     document.querySelector("#preset-chirp").addEventListener("click", () => {
@@ -1097,6 +1137,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setConfigDetailsOpen(false);
         setActivePreset("#preset-chirp");
         logInfo("Applied preset: CHIRP Programming (RTS & DTR)");
+        
+        settingsModified = true;
+        settingsAppliedTemporarily = false;
+        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
     });
     
     document.querySelector("#preset-soundcard").addEventListener("click", () => {
@@ -1107,6 +1151,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setConfigDetailsOpen(false);
         setActivePreset("#preset-soundcard");
         logInfo("Applied preset: Soundcard Digital Modes (CM108 GPIO 1)");
+        
+        settingsModified = true;
+        settingsAppliedTemporarily = false;
+        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
     });
 
     document.querySelector("#preset-asl").addEventListener("click", () => {
@@ -1120,6 +1168,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setConfigDetailsOpen(false);
         setActivePreset("#preset-asl");
         logInfo("Applied preset: AllStarLink (CM108 Emulation)");
+        
+        settingsModified = true;
+        settingsAppliedTemporarily = false;
+        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
     });
 
     document.querySelector("#preset-custom").addEventListener("click", () => {
@@ -1130,8 +1182,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Clear active presets on any manual config changes
     document.querySelectorAll("#hid-panel input, #hid-panel select").forEach(input => {
-        input.addEventListener("input", clearActivePresets);
-        input.addEventListener("change", clearActivePresets);
+        const markDirty = () => {
+            clearActivePresets();
+            if (!settingsModified) {
+                settingsModified = true;
+                settingsAppliedTemporarily = false;
+                showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> You have edited settings on this page that are not yet sent to the AIOC. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below.");
+            }
+        };
+        input.addEventListener("input", markDirty);
+        input.addEventListener("change", markDirty);
     });
     
     // 4. WebUSB DFU Flashing buttons
@@ -1159,6 +1219,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileInput = document.querySelector("#dfu-file-input");
     fileInput.addEventListener("change", (e) => {
         firmwareFile = null;
+        document.querySelector("#step-write")?.classList.add("inactive");
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             document.querySelector("#file-info").textContent = `Selected: ${file.name} (${niceSize(file.size)})`;
@@ -1167,6 +1228,7 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.onload = () => {
                 firmwareFile = reader.result;
                 logInfo(`Firmware file loaded: ${file.name} (${file.size} bytes)`);
+                document.querySelector("#step-write")?.classList.remove("inactive");
             };
             reader.readAsArrayBuffer(file);
         } else {
@@ -1183,6 +1245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     firmwareSelect.addEventListener("change", async () => {
         firmwareFile = null;
+        document.querySelector("#step-write")?.classList.add("inactive");
         if (firmwareSelect.value === "custom") {
             dropZone.hidden = false;
             if (fileInput) fileInput.disabled = false;
