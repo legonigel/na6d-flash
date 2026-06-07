@@ -492,6 +492,16 @@ button:disabled {
     color: #ffffff;
 }
 
+.btn-preset.active:not(:disabled) {
+    background: var(--color-orange);
+    color: #ffffff;
+}
+
+.btn-preset.active:hover:not(:disabled) {
+    background: var(--color-orange);
+    color: #ffffff;
+}
+
 /* Action Buttons Grid */
 .actions-grid {
     display: grid;

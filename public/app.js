@@ -276,6 +276,9 @@ async function readAllSettings() {
     try {
         logInfo("Reading settings from AIOC registers...");
         
+        // Clear active presets class on read
+        document.querySelectorAll(".btn-preset").forEach(btn => btn.classList.remove("active"));
+        
         // PTT1 (IOMUX0) & PTT2 (IOMUX1)
         const ptt1Val = await readRegister(hidDevice, Register.AIOC_IOMUX0);
         const ptt2Val = await readRegister(hidDevice, Register.AIOC_IOMUX1);
@@ -935,13 +938,33 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-load-defaults").addEventListener("click", loadDefaults);
     document.querySelector("#btn-reboot-hid").addEventListener("click", rebootDevice);
     
-    // PTT Preset Helpers
-    document.querySelector("#preset-defaults").addEventListener("click", () => {
-        // Load default configuration presets in the UI
+    // Device Presets & Configuration View Helpers
+    function setActivePreset(buttonId) {
+        document.querySelectorAll(".btn-preset").forEach(btn => {
+            btn.classList.remove("active");
+        });
+        if (buttonId) {
+            const el = document.querySelector(buttonId);
+            if (el) el.classList.add("active");
+        }
+    }
+
+    function setConfigDetailsOpen(open) {
+        document.querySelectorAll("#hid-panel details").forEach(el => {
+            el.open = open;
+        });
+    }
+
+    function clearActivePresets() {
+        document.querySelectorAll(".btn-preset").forEach(btn => {
+            btn.classList.remove("active");
+        });
+    }
+
+    function applyBaseDefaults() {
+        // Clear all checkboxes
         document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
-        document.querySelector("#ptt1-cm108gpio3").checked = true;
-        document.querySelector("#ptt1-serialdtrnrts").checked = true;
-        document.querySelector("#ptt2-cm108gpio4").checked = true;
+        // Reset inputs to clean system defaults
         document.querySelector("#audio-rx-gain").value = "0";
         document.querySelector("#audio-tx-boost").checked = false;
         document.querySelector("#vcos-level").value = "256";
@@ -954,36 +977,64 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector("#fox-message").value = "";
         document.querySelector("#usb-vid").value = "0x1209";
         document.querySelector("#usb-pid").value = "0x7388";
+    }
+
+    // Register presets event listeners
+    document.querySelector("#preset-defaults").addEventListener("click", () => {
+        applyBaseDefaults();
+        document.querySelector("#ptt1-cm108gpio3").checked = true;
+        document.querySelector("#ptt1-serialdtrnrts").checked = true;
+        document.querySelector("#ptt2-cm108gpio4").checked = true;
+        
+        setConfigDetailsOpen(false);
+        setActivePreset("#preset-defaults");
         logInfo("Applied preset: Default HID Configuration");
     });
 
     document.querySelector("#preset-chirp").addEventListener("click", () => {
+        applyBaseDefaults();
         // CHIRP typically uses Serial RTS/DTR
-        document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
         document.querySelector("#ptt1-serialrts").checked = true;
         document.querySelector("#ptt1-serialdtr").checked = true;
-        document.querySelector("#usb-vid").value = "0x1209";
-        document.querySelector("#usb-pid").value = "0x7388";
-        logInfo("Applied PTT1 preset: CHIRP Programming (RTS & DTR)");
+        
+        setConfigDetailsOpen(false);
+        setActivePreset("#preset-chirp");
+        logInfo("Applied preset: CHIRP Programming (RTS & DTR)");
     });
     
     document.querySelector("#preset-soundcard").addEventListener("click", () => {
-        // Soundcard modes typically trigger via CM108 GPIOs
-        document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
+        applyBaseDefaults();
+        // Soundcard modes typically trigger via CM108 GPIO 1
         document.querySelector("#ptt1-cm108gpio1").checked = true;
-        document.querySelector("#usb-vid").value = "0x1209";
-        document.querySelector("#usb-pid").value = "0x7388";
-        logInfo("Applied PTT1 preset: Soundcard Digital Modes (CM108 GPIO 1)");
+        
+        setConfigDetailsOpen(false);
+        setActivePreset("#preset-soundcard");
+        logInfo("Applied preset: Soundcard Digital Modes (CM108 GPIO 1)");
     });
 
     document.querySelector("#preset-asl").addEventListener("click", () => {
+        applyBaseDefaults();
         // AllStarLink (CM108 Emulation) preset
-        document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
         document.querySelector("#ptt1-cm108gpio1").checked = true;
         document.querySelector("#vcos-timeout").value = "1500";
         document.querySelector("#usb-vid").value = "0x0D8C";
         document.querySelector("#usb-pid").value = "0x000C";
+        
+        setConfigDetailsOpen(false);
+        setActivePreset("#preset-asl");
         logInfo("Applied preset: AllStarLink (CM108 Emulation)");
+    });
+
+    document.querySelector("#preset-custom").addEventListener("click", () => {
+        setConfigDetailsOpen(true);
+        setActivePreset("#preset-custom");
+        logInfo("Custom Mode: Expanded all configuration sections.");
+    });
+
+    // Clear active presets on any manual config changes
+    document.querySelectorAll("#hid-panel input, #hid-panel select").forEach(input => {
+        input.addEventListener("input", clearActivePresets);
+        input.addEventListener("change", clearActivePresets);
     });
     
     // 4. WebUSB DFU Flashing buttons
