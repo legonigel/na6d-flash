@@ -962,6 +962,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
         document.querySelector("#ptt1-serialrts").checked = true;
         document.querySelector("#ptt1-serialdtr").checked = true;
+        document.querySelector("#usb-vid").value = "0x1209";
+        document.querySelector("#usb-pid").value = "0x7388";
         logInfo("Applied PTT1 preset: CHIRP Programming (RTS & DTR)");
     });
     
@@ -969,6 +971,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Soundcard modes typically trigger via CM108 GPIOs
         document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
         document.querySelector("#ptt1-cm108gpio1").checked = true;
+        document.querySelector("#usb-vid").value = "0x1209";
+        document.querySelector("#usb-pid").value = "0x7388";
         logInfo("Applied PTT1 preset: Soundcard Digital Modes (CM108 GPIO 1)");
     });
 
