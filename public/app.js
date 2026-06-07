@@ -149,6 +149,8 @@ async function writeRegister(device, address, value) {
 }
 
 async function connectHID() {
+    const btn = document.querySelector("#btn-connect-hid");
+    if (btn) btn.disabled = true;
     try {
         logInfo("Requesting AIOC HID device...");
         const devices = await navigator.hid.requestDevice({
@@ -157,12 +159,28 @@ async function connectHID() {
         
         if (devices.length === 0) {
             logWarning("No device selected.");
+            if (btn) btn.disabled = false;
             return;
         }
         
         hidDevice = devices[0];
         await hidDevice.open();
         logSuccess(`Connected to HID: ${hidDevice.productName}`);
+        
+        // Validate if this interface supports feature reports (i.e. is the AIOC configuration interface)
+        const hasFeatureReports = hidDevice.collections && hidDevice.collections.some(
+            c => (c.featureReports && c.featureReports.length > 0)
+        );
+        
+        if (!hasFeatureReports) {
+            logError("Connection failed: The selected HID interface does not support feature reports.");
+            logWarning("If your device is running firmware v1.3.0 or later, make sure to select the 'AIOC Configuration' interface in the browser prompt, not 'CM108'.");
+            logWarning("If the configuration interface is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the DFU Flashing tab.");
+            await hidDevice.close();
+            hidDevice = null;
+            if (btn) btn.disabled = false;
+            return;
+        }
         
         // Check magic register
         const magicVal = await readRegister(hidDevice, Register.MAGIC);
@@ -180,28 +198,41 @@ async function connectHID() {
         
         document.querySelector("#hid-status").textContent = "Connected";
         document.querySelector("#hid-status").className = "status-connected";
-        document.querySelector("#btn-connect-hid").textContent = "Disconnect";
+        if (btn) {
+            btn.textContent = "Disconnect";
+            btn.disabled = false;
+        }
         enableHIDControls(true);
         
         // Read everything
         await readAllSettings();
     } catch (err) {
         logError(`HID connection failed: ${err.message}`);
+        if (btn) {
+            btn.textContent = "Connect Configurator (HID)";
+            btn.disabled = false;
+        }
     }
 }
 
 function disconnectHID() {
     if (hidDevice) {
+        const btn = document.querySelector("#btn-connect-hid");
+        if (btn) btn.disabled = true;
         hidDevice.close().then(() => {
             logInfo("HID interface closed.");
             hidDevice = null;
             document.querySelector("#hid-status").textContent = "Disconnected";
             document.querySelector("#hid-status").className = "status-disconnected";
-            document.querySelector("#btn-connect-hid").textContent = "Connect Configurator (HID)";
+            if (btn) {
+                btn.textContent = "Connect Configurator (HID)";
+                btn.disabled = false;
+            }
             enableHIDControls(false);
             clearHIDFields();
         }).catch(err => {
             logError(`Error closing HID device: ${err.message}`);
+            if (btn) btn.disabled = false;
         });
     }
 }
@@ -459,6 +490,8 @@ async function loadServerFirmware(url) {
 }
 
 async function connectDFU() {
+    const btn = document.querySelector("#btn-connect-dfu");
+    if (btn) btn.disabled = true;
     try {
         logInfo("Scanning for USB DFU interfaces...");
         const dfu_devices = await dfu.findAllDfuInterfaces();
@@ -532,7 +565,10 @@ async function connectDFU() {
         
         document.querySelector("#dfu-status").textContent = "Connected";
         document.querySelector("#dfu-status").className = "status-connected";
-        document.querySelector("#btn-connect-dfu").textContent = "Disconnect";
+        if (btn) {
+            btn.textContent = "Disconnect";
+            btn.disabled = false;
+        }
         
         document.querySelector("#dfu-device-info").textContent = 
             `Device: ${dfuDevice.device_.productName || "Unknown"}\n` +
@@ -549,21 +585,31 @@ async function connectDFU() {
     } catch (err) {
         logError(`DFU Connection failed: ${err.message}`);
         disconnectDFU();
+        if (btn) {
+            btn.textContent = "Connect Flasher (DFU)";
+            btn.disabled = false;
+        }
     }
 }
 
 function disconnectDFU() {
     if (dfuDevice) {
+        const btn = document.querySelector("#btn-connect-dfu");
+        if (btn) btn.disabled = true;
         dfuDevice.close().then(() => {
             logInfo("DFU interface closed.");
             dfuDevice = null;
             document.querySelector("#dfu-status").textContent = "Disconnected";
             document.querySelector("#dfu-status").className = "status-disconnected";
-            document.querySelector("#btn-connect-dfu").textContent = "Connect Flasher (DFU)";
+            if (btn) {
+                btn.textContent = "Connect Flasher (DFU)";
+                btn.disabled = false;
+            }
             document.querySelector("#dfu-device-info").textContent = "";
             enableDFUControls(false);
         }).catch(err => {
             logError(`Error closing DFU: ${err.message}`);
+            if (btn) btn.disabled = false;
         });
     }
 }
