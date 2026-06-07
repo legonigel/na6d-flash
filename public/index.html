@@ -59,6 +59,9 @@
                             <span id="hid-status" class="status-pill status-disconnected">Disconnected</span>
                         </div>
                         
+                        <!-- Status Alert Box -->
+                        <div id="hid-alert" class="alert-box" hidden></div>
+                        
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
@@ -235,6 +238,9 @@
                             <span id="dfu-status" class="status-pill status-disconnected">Disconnected</span>
                         </div>
                         
+                        <!-- Status Alert Box -->
+                        <div id="dfu-alert" class="alert-box" hidden></div>
+                        
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
@@ -303,17 +309,6 @@ To enter DFU mode: Use the Device Settings tab and select "Reboot Cable" while s
                     </div>
                 </div>
             </main>
-            
-            <!-- Right Side: Real-Time Event Log Console -->
-            <aside class="console-card card glass">
-                <div class="terminal-header">
-                    <span class="terminal-title">Event Log</span>
-                    <button id="btn-clear-console" class="btn-preset" style="font-size:0.75rem;">Clear Console</button>
-                </div>
-                <div class="terminal-wrapper" id="terminal-output">
-                    <!-- Logs will append here -->
-                </div>
-            </aside>
         </div>
     </div>
 </body>

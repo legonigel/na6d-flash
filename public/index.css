@@ -271,16 +271,9 @@ body {
 
 /* Layout Grid */
 .layout-grid {
-    display: grid;
-    grid-template-columns: 1.25fr 0.75fr;
-    gap: 2.5rem;
-    align-items: start;
-}
-
-@media (max-width: 968px) {
-    .layout-grid {
-        grid-template-columns: 1fr;
-    }
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Panels */
@@ -673,109 +666,63 @@ progress::-moz-progress-bar {
     border-right: var(--border-width-thin) solid var(--color-charcoal);
 }
 
-/* Console Logger */
-.console-card {
-    height: 100%;
+/* Alert Box Notification System */
+.alert-box {
+    padding: 1.25rem;
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-weight: 500;
+    box-shadow: 3px 3px 0px var(--color-charcoal);
     display: flex;
     flex-direction: column;
-    min-height: 550px;
+    gap: 0.5rem;
 }
 
-.terminal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-    border-bottom: var(--border-width-thick) solid var(--color-charcoal);
-    padding-bottom: 1rem;
-}
-
-.terminal-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.terminal-title::before {
-    content: "";
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background: var(--color-orange);
-    border: 1px solid var(--color-charcoal);
-}
-
-.terminal-wrapper {
-    flex: 1;
-    background: var(--bg-terminal);
-    border: var(--border-width-thick) solid var(--color-charcoal);
-    border-radius: 0px;
-    padding: 1.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    overflow-y: auto;
-    max-height: 600px;
-    min-height: 400px;
-    box-shadow: 4px 4px 0px var(--color-charcoal);
-}
-
-/* Log Levels colors - high contrast over light terminal */
-.log-entry {
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
-    word-break: break-all;
-}
-
-.log-time {
-    color: var(--text-muted);
-    user-select: none;
-    margin-right: 8px;
-}
-
-.log-info .log-msg {
+.alert-box.info {
+    background-color: rgba(75, 154, 210, 0.15);
+    border-color: var(--color-blue);
     color: var(--text-primary);
 }
 
-.log-warning .log-msg {
-    color: #b45309; /* Dark Amber/Orange */
+.alert-box.success {
+    background-color: #ecfdf5;
+    border-color: var(--status-success);
+    color: #065f46;
+    font-weight: 600;
 }
 
-.log-error .log-msg {
-    color: #b91c1c; /* Dark Red */
+.alert-box.warning {
+    background-color: #fffbeb;
+    border-color: var(--status-warning);
+    color: #92400e;
+}
+
+.alert-box.error {
+    background-color: #fef2f2;
+    border-color: var(--status-error);
+    color: #991b1b;
+}
+
+.alert-box a {
+    color: var(--color-orange);
+    text-decoration: underline;
     font-weight: 700;
 }
 
-.log-success .log-msg {
-    color: #047857; /* Dark Green */
+.alert-box ul {
+    margin-left: 1.25rem;
+    margin-top: 0.25rem;
+}
+
+.alert-box li {
+    margin-bottom: 0.35rem;
+}
+
+.alert-box strong {
     font-weight: 700;
-}
-
-.log-debug .log-msg {
-    color: var(--text-muted);
-}
-
-/* Custom Scrollbar for Terminal */
-.terminal-wrapper::-webkit-scrollbar {
-    width: 10px;
-}
-
-.terminal-wrapper::-webkit-scrollbar-track {
-    background: rgba(255, 248, 231, 0.4);
-    border-left: var(--border-width-thin) solid var(--color-charcoal);
-}
-
-.terminal-wrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border: 2px solid #fff8e7;
-}
-
-.terminal-wrapper::-webkit-scrollbar-thumb:hover {
-    background: var(--color-shadow);
 }
 
 /* Collapsible Advanced Settings details/summary */

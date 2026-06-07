@@ -72,25 +72,60 @@ let dfuDevice = null;
 let firmwareFile = null;
 let dfuManifestationTolerant = true;
 let dfuTransferSize = 1024;
+let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 
-// Log helper
-function log(type, msg) {
-    const consoleEl = document.querySelector("#terminal-output");
-    if (!consoleEl) return;
-
-    const time = new Date().toLocaleTimeString();
-    const line = document.createElement("p");
-    line.className = `log-entry log-${type}`;
-    line.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-msg">${msg}</span>`;
-    consoleEl.appendChild(line);
-    consoleEl.scrollTop = consoleEl.scrollHeight;
+// Helper sizing function (moved to file-level scope)
+function niceSize(n) {
+    if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
+    if (n >= 1024) return (n / 1024).toFixed(1) + " KB";
+    return n + " B";
 }
 
-function logInfo(msg) { log("info", msg); }
-function logWarning(msg) { log("warning", msg); }
-function logError(msg) { log("error", msg); }
-function logDebug(msg) { log("debug", msg); }
-function logSuccess(msg) { log("success", msg); }
+// Log helper
+function log(type, msg, module = null) {
+    const targetModule = module || currentModule;
+    const time = new Date().toLocaleTimeString();
+    
+    // Strip HTML tags for developer console logs
+    const plainTextMsg = msg.replace(/<[^>]*>/g, "");
+    const consoleMsg = `[${time}] [${targetModule.toUpperCase()}] ${plainTextMsg}`;
+    
+    if (type === "error") {
+        console.error(consoleMsg);
+    } else if (type === "warning") {
+        console.warn(consoleMsg);
+    } else if (type === "debug") {
+        console.debug(consoleMsg);
+    } else {
+        console.log(consoleMsg);
+    }
+
+    // Skip showing debug logs in on-page alerts
+    if (type === "debug") return;
+
+    // Update on-page alert box
+    const alertEl = document.querySelector(`#${targetModule}-alert`);
+    if (alertEl) {
+        alertEl.className = `alert-box ${type}`;
+        alertEl.innerHTML = msg;
+        alertEl.hidden = false;
+    }
+}
+
+function logInfo(msg, module = null) { log("info", msg, module); }
+function logWarning(msg, module = null) { log("warning", msg, module); }
+function logError(msg, module = null) { log("error", msg, module); }
+function logDebug(msg) {
+    console.debug(`[DEBUG] ${msg}`);
+}
+function logSuccess(msg, module = null) { log("success", msg, module); }
+
+function hideAlert(module) {
+    const alertEl = document.querySelector(`#${module}-alert`);
+    if (alertEl) {
+        alertEl.hidden = true;
+    }
+}
 
 // UI Progress logger interface for DFU
 function logProgress(done, total) {
@@ -100,11 +135,23 @@ function logProgress(done, total) {
     if (typeof total === "undefined") {
         progressEl.removeAttribute("value");
         logDebug(`Progress: ${done} bytes`);
+        
+        const alertEl = document.querySelector("#dfu-alert");
+        if (alertEl && !alertEl.hidden) {
+            alertEl.className = "alert-box info";
+            alertEl.innerHTML = `<p>Operation in progress... (Processed <strong>${niceSize(done)}</strong>)</p>`;
+        }
     } else {
         progressEl.max = total;
         progressEl.value = done;
         const pct = Math.round((done / total) * 100);
         logDebug(`Progress: ${done}/${total} bytes (${pct}%)`);
+        
+        const alertEl = document.querySelector("#dfu-alert");
+        if (alertEl && !alertEl.hidden) {
+            alertEl.className = "alert-box info";
+            alertEl.innerHTML = `<p>Operation in progress... <strong>${pct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
+        }
     }
 }
 
@@ -198,9 +245,15 @@ async function connectHID() {
         );
         
         if (!hasFeatureReports) {
-            logError("Connection failed: The selected HID interface does not support feature reports.");
-            logWarning("If your device is running firmware v1.3.0 or later, make sure to select the 'AIOC Configuration' interface in the browser prompt, not 'CM108'.");
-            logWarning("If the configuration interface is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the DFU Flashing tab.");
+            const warningHtml = `
+                <strong>Connection failed: Selected interface does not support configuration.</strong>
+                <p style="margin-top: 0.5rem;">To resolve this:</p>
+                <ul>
+                    <li>If your device is running firmware v1.3.0 or later, make sure to select the <strong>"AIOC Configuration"</strong> interface in the browser prompt (not "CM108").</li>
+                    <li>If "AIOC Configuration" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Firmware Flashing (DFU)</strong> tab.</li>
+                </ul>
+            `;
+            log("error", warningHtml, "hid");
             await hidDevice.close();
             hidDevice = null;
             if (btn) btn.disabled = false;
@@ -246,6 +299,7 @@ function disconnectHID() {
         if (btn) btn.disabled = true;
         hidDevice.close().then(() => {
             logInfo("HID interface closed.");
+            hideAlert("hid");
             hidDevice = null;
             originalDeviceVid = null;
             originalDevicePid = null;
@@ -646,25 +700,35 @@ async function connectDFU() {
             selected_device = dfu_devices[0];
         }
         
-        logInfo("Opening DFU device...");
+        logInfo("Opening DFU device...", "dfu");
         try {
             await withTimeout(selected_device.open(), 2500, "Timeout opening USB device. This usually means Windows is missing the WinUSB driver for the DFU interface.");
         } catch (error) {
             if (error.message.includes("Timeout opening USB device")) {
-                logError(error.message);
-                logWarning("--------------------------------------------------");
-                logWarning("WINDOWS DRIVER ISSUES DETECTED:");
+                let warningHtml = "";
                 if (selected_device.device_.vendorId === 0x1209) {
-                    logWarning("Your AIOC is in normal mode, but Chrome is blocked trying to access its DFU Runtime interface.");
-                    logWarning("To fix this:");
-                    logWarning("Option A: Use the 'Device Settings (HID)' tab to connect via HID (no WinUSB driver needed) and click 'Reboot Cable'.");
-                    logWarning("Option B: Open Zadig (https://zadig.akeo.ie), check 'Options -> List All Devices', select 'All-In-One-Cable (Interface 6)', and install the WinUSB driver.");
+                    warningHtml = `
+                        <strong>Windows Driver Issue Detected</strong>
+                        <p>Your AIOC is in normal mode, but the browser is blocked trying to access its DFU Runtime interface.</p>
+                        <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
+                        <ul>
+                            <li><strong>Option A:</strong> Switch to the <em>Device Settings (HID)</em> tab, connect via HID, and click <strong>Reboot Cable</strong>.</li>
+                            <li><strong>Option B:</strong> Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>All-In-One-Cable (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
+                        </ul>
+                    `;
                 } else {
-                    logWarning("Your AIOC is in DFU bootloader mode, but Windows does not have the WinUSB driver installed for it.");
-                    logWarning("To fix this:");
-                    logWarning("Open Zadig (https://zadig.akeo.ie), check 'Options -> List All Devices', select 'STM32 BOOTLOADER', and install the WinUSB driver.");
+                    warningHtml = `
+                        <strong>Windows Driver Issue Detected</strong>
+                        <p>Your AIOC is in DFU bootloader mode, but Windows does not have the WinUSB driver installed for it.</p>
+                        <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
+                        <ul>
+                            <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>STM32 BOOTLOADER</strong>, and install/replace driver with <strong>WinUSB</strong>.</li>
+                        </ul>
+                    `;
                 }
-                logWarning("--------------------------------------------------");
+                log("error", warningHtml, "dfu");
+            } else {
+                logError(`DFU Connection failed: ${error.message}`, "dfu");
             }
             throw error;
         }
@@ -789,6 +853,7 @@ function disconnectDFU() {
         }
         document.querySelector("#dfu-device-info").textContent = "";
         enableDFUControls(false);
+        hideAlert("dfu");
     };
 
     if (dfuDevice) {
@@ -949,6 +1014,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             tab.classList.add("active");
             document.querySelector(`#${tab.dataset.tab}`).classList.add("active");
+            currentModule = tab.dataset.tab === "hid-panel" ? "hid" : "dfu";
             logDebug(`Switched to tab: ${tab.dataset.tab}`);
         });
     });
@@ -1130,17 +1196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 5. Console clearing
-    document.querySelector("#btn-clear-console").addEventListener("click", () => {
-        document.querySelector("#terminal-output").innerHTML = "";
-    });
-    
-    // Helper sizing function
-    function niceSize(n) {
-        if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
-        if (n >= 1024) return (n / 1024).toFixed(1) + " KB";
-        return n + " B";
-    }
+    // 5. Console clearing (Removed since event log console panel was removed)
     
     // WebUSB disconnect event
     navigator.usb?.addEventListener("disconnect", (event) => {
