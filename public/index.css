@@ -74,6 +74,10 @@ body {
     box-shadow: 4px 4px 0px var(--color-charcoal);
 }
 
+.warning-banner[hidden] {
+    display: none !important;
+}
+
 /* Header */
 header {
     margin-bottom: 3rem;

@@ -775,7 +775,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Firmware selection changes
     const firmwareSelect = document.querySelector("#firmware-select");
     const dropZone = document.querySelector("#drop-zone");
-    const fileInput = document.querySelector("#dfu-file-input");
     
     firmwareSelect.addEventListener("change", async () => {
         firmwareFile = null;
