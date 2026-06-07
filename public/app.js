@@ -66,6 +66,8 @@ const TXBoost = {
 
 // Global App State
 let hidDevice = null;
+let originalDeviceVid = null;
+let originalDevicePid = null;
 let dfuDevice = null;
 let firmwareFile = null;
 let dfuManifestationTolerant = true;
@@ -232,7 +234,7 @@ async function connectHID() {
     } catch (err) {
         logError(`HID connection failed: ${err.message}`);
         if (btn) {
-            btn.textContent = "Connect Configurator (HID)";
+            btn.textContent = "Connect Device Settings (HID)";
             btn.disabled = false;
         }
     }
@@ -245,10 +247,12 @@ function disconnectHID() {
         hidDevice.close().then(() => {
             logInfo("HID interface closed.");
             hidDevice = null;
+            originalDeviceVid = null;
+            originalDevicePid = null;
             document.querySelector("#hid-status").textContent = "Disconnected";
             document.querySelector("#hid-status").className = "status-disconnected";
             if (btn) {
-                btn.textContent = "Connect Configurator (HID)";
+                btn.textContent = "Connect Device Settings (HID)";
                 btn.disabled = false;
             }
             enableHIDControls(false);
@@ -346,6 +350,10 @@ async function readAllSettings() {
         document.querySelector("#usb-pid").value = hex16(pid);
         logInfo(`USB VID/PID: ${hex16(vid)}:${hex16(pid)}`);
         
+        // Save initial values
+        originalDeviceVid = vid;
+        originalDevicePid = pid;
+        
         logSuccess("Registers loaded successfully.");
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
@@ -378,6 +386,28 @@ async function writeAllSettings(store = false) {
     if (!hidDevice) {
         logError("Device not connected.");
         return;
+    }
+    
+    // Check if USB ID has been modified from original value read from device
+    const vidStr = document.querySelector("#usb-vid").value.trim();
+    const pidStr = document.querySelector("#usb-pid").value.trim();
+    const vid = parseInt(vidStr.startsWith("0x") || vidStr.startsWith("0X") ? vidStr : "0x" + vidStr, 16);
+    const pid = parseInt(pidStr.startsWith("0x") || pidStr.startsWith("0X") ? pidStr : "0x" + pidStr, 16);
+    
+    if (originalDeviceVid !== null && originalDevicePid !== null && !isNaN(vid) && !isNaN(pid)) {
+        if (vid !== originalDeviceVid || pid !== originalDevicePid) {
+            const confirmed = confirm(
+                `⚠️ WARNING: You are changing the USB Vendor ID (VID) / Product ID (PID) from the values currently read on the device.\n\n` +
+                `Current: ${hex16(originalDeviceVid)}:${hex16(originalDevicePid)}\n` +
+                `New: ${hex16(vid)}:${hex16(pid)}\n\n` +
+                `This will change how your operating system and browser recognize the cable when it reboots. If this is incorrect, the cable may become unrecognized.\n\n` +
+                `Are you sure you want to proceed with this change?`
+            );
+            if (!confirmed) {
+                logWarning("USB ID override change cancelled by user. Settings not applied.");
+                return;
+            }
+        }
     }
     
     try {
@@ -627,7 +657,7 @@ async function connectDFU() {
                 if (selected_device.device_.vendorId === 0x1209) {
                     logWarning("Your AIOC is in normal mode, but Chrome is blocked trying to access its DFU Runtime interface.");
                     logWarning("To fix this:");
-                    logWarning("Option A: Use the first tab 'Register Configuration (HID)' to connect via HID (no WinUSB driver needed) and click 'Reboot Cable'.");
+                    logWarning("Option A: Use the 'Device Settings (HID)' tab to connect via HID (no WinUSB driver needed) and click 'Reboot Cable'.");
                     logWarning("Option B: Open Zadig (https://zadig.akeo.ie), check 'Options -> List All Devices', select 'All-In-One-Cable (Interface 6)', and install the WinUSB driver.");
                 } else {
                     logWarning("Your AIOC is in DFU bootloader mode, but Windows does not have the WinUSB driver installed for it.");

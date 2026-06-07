@@ -41,8 +41,8 @@
         
         <!-- Tab navigation -->
         <div class="tab-nav">
-            <button class="tab-btn active" data-tab="hid-panel" id="tab-config">Register Configuration (HID)</button>
-            <button class="tab-btn" data-tab="dfu-panel" id="tab-flash">Firmware Flashing (DFU)</button>
+            <button class="tab-btn active" data-tab="dfu-panel" id="tab-flash">Firmware Flashing (DFU)</button>
+            <button class="tab-btn" data-tab="hid-panel" id="tab-config">Device Settings (HID)</button>
         </div>
         
         <!-- Main Layout Grid -->
@@ -52,17 +52,17 @@
             <main>
                 
                 <!-- HID Panel -->
-                <div id="hid-panel" class="panel active">
+                <div id="hid-panel" class="panel">
                     <div class="card glass">
                         <div class="card-title">
-                            <span>Configuration Registers</span>
+                            <span>Device Settings</span>
                             <span id="hid-status" class="status-pill status-disconnected">Disconnected</span>
                         </div>
                         
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <button id="btn-connect-hid" class="btn btn-primary">Connect Configurator (HID)</button>
+                                    <button id="btn-connect-hid" class="btn btn-primary">Connect Device Settings (HID)</button>
                                 </div>
                             </div>
                         </div>
@@ -228,7 +228,7 @@
                 </div>
                 
                 <!-- DFU Panel -->
-                <div id="dfu-panel" class="panel">
+                <div id="dfu-panel" class="panel active">
                     <div class="card glass">
                         <div class="card-title">
                             <span>Firmware Flasher</span>
@@ -246,7 +246,7 @@
                         <!-- Connected DFU Device summary -->
                         <div id="dfu-device-info" class="device-info-box" style="display:block;">
                             Device not connected. Connect the cable in DFU mode to program.
-                            To enter DFU mode: Use the Configurator tab and select "Reboot Cable" while shorting DFU pads, or short the hardware DFU pins and replug.
+                            To enter DFU mode: Use the Device Settings tab and select "Reboot Cable" while shorting DFU pads, or short the hardware DFU pins and replug.
                         </div>
                         
                         <!-- DFU parameters -->
