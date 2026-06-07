@@ -156,12 +156,14 @@ async function readRegister(device, address) {
     await sendHIDFeature(device, Command.NONE, address, 0x00000000);
     const response = await device.receiveFeatureReport(0x00);
     
-    // Response layout:
-    // response.getUint8(0) -> Report ID (0)
-    // response.getUint8(1) -> Command (0)
-    // response.getUint8(2) -> Address
-    // response.getUint32(3, true) -> Value (Uint32, little-endian)
-    return response.getUint32(3, true);
+    // WebHID may omit the report ID byte for Report ID 0 depending on the platform/OS:
+    // - 6-byte response: [cmd, addr, v0, v1, v2, v3] -> value starts at offset 2
+    // - 7-byte response: [reportId, cmd, addr, v0, v1, v2, v3] -> value starts at offset 3
+    if (response.byteLength < 6) {
+        throw new Error(`Short feature report received: ${response.byteLength} bytes`);
+    }
+    const offset = response.byteLength >= 7 ? 3 : 2;
+    return response.getUint32(offset, true);
 }
 
 async function writeRegister(device, address, value) {
