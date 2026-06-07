@@ -37,13 +37,13 @@
         <!-- Page Title Section -->
         <div class="page-title-section">
             <h1 class="page-title">AIOC Web Flasher & Configurator</h1>
-            <p class="page-subtitle">Configure PTT sources, audio gains, levels, and flash firmware onto your All-In-One Cable</p>
+            <p class="page-subtitle">Configure settings, audio gains, and easily update firmware on your AIOC</p>
         </div>
         
         <!-- Tab navigation -->
         <div class="tab-nav">
-            <button class="tab-btn active" data-tab="dfu-panel" id="tab-flash">Firmware Flashing (DFU)</button>
-            <button class="tab-btn" data-tab="hid-panel" id="tab-config">Device Settings (HID)</button>
+            <button class="tab-btn active" data-tab="dfu-panel" id="tab-flash">Update Firmware</button>
+            <button class="tab-btn" data-tab="hid-panel" id="tab-config">Configure AIOC</button>
         </div>
         
         <!-- Main Layout Grid -->
@@ -56,7 +56,7 @@
                 <div id="hid-panel" class="panel">
                     <div class="card glass">
                         <div class="card-title">
-                            <span>Device Settings</span>
+                            <span>AIOC Configuration</span>
                             <span id="hid-status" class="status-pill status-disconnected">Disconnected</span>
                         </div>
                         
@@ -66,7 +66,7 @@
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <button id="btn-connect-hid" class="btn btn-primary">Connect Device Settings (HID)</button>
+                                    <button id="btn-connect-hid" class="btn btn-primary">Connect AIOC Settings</button>
                                 </div>
                             </div>
                         </div>
@@ -86,10 +86,10 @@
                         
                         <!-- PTT Configuration -->
                         <details style="margin-top: 1.5rem;">
-                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">PTT Sources (IOMUX Configuration)</summary>
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Transmit PTT Sources</summary>
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <label style="margin-bottom: 0.5rem; display: block;">PTT1 Trigger Sources (Register AIOC_IOMUX0)</label>
+                                    <label style="margin-bottom: 0.5rem; display: block;">PTT 1 Transmit Triggers</label>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -104,7 +104,7 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label style="margin-bottom: 0.5rem; display: block;">PTT2 Trigger Sources (Register AIOC_IOMUX1)</label>
+                                    <label style="margin-bottom: 0.5rem; display: block;">PTT 2 Transmit Triggers</label>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -126,7 +126,7 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="audio-rx-gain">RX Audio Gain (AUDIO_RX)</label>
+                                        <label for="audio-rx-gain">RX Audio Gain (From Radio)</label>
                                         <select id="audio-rx-gain" disabled>
                                             <option value="0">1x Gain (0 dB)</option>
                                             <option value="1">2x Gain (+6 dB)</option>
@@ -138,7 +138,7 @@
                                     <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
                                         <label class="checkbox-item" style="font-size: 1rem;">
                                             <input type="checkbox" id="audio-tx-boost" disabled />
-                                            Enable TX Audio Boost (+20 dB, AUDIO_TX)
+                                            Enable TX Audio Boost (+20 dB, To Radio)
                                         </label>
                                     </div>
                                 </div>
@@ -147,27 +147,27 @@
                         
                         <!-- Squelch and Virtual PTT Levels -->
                         <details style="margin-top: 1.5rem;">
-                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Virtual Levels & Timers</summary>
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Auto Squelch (VCOS) & Auto Transmit (VPTT)</summary>
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vcos-level">Virtual COS Threshold Level (VCOS_LVLCTRL)</label>
-                                        <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                        <label for="vcos-level">Auto Squelch (VCOS) Sensitivity Level</label>
+                                        <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535 (Default: 256)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vcos-timeout">Virtual COS Squelch Tail Timer (ms, VCOS_TIMCTRL)</label>
-                                        <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 1500" disabled />
+                                        <label for="vcos-timeout">Auto Squelch Delay (ms)</label>
+                                        <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 3200" disabled />
                                     </div>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vptt-level">Virtual PTT Threshold Level (VPTT_LVLCTRL)</label>
-                                        <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535" disabled />
+                                        <label for="vptt-level">Auto Transmit (VPTT) Sensitivity Level</label>
+                                        <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535 (Default: 16)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vptt-timeout">Virtual PTT Hold Timer (ms, VPTT_TIMCTRL)</label>
-                                        <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 1000" disabled />
+                                        <label for="vptt-timeout">Auto Transmit Hold Time (ms)</label>
+                                        <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 320" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +226,7 @@
                             <button id="btn-write-settings" class="btn btn-secondary" disabled>Apply (RAM)</button>
                             <button id="btn-save-settings" class="btn btn-accent" disabled>Save to Flash (Store)</button>
                             <button id="btn-load-defaults" class="btn btn-danger" disabled>Reset Defaults</button>
-                            <button id="btn-reboot-hid" class="btn btn-danger" disabled>Reboot Cable</button>
+                            <button id="btn-reboot-hid" class="btn btn-danger" disabled>Restart AIOC</button>
                         </div>
                     </div>
                 </div>
@@ -235,7 +235,7 @@
                 <div id="dfu-panel" class="panel active">
                     <div class="card glass">
                         <div class="card-title">
-                            <span>Firmware Flasher</span>
+                            <span>Firmware Updater</span>
                             <span id="dfu-status" class="status-pill status-disconnected">Disconnected</span>
                         </div>
                         
@@ -245,17 +245,17 @@
                         <div class="form-section">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <button id="btn-connect-dfu" class="btn btn-primary">Connect Flasher (DFU)</button>
+                                    <button id="btn-connect-dfu" class="btn btn-primary">Connect AIOC for Update</button>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Connected DFU Device summary -->
-                        <div id="dfu-device-info" class="device-info-box" style="display:block;">Device not connected. Connect the cable in DFU mode to program.
-
-<strong>How to enter DFU mode:</strong>
-• <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect Flasher (DFU)</em> and select your cable in the browser prompt. The app will connect to the cable's DFU Runtime interface and automatically command it to reboot into DFU mode.
-• <strong>Manual (Older firmware/bricked devices):</strong> Unplug the USB cable, short the hardware DFU pins on the board, and plug the USB cable back in. (Alternatively, keep the pins shorted and click <em>Reboot Cable</em> in the Device Settings tab to trigger a reset).</div>
+                        <div id="dfu-device-info" class="device-info-box" style="display:block;">Device not connected. Connect the AIOC in update mode to program.
+ 
+ <strong>How to connect:</strong>
+ • <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect AIOC for Update</em> above and select your device in the browser prompt. The app will automatically restart your AIOC into update mode.
+ • <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on the Configure Settings tab).</div>
                         
                         <!-- DFU parameters -->
                         <div class="form-section">
@@ -280,7 +280,7 @@
                         
                         <!-- Firmware download (Write to device) -->
                         <div class="form-section">
-                            <div class="form-section-title">Flash Firmware (Write to Cable)</div>
+                            <div class="form-section-title">Update Firmware (Write to AIOC)</div>
                             
                             <div class="form-group firmware-select-group">
                                 <label for="firmware-select">Select Firmware Version</label>
@@ -303,7 +303,7 @@
                             
                             <div class="form-row" style="margin-top: 1rem;">
                                 <div class="form-group">
-                                    <button id="btn-flash" class="btn btn-accent" disabled>Flash Firmware</button>
+                                    <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
                                 </div>
                                 <div class="form-group">
                                     <button id="btn-upload" class="btn btn-secondary" disabled>Backup (Read Firmware)</button>

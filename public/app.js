@@ -250,7 +250,7 @@ async function connectHID() {
                 <p style="margin-top: 0.5rem;">To resolve this:</p>
                 <ul>
                     <li>If your device is running firmware v1.3.0 or later, make sure to select the <strong>"AIOC Configuration"</strong> interface in the browser prompt (not "CM108").</li>
-                    <li>If "AIOC Configuration" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Firmware Flashing (DFU)</strong> tab.</li>
+                    <li>If "AIOC Configuration" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Update Firmware</strong> tab.</li>
                 </ul>
             `;
             log("error", warningHtml, "hid");
@@ -287,7 +287,7 @@ async function connectHID() {
     } catch (err) {
         logError(`HID connection failed: ${err.message}`);
         if (btn) {
-            btn.textContent = "Connect Device Settings (HID)";
+            btn.textContent = "Connect AIOC Settings";
             btn.disabled = false;
         }
     }
@@ -305,7 +305,7 @@ function disconnectHID() {
             document.querySelector("#hid-status").textContent = "Disconnected";
             document.querySelector("#hid-status").className = "status-disconnected";
             if (btn) {
-                btn.textContent = "Connect Device Settings (HID)";
+                btn.textContent = "Connect AIOC Settings";
                 btn.disabled = false;
             }
             enableHIDControls(false);
@@ -453,7 +453,7 @@ async function writeAllSettings(store = false) {
                 `⚠️ WARNING: You are changing the USB Vendor ID (VID) / Product ID (PID) from the values currently read on the device.\n\n` +
                 `Current: ${hex16(originalDeviceVid)}:${hex16(originalDevicePid)}\n` +
                 `New: ${hex16(vid)}:${hex16(pid)}\n\n` +
-                `This will change how your operating system and browser recognize the cable when it reboots. If this is incorrect, the cable may become unrecognized.\n\n` +
+                `This will change how your operating system and browser recognize the device when it reboots. If this is incorrect, the AIOC may become unrecognized.\n\n` +
                 `Are you sure you want to proceed with this change?`
             );
             if (!confirmed) {
@@ -708,17 +708,17 @@ async function connectDFU() {
                 if (selected_device.device_.vendorId === 0x1209) {
                     warningHtml = `
                         <strong>Windows Driver Issue Detected</strong>
-                        <p>Your AIOC is in normal mode, but the browser is blocked trying to access its DFU Runtime interface (Interface 6).</p>
+                        <p>Your AIOC is in normal mode, but the browser is blocked trying to access its firmware update interface (Interface 6).</p>
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
                         <ul>
                             <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>All-In-One-Cable (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
-                            <li><strong>Alternative:</strong> Bypass the normal-mode driver block by manually entering DFU mode: unplug the USB cable, short the hardware DFU pins on the board, and plug the USB cable back in.</li>
+                            <li><strong>Alternative:</strong> Bypass the normal-mode driver block by manually entering update mode: unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in.</li>
                         </ul>
                     `;
                 } else {
                     warningHtml = `
                         <strong>Windows Driver Issue Detected</strong>
-                        <p>Your AIOC is in DFU bootloader mode, but Windows does not have the WinUSB driver installed for it.</p>
+                        <p>Your AIOC is in firmware update mode, but Windows does not have the WinUSB driver installed for it.</p>
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
                         <ul>
                             <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>STM32 BOOTLOADER</strong>, and install/replace driver with <strong>WinUSB</strong>.</li>
@@ -781,7 +781,7 @@ async function connectDFU() {
         dfuDevice.logProgress = logProgress;
         
         if (isRuntimeMode) {
-            logWarning("Device is in DFU Runtime mode (normal configuration). Automatically rebooting cable into DFU bootloader mode...");
+            logWarning("Device is connected in normal mode. Automatically restarting AIOC into firmware update mode...");
             await dfuDevice.detach();
             logSuccess("Detach command sent successfully. Rebooting...");
             
@@ -835,7 +835,7 @@ async function connectDFU() {
         }
         disconnectDFU();
         if (btn) {
-            btn.textContent = "Connect Flasher (DFU)";
+            btn.textContent = "Connect AIOC for Update";
             btn.disabled = false;
         }
     }
@@ -849,7 +849,7 @@ function disconnectDFU() {
         document.querySelector("#dfu-status").textContent = "Disconnected";
         document.querySelector("#dfu-status").className = "status-disconnected";
         if (btn) {
-            btn.textContent = "Connect Flasher (DFU)";
+            btn.textContent = "Connect AIOC for Update";
             btn.disabled = false;
         }
         document.querySelector("#dfu-device-info").textContent = "";
