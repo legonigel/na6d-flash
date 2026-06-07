@@ -18,6 +18,11 @@
     <script src="app.js"></script>
 </head>
 <body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <p>Free shipping for orders over $60.00</p>
+    </div>
+
     <div class="container">
         <!-- Browser incompatibility banner -->
         <div id="browser-warning" class="warning-banner" hidden>
@@ -25,13 +30,49 @@
         </div>
         
         <!-- Header -->
-        <header>
-            <div class="header-logo-container">
-                <img src="https://na6d.com/cdn/shop/files/NA6D.png" alt="NA6D Logo" class="header-logo" />
-                <h1>NA6D.COM</h1>
+        <header class="site-header">
+            <div class="header-main-row">
+                <div class="header-left">
+                    <a href="https://na6d.com/search" class="header-icon-link" aria-label="Search">
+                        <svg fill="none" class="icon icon-search" viewBox="0 0 18 19" width="20" height="20">
+                            <path fill="currentColor" fill-rule="evenodd" d="M11.03 11.68A5.784 5.784 0 1 1 2.85 3.5a5.784 5.784 0 0 1 8.18 8.18m.26 1.12a6.78 6.78 0 1 1 .72-.7l5.4 5.4a.5.5 0 1 1-.71.7z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="header-center">
+                    <a href="https://na6d.com/" class="header-logo-link">
+                        <img src="logo.svg" alt="NA6D Logo" class="header-logo" />
+                    </a>
+                </div>
+                <div class="header-right">
+                    <a href="https://na6d.com/account" class="header-icon-link" aria-label="Account">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="icon icon-account" viewBox="0 0 18 19" width="20" height="20">
+                            <path fill="currentColor" fill-rule="evenodd" d="M6 4.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8m5.58 12.15c1.12.82 1.83 2.24 1.91 4.85H1.51c.08-2.6.79-4.03 1.9-4.85C4.66 11.75 6.5 11.5 9 11.5s4.35.26 5.58 1.15M9 10.5c-2.5 0-4.65.24-6.17 1.35C1.27 12.98.5 14.93.5 18v.5h17V18c0-3.07-.77-5.02-2.33-6.15-1.52-1.1-3.67-1.35-6.17-1.35" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                    <a href="https://na6d.com/cart" class="header-icon-link" aria-label="Cart">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" class="icon icon-cart-empty" viewBox="0 0 40 40" width="22" height="22">
+                            <path fill="currentColor" fill-rule="evenodd" d="M15.75 11.8h-3.16l-.77 11.6a5 5 0 0 0 4.99 5.34h7.38a5 5 0 0 0 4.99-5.33L28.4 11.8zm0 1h-2.22l-.71 10.67a4 4 0 0 0 3.99 4.27h7.38a4 4 0 0 0 4-4.27l-.72-10.67h-2.22v.63a4.75 4.75 0 1 1-9.5 0zm8.5 0h-7.5v.63a3.75 3.75 0 1 0 7.5 0z"/>
+                        </svg>
+                    </a>
+                </div>
             </div>
-            <p>AIOC Web Flasher & Configurator</p>
+            <nav class="header-nav">
+                <a href="https://na6d.com/" class="nav-link">Home</a>
+                <a href="https://na6d.com/collections/all" class="nav-link">Catalog</a>
+                <a href="https://na6d.com/collections/accessories" class="nav-link">Accessories</a>
+                <a href="https://na6d.com/pages/frequently-asked-questions" class="nav-link">Frequently Asked Questions</a>
+                <a href="https://na6d.com/pages/reviews" class="nav-link">Happy Customers</a>
+                <a href="https://na6d.com/pages/contact" class="nav-link">Contact</a>
+                <a href="https://na6d.com/pages/about-us" class="nav-link">About Us</a>
+            </nav>
         </header>
+
+        <!-- Page Title Section -->
+        <div class="page-title-section">
+            <h1 class="page-title">AIOC Web Flasher & Configurator</h1>
+            <p class="page-subtitle">Configure PTT sources, audio gains, levels, and flash firmware onto your All-In-One Cable</p>
+        </div>
         
         <!-- Tab navigation -->
         <div class="tab-nav">
@@ -70,66 +111,70 @@
                                 <button id="preset-chirp" class="btn-preset" disabled>CHIRP Programming (RTS+DTR)</button>
                                 <button id="preset-soundcard" class="btn-preset" disabled>Digital Modes (CM108 GPIO 1)</button>
                                 <button id="preset-asl" class="btn-preset" disabled>AllStarLink (CM108 Emulation)</button>
+                                <button id="preset-custom" class="btn-preset" disabled>Custom (Show All)</button>
                             </div>
                         </div>
                         
                         <!-- PTT Configuration -->
-                        <div class="form-section">
-                            <div class="form-section-title">PTT Sources (IOMUX Configuration)</div>
-                            
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label style="margin-bottom: 0.5rem; display: block;">PTT1 Trigger Sources (Register AIOC_IOMUX0)</label>
-                                <div class="checkbox-grid">
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio3" disabled /> CM108 GPIO 3</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio4" disabled /> CM108 GPIO 4</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtr" disabled /> Serial DTR</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialrts" disabled /> Serial RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtrnrts" disabled /> DTR !RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label>
+                        <details style="margin-top: 1.5rem;">
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">PTT Sources (IOMUX Configuration)</summary>
+                            <div style="margin-top: 1.25rem;">
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label style="margin-bottom: 0.5rem; display: block;">PTT1 Trigger Sources (Register AIOC_IOMUX0)</label>
+                                    <div class="checkbox-grid">
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio3" disabled /> CM108 GPIO 3</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio4" disabled /> CM108 GPIO 4</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtr" disabled /> Serial DTR</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-serialrts" disabled /> Serial RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtrnrts" disabled /> DTR !RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label style="margin-bottom: 0.5rem; display: block;">PTT2 Trigger Sources (Register AIOC_IOMUX1)</label>
+                                    <div class="checkbox-grid">
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio3" disabled /> CM108 GPIO 3</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio4" disabled /> CM108 GPIO 4</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtr" disabled /> Serial DTR</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-serialrts" disabled /> Serial RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtrnrts" disabled /> DTR !RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR RTS</label>
+                                        <label class="checkbox-item"><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-group">
-                                <label style="margin-bottom: 0.5rem; display: block;">PTT2 Trigger Sources (Register AIOC_IOMUX1)</label>
-                                <div class="checkbox-grid">
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio3" disabled /> CM108 GPIO 3</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio4" disabled /> CM108 GPIO 4</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtr" disabled /> Serial DTR</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialrts" disabled /> Serial RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtrnrts" disabled /> DTR !RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR RTS</label>
-                                    <label class="checkbox-item"><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label>
-                                </div>
-                            </div>
-                        </div>
+                        </details>
                         
                         <!-- Audio levels -->
-                        <div class="form-section">
-                            <div class="form-section-title">Audio Configuration</div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="audio-rx-gain">RX Audio Gain (AUDIO_RX)</label>
-                                    <select id="audio-rx-gain" disabled>
-                                        <option value="0">1x Gain (0 dB)</option>
-                                        <option value="1">2x Gain (+6 dB)</option>
-                                        <option value="2">4x Gain (+12 dB)</option>
-                                        <option value="3">8x Gain (+18 dB)</option>
-                                        <option value="4">16x Gain (+24 dB)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
-                                    <label class="checkbox-item" style="font-size: 1rem;">
-                                        <input type="checkbox" id="audio-tx-boost" disabled />
-                                        Enable TX Audio Boost (+20 dB, AUDIO_TX)
-                                    </label>
+                        <details>
+                            <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Audio Configuration</summary>
+                            <div style="margin-top: 1.25rem;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="audio-rx-gain">RX Audio Gain (AUDIO_RX)</label>
+                                        <select id="audio-rx-gain" disabled>
+                                            <option value="0">1x Gain (0 dB)</option>
+                                            <option value="1">2x Gain (+6 dB)</option>
+                                            <option value="2">4x Gain (+12 dB)</option>
+                                            <option value="3">8x Gain (+18 dB)</option>
+                                            <option value="4">16x Gain (+24 dB)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
+                                        <label class="checkbox-item" style="font-size: 1rem;">
+                                            <input type="checkbox" id="audio-tx-boost" disabled />
+                                            Enable TX Audio Boost (+20 dB, AUDIO_TX)
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </details>
                         
                         <!-- Squelch and Virtual PTT Levels -->
                         <details style="margin-top: 1.5rem;">
