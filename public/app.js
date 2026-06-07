@@ -335,6 +335,14 @@ async function readAllSettings() {
         document.querySelector("#fox-message").value = msgText;
         logInfo(`Foxhunt Message: "${msgText}"`);
         
+        // USB ID Override (0x08)
+        const usbidVal = await readRegister(hidDevice, Register.USBID);
+        const vid = usbidVal & 0xFFFF;
+        const pid = (usbidVal >> 16) & 0xFFFF;
+        document.querySelector("#usb-vid").value = hex16(vid);
+        document.querySelector("#usb-pid").value = hex16(pid);
+        logInfo(`USB VID/PID: ${hex16(vid)}:${hex16(pid)}`);
+        
         logSuccess("Registers loaded successfully.");
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
@@ -420,6 +428,16 @@ async function writeAllSettings(store = false) {
         await writeRegister(hidDevice, Register.FOXHUNT_MSG1, w1);
         await writeRegister(hidDevice, Register.FOXHUNT_MSG2, w2);
         await writeRegister(hidDevice, Register.FOXHUNT_MSG3, w3);
+        
+        // USB ID Override
+        const vidStr = document.querySelector("#usb-vid").value.trim();
+        const pidStr = document.querySelector("#usb-pid").value.trim();
+        const vid = parseInt(vidStr.startsWith("0x") || vidStr.startsWith("0X") ? vidStr : "0x" + vidStr, 16);
+        const pid = parseInt(pidStr.startsWith("0x") || pidStr.startsWith("0X") ? pidStr : "0x" + pidStr, 16);
+        if (!isNaN(vid) && !isNaN(pid)) {
+            const usbidVal = ((pid & 0xFFFF) << 16) | (vid & 0xFFFF);
+            await writeRegister(hidDevice, Register.USBID, usbidVal);
+        }
         
         logSuccess("Settings written to device RAM successfully.");
         
@@ -918,6 +936,25 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-reboot-hid").addEventListener("click", rebootDevice);
     
     // PTT Preset Helpers
+    document.querySelector("#preset-defaults").addEventListener("click", () => {
+        // Load default configuration presets in the UI
+        document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
+        document.querySelector("#ptt1-cm108gpio1").checked = true;
+        document.querySelector("#audio-rx-gain").value = "0";
+        document.querySelector("#audio-tx-boost").checked = false;
+        document.querySelector("#vcos-level").value = "0";
+        document.querySelector("#vcos-timeout").value = "0";
+        document.querySelector("#vptt-level").value = "0";
+        document.querySelector("#vptt-timeout").value = "0";
+        document.querySelector("#fox-volume").value = "0";
+        document.querySelector("#fox-wpm").value = "0";
+        document.querySelector("#fox-interval").value = "0";
+        document.querySelector("#fox-message").value = "";
+        document.querySelector("#usb-vid").value = "0x1209";
+        document.querySelector("#usb-pid").value = "0x7388";
+        logInfo("Applied preset: Default HID Configuration");
+    });
+
     document.querySelector("#preset-chirp").addEventListener("click", () => {
         // CHIRP typically uses Serial RTS/DTR
         document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
@@ -931,6 +968,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("input[id^='ptt1-']").forEach(el => el.checked = false);
         document.querySelector("#ptt1-cm108gpio1").checked = true;
         logInfo("Applied PTT1 preset: Soundcard Digital Modes (CM108 GPIO 1)");
+    });
+
+    document.querySelector("#preset-asl").addEventListener("click", () => {
+        // AllStarLink (CM108 Emulation) preset
+        document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
+        document.querySelector("#ptt1-cm108gpio1").checked = true;
+        document.querySelector("#vcos-timeout").value = "1500";
+        document.querySelector("#usb-vid").value = "0x0D8C";
+        document.querySelector("#usb-pid").value = "0x000C";
+        logInfo("Applied preset: AllStarLink (CM108 Emulation)");
     });
     
     // 4. WebUSB DFU Flashing buttons
