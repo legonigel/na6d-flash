@@ -494,13 +494,18 @@ async function connectDFU() {
     if (btn) btn.disabled = true;
     try {
         logInfo("Scanning for USB DFU interfaces...");
-        const dfu_devices = await dfu.findAllDfuInterfaces();
+        let dfu_devices = await dfu.findAllDfuInterfaces();
+        
+        // Filter to only match the STM32 DFU bootloader (VID: 0x0483, PID: 0xDF11)
+        dfu_devices = dfu_devices.filter(d => 
+            d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11
+        );
         
         let selected_device = null;
         if (dfu_devices.length === 0) {
             logInfo("Requesting USB DFU device from user...");
             const rawUsbDevice = await navigator.usb.requestDevice({
-                filters: [] // Allow choosing any DFU/DfuSe device
+                filters: [{ vendorId: 0x0483, productId: 0xDF11 }]
             });
             const interfaces = dfu.findDeviceDfuInterfaces(rawUsbDevice);
             if (interfaces.length === 0) {
