@@ -157,7 +157,7 @@ body {
 .header-logo {
     display: block;
     height: auto;
-    width: 200px; /* Large, matching na6d.com style */
+    width: 300px; /* Matching na6d.com style exactly */
     max-width: 100%;
     border: none !important;
     background: transparent !important;
