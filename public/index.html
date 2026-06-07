@@ -92,7 +92,13 @@
                             <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Transmit PTT Sources</summary>
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <label style="margin-bottom: 0.5rem; display: block;">PTT 1 Transmit Triggers</label>
+                                    <label style="margin-bottom: 0.5rem; display: block;">
+                                        PTT 1 Transmit Triggers
+                                        <span class="tooltip-container">
+                                            <span class="tooltip-icon">?</span>
+                                            <span class="tooltip-text">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
+                                        </span>
+                                    </label>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -107,7 +113,13 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label style="margin-bottom: 0.5rem; display: block;">PTT 2 Transmit Triggers</label>
+                                    <label style="margin-bottom: 0.5rem; display: block;">
+                                        PTT 2 Transmit Triggers
+                                        <span class="tooltip-container">
+                                            <span class="tooltip-icon">?</span>
+                                            <span class="tooltip-text">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
+                                        </span>
+                                    </label>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -129,7 +141,13 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="audio-rx-gain">RX Audio Gain (From Radio)</label>
+                                        <label for="audio-rx-gain">
+                                            RX Audio Gain (From Radio)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Sets the amplification level for audio incoming from your radio transceiver. 1x Gain is default.</span>
+                                            </span>
+                                        </label>
                                         <select id="audio-rx-gain" disabled>
                                             <option value="0">1x Gain (0 dB)</option>
                                             <option value="1">2x Gain (+6 dB)</option>
@@ -142,6 +160,10 @@
                                         <label class="checkbox-item" style="font-size: 1rem;">
                                             <input type="checkbox" id="audio-tx-boost" disabled />
                                             Enable TX Audio Boost (+20 dB, To Radio)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Applies a +20 dB boost to the audio sent to your radio's microphone input. Enable this if your transmit audio is too quiet.</span>
+                                            </span>
                                         </label>
                                     </div>
                                 </div>
@@ -154,22 +176,46 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vcos-level">Auto Squelch (VCOS) Sensitivity Level</label>
+                                        <label for="vcos-level">
+                                            Auto Squelch (VCOS) Sensitivity Level
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Threshold for the Virtual Carrier Operated Squelch. Lower values make it more sensitive to incoming signals.</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535 (Default: 256)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vcos-timeout">Auto Squelch Delay (ms)</label>
+                                        <label for="vcos-timeout">
+                                            Auto Squelch Delay (ms)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">How long the squelch remains open after audio signal stops (squelch tail).</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 3200" disabled />
                                     </div>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vptt-level">Auto Transmit (VPTT) Sensitivity Level</label>
+                                        <label for="vptt-level">
+                                            Auto Transmit (VPTT) Sensitivity Level
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Threshold for Virtual PTT. If the computer output audio exceeds this level, the AIOC will automatically key the transmitter.</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535 (Default: 16)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vptt-timeout">Auto Transmit Hold Time (ms)</label>
+                                        <label for="vptt-timeout">
+                                            Auto Transmit Hold Time (ms)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">How long the AIOC keeps transmitting after computer audio stops, to prevent transmitter drops between words.</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 320" disabled />
                                     </div>
                                 </div>
@@ -182,21 +228,45 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
+                                        <label for="fox-message">
+                                            Morse Code ID Message (Max 16 chars)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Morse code string sent by the beacon (A-Z, 0-9, and space only).</span>
+                                            </span>
+                                        </label>
                                         <input type="text" id="fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="fox-wpm">Morse Speed (WPM)</label>
+                                        <label for="fox-wpm">
+                                            Morse Speed (WPM)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Morse code speed in Words Per Minute.</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
+                                        <label for="fox-interval">
+                                            Beacon Interval (seconds, 0 = Disabled)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Time between automatic Morse beacon transmissions. Set to 0 to disable the beacon completely.</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="fox-interval" min="0" placeholder="e.g. 60" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
+                                        <label for="fox-volume">
+                                            Beacon Audio Volume (0 - 65535)
+                                            <span class="tooltip-container">
+                                                <span class="tooltip-icon">?</span>
+                                                <span class="tooltip-text">Audio volume for the Morse beacon tone (0 is silent, 65535 is maximum).</span>
+                                            </span>
+                                        </label>
                                         <input type="number" id="fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
                                     </div>
                                 </div>

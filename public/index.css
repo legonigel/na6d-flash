@@ -815,3 +815,64 @@ summary:hover {
     margin-bottom: 1.5rem;
 }
 
+/* Tooltip styles in Shopify Brutalist Theme */
+.tooltip-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: help;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.tooltip-icon {
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #ffffff;
+    color: var(--color-charcoal);
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.tooltip-container:hover .tooltip-icon {
+    background: var(--color-blue);
+    color: #ffffff;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    box-shadow: 3px 3px 0px var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    width: 240px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity var(--transition-fast), visibility var(--transition-fast);
+    pointer-events: none;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+
