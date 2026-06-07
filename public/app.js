@@ -265,8 +265,8 @@ async function connectHID() {
                 <strong>Connection failed: Selected interface does not support configuration.</strong>
                 <p style="margin-top: 0.5rem;">To resolve this:</p>
                 <ul>
-                    <li>If your device is running firmware v1.3.0 or later, make sure to select the <strong>"AIOC Configuration"</strong> interface in the browser prompt (not "CM108").</li>
-                    <li>If "AIOC Configuration" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Update Firmware</strong> tab.</li>
+                    <li>If your device is running firmware v1.3.0 or later, make sure to select the <strong>"AIOC HID"</strong> interface in the browser prompt (not "CM108").</li>
+                    <li>If "AIOC HID" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Update Firmware</strong> tab.</li>
                 </ul>
             `;
             log("error", warningHtml, "hid");
