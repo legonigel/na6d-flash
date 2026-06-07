@@ -443,6 +443,21 @@ async function getDFUDescriptorProperties(device) {
     return {};
 }
 
+async function loadServerFirmware(url) {
+    try {
+        logInfo(`Fetching firmware from server: ${url}...`);
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Server returned status ${response.status}: ${response.statusText}`);
+        }
+        firmwareFile = await response.arrayBuffer();
+        logSuccess(`Firmware loaded: ${url.split('/').pop()} (${firmwareFile.byteLength} bytes)`);
+    } catch (err) {
+        logError(`Failed to load firmware from server: ${err.message}`);
+        firmwareFile = null;
+    }
+}
+
 async function connectDFU() {
     try {
         logInfo("Scanning for USB DFU interfaces...");
@@ -526,6 +541,10 @@ async function connectDFU() {
             (memorySummary ? `${memorySummary}\n` : "");
             
         enableDFUControls(true);
+        const firmwareSelect = document.querySelector("#firmware-select");
+        if (firmwareSelect && firmwareSelect.value !== "custom") {
+            await loadServerFirmware(firmwareSelect.value);
+        }
         logSuccess("DFU Interface opened successfully.");
     } catch (err) {
         logError(`DFU Connection failed: ${err.message}`);
@@ -550,8 +569,22 @@ function disconnectDFU() {
 }
 
 function enableDFUControls(enable) {
-    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel button:not(#btn-connect-dfu)");
+    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu)");
     controls.forEach(el => el.disabled = !enable);
+    
+    // Also manage the drop zone visibility and input disabled state based on selection
+    const firmwareSelect = document.querySelector("#firmware-select");
+    const dropZone = document.querySelector("#drop-zone");
+    const fileInput = document.querySelector("#dfu-file-input");
+    if (enable && firmwareSelect && firmwareSelect.value === "custom") {
+        dropZone.hidden = false;
+        if (fileInput) fileInput.disabled = false;
+        dropZone.classList.remove("disabled");
+    } else {
+        dropZone.hidden = true;
+        if (fileInput) fileInput.disabled = true;
+        dropZone.classList.add("disabled");
+    }
 }
 
 async function startDownload() {
@@ -739,6 +772,28 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-flash").addEventListener("click", startDownload);
     document.querySelector("#btn-upload").addEventListener("click", startUpload);
     
+    // Handle Firmware selection changes
+    const firmwareSelect = document.querySelector("#firmware-select");
+    const dropZone = document.querySelector("#drop-zone");
+    const fileInput = document.querySelector("#dfu-file-input");
+    
+    firmwareSelect.addEventListener("change", async () => {
+        firmwareFile = null;
+        if (firmwareSelect.value === "custom") {
+            dropZone.hidden = false;
+            if (fileInput) fileInput.disabled = false;
+            dropZone.classList.remove("disabled");
+            document.querySelector("#file-info").textContent = "Drag & drop your firmware file or click to browse";
+        } else {
+            dropZone.hidden = true;
+            if (fileInput) fileInput.disabled = true;
+            dropZone.classList.add("disabled");
+            if (dfuDevice) {
+                await loadServerFirmware(firmwareSelect.value);
+            }
+        }
+    });
+
     // 5. Console clearing
     document.querySelector("#btn-clear-console").addEventListener("click", () => {
         document.querySelector("#terminal-output").innerHTML = "";

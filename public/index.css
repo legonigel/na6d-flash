@@ -143,20 +143,16 @@ header p {
 .tab-btn:hover {
     background: var(--color-blue);
     color: #ffffff;
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
 }
 
 .tab-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px var(--color-charcoal);
+    background: var(--color-orange);
+    color: #ffffff;
 }
 
 .tab-btn.active {
     background: var(--color-orange);
     color: #ffffff;
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
 }
 
 /* Layout Grid */
@@ -195,8 +191,7 @@ header p {
 }
 
 .card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0px var(--color-charcoal);
+    border-color: var(--color-blue);
 }
 
 .card-title {
@@ -374,13 +369,6 @@ button:disabled {
 .btn-preset:hover:not(:disabled) {
     background: var(--color-blue);
     color: #ffffff;
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px var(--color-charcoal);
-}
-
-.btn-preset:active:not(:disabled) {
-    transform: translate(1px, 1px);
-    box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
 /* Action Buttons Grid */
@@ -415,12 +403,10 @@ button:disabled {
 }
 
 .btn-primary:hover:not(:disabled) {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
+    background-color: var(--color-orange);
 }
 
 .btn-primary:active:not(:disabled) {
-    transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
@@ -431,12 +417,9 @@ button:disabled {
 
 .btn-secondary:hover:not(:disabled) {
     background-color: #f1f5f9;
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
 }
 
 .btn-secondary:active:not(:disabled) {
-    transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
@@ -446,12 +429,10 @@ button:disabled {
 }
 
 .btn-accent:hover:not(:disabled) {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
+    background-color: var(--color-blue);
 }
 
 .btn-accent:active:not(:disabled) {
-    transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
@@ -462,12 +443,9 @@ button:disabled {
 
 .btn-danger:hover:not(:disabled) {
     background-color: #fca5a5;
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
 }
 
 .btn-danger:active:not(:disabled) {
-    transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
@@ -488,13 +466,6 @@ button:disabled {
 .upload-zone:hover:not(.disabled) {
     background: rgba(75, 154, 210, 0.05);
     border-style: solid;
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px var(--color-charcoal);
-}
-
-.upload-zone:active:not(.disabled) {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px var(--color-charcoal);
 }
 
 .upload-zone.disabled {
@@ -674,4 +645,37 @@ progress::-moz-progress-bar {
 
 .terminal-wrapper::-webkit-scrollbar-thumb:hover {
     background: var(--color-shadow);
+}
+
+/* Collapsible Advanced Settings details/summary */
+details {
+    background: rgba(255, 248, 231, 0.3);
+    border: var(--border-width-thin) solid var(--color-charcoal);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+details[open] {
+    background: rgba(255, 248, 231, 0.55);
+}
+
+summary {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+    display: list-item;
+}
+
+summary:hover {
+    color: var(--color-blue);
+}
+
+/* Dropdown for firmware selection */
+.firmware-select-group {
+    margin-bottom: 1.5rem;
 }

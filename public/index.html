@@ -212,28 +212,39 @@
                         
                         <!-- DFU parameters -->
                         <div class="form-section">
-                            <div class="form-section-title">DFU Transfer Settings</div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="dfu-xfer-size">Block size (bytes)</label>
-                                    <input type="number" id="dfu-xfer-size" value="1024" disabled />
+                            <details id="dfu-settings-details">
+                                <summary>Advanced DFU Settings</summary>
+                                <div class="form-row" style="margin-top: 1rem;">
+                                    <div class="form-group">
+                                        <label for="dfu-xfer-size">Block size (bytes)</label>
+                                        <input type="number" id="dfu-xfer-size" value="1024" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dfu-start-addr">DfuSe Start Address (hex)</label>
+                                        <input type="text" id="dfu-start-addr" value="0x08000000" pattern="0x[A-Fa-f0-9]+" disabled />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dfu-upload-size">Upload Backup Size (bytes)</label>
+                                        <input type="number" id="dfu-upload-size" value="131072" min="1" disabled />
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="dfu-start-addr">DfuSe Start Address (hex)</label>
-                                    <input type="text" id="dfu-start-addr" value="0x08000000" pattern="0x[A-Fa-f0-9]+" disabled />
-                                </div>
-                                <div class="form-group">
-                                    <label for="dfu-upload-size">Upload Backup Size (bytes)</label>
-                                    <input type="number" id="dfu-upload-size" value="131072" min="1" disabled />
-                                </div>
-                            </div>
+                            </details>
                         </div>
                         
                         <!-- Firmware download (Write to device) -->
                         <div class="form-section">
                             <div class="form-section-title">Flash Firmware (Write to Cable)</div>
                             
-                            <div class="upload-zone disabled" id="drop-zone">
+                            <div class="form-group firmware-select-group">
+                                <label for="firmware-select">Select Firmware Version</label>
+                                <select id="firmware-select" disabled>
+                                    <option value="firmware/aioc-v1.4.1.bin">AIOC Firmware v1.4.1 (Recommended)</option>
+                                    <option value="firmware/aioc-v1.3.0.bin">AIOC Firmware v1.3.0</option>
+                                    <option value="custom">Upload Local File...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="upload-zone disabled" id="drop-zone" hidden>
                                 <span class="upload-icon">⤓</span>
                                 <div id="file-info">Drag & drop your firmware file or click to browse</div>
                                 <input type="file" id="dfu-file-input" accept=".bin" disabled />
