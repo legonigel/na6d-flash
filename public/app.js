@@ -114,6 +114,26 @@ function hex32(n) {
     return "0x" + n.toString(16).padStart(8, "0").toUpperCase();
 }
 
+// Helper: Wraps a promise with a timeout
+function withTimeout(promise, ms, timeoutError) {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(timeoutError));
+        }, ms);
+        
+        promise.then(
+            (res) => {
+                clearTimeout(timer);
+                resolve(res);
+            },
+            (err) => {
+                clearTimeout(timer);
+                reject(err);
+            }
+        );
+    });
+}
+
 /* ==========================================================================
    WebHID Implementation (Configuration Mode)
    ========================================================================== */
@@ -574,7 +594,27 @@ async function connectDFU() {
         }
         
         logInfo("Opening DFU device...");
-        await selected_device.open();
+        try {
+            await withTimeout(selected_device.open(), 2500, "Timeout opening USB device. This usually means Windows is missing the WinUSB driver for the DFU interface.");
+        } catch (error) {
+            if (error.message.includes("Timeout opening USB device")) {
+                logError(error.message);
+                logWarning("--------------------------------------------------");
+                logWarning("WINDOWS DRIVER ISSUES DETECTED:");
+                if (selected_device.device_.vendorId === 0x1209) {
+                    logWarning("Your AIOC is in normal mode, but Chrome is blocked trying to access its DFU Runtime interface.");
+                    logWarning("To fix this:");
+                    logWarning("Option A: Use the first tab 'Register Configuration (HID)' to connect via HID (no WinUSB driver needed) and click 'Reboot Cable'.");
+                    logWarning("Option B: Open Zadig (https://zadig.akeo.ie), check 'Options -> List All Devices', select 'All-In-One-Cable (Interface 6)', and install the WinUSB driver.");
+                } else {
+                    logWarning("Your AIOC is in DFU bootloader mode, but Windows does not have the WinUSB driver installed for it.");
+                    logWarning("To fix this:");
+                    logWarning("Open Zadig (https://zadig.akeo.ie), check 'Options -> List All Devices', select 'STM32 BOOTLOADER', and install the WinUSB driver.");
+                }
+                logWarning("--------------------------------------------------");
+            }
+            throw error;
+        }
         
         // Read DFU functional descriptor details
         const desc = await getDFUDescriptorProperties(selected_device);
