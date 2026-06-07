@@ -1000,7 +1000,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector("#btn-connect-hid").disabled = true;
         document.querySelector("#btn-connect-dfu").disabled = true;
     } else {
-        logInfo("WebUSB and WebHID interfaces loaded. Browser is compatible.");
+        console.log("[DFU] WebUSB and WebHID interfaces loaded. Browser is compatible.");
     }
     
     // 2. Tab switching logic
