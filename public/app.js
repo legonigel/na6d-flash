@@ -149,6 +149,7 @@ async function writeRegister(device, address, value) {
 }
 
 async function connectHID() {
+    disconnectDFU(); // Prevent concurrent USB access
     const btn = document.querySelector("#btn-connect-hid");
     if (btn) btn.disabled = true;
     try {
@@ -525,15 +526,17 @@ async function trySoftwareRebootToDFU() {
 }
 
 async function connectDFU() {
+    disconnectHID(); // Prevent concurrent USB access conflicts
     const btn = document.querySelector("#btn-connect-dfu");
     if (btn) btn.disabled = true;
     try {
         logInfo("Scanning for USB DFU interfaces...");
         let dfu_devices = await dfu.findAllDfuInterfaces();
         
-        // Filter to only match the STM32 DFU bootloader (VID: 0x0483, PID: 0xDF11)
+        // Filter to match DFU bootloader (0483:df11) AND normal-mode AIOC DFU runtime interface (1209:7388)
         dfu_devices = dfu_devices.filter(d => 
-            d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11
+            (d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11) ||
+            (d.device_.vendorId === 0x1209 && d.device_.productId === 0x7388)
         );
         
         if (dfu_devices.length === 0) {
@@ -542,17 +545,20 @@ async function connectDFU() {
                 logInfo("Scanning again for DFU bootloader...");
                 dfu_devices = await dfu.findAllDfuInterfaces();
                 dfu_devices = dfu_devices.filter(d => 
-                    d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11
+                    (d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11) ||
+                    (d.device_.vendorId === 0x1209 && d.device_.productId === 0x7388)
                 );
             }
         }
         
         let selected_device = null;
         if (dfu_devices.length === 0) {
-            logInfo("No active DFU bootloader found. Requesting USB DFU device from user...");
-            logInfo("Tip: If your cable is in normal mode, you can connect it under the 'Register Configuration' tab and click 'Reboot Cable', or physically short the DFU pins and replug.");
+            logInfo("No active DFU device found. Requesting USB DFU device from user...");
             const rawUsbDevice = await navigator.usb.requestDevice({
-                filters: [{ vendorId: 0x0483, productId: 0xDF11 }]
+                filters: [
+                    { vendorId: 0x0483, productId: 0xDF11 },
+                    { vendorId: 0x1209, productId: 0x7388 }
+                ]
             });
             const interfaces = dfu.findDeviceDfuInterfaces(rawUsbDevice);
             if (interfaces.length === 0) {
@@ -608,6 +614,9 @@ async function connectDFU() {
             dfuDevice = selected_device;
         }
         
+        // Check if device is in Runtime mode (0x01) or DFU mode (0x02)
+        const isRuntimeMode = selected_device.settings.alternate.interfaceProtocol === 0x01;
+        
         // Hook up log methods
         dfuDevice.logDebug = logDebug;
         dfuDevice.logInfo = logInfo;
@@ -626,12 +635,27 @@ async function connectDFU() {
             `Device: ${dfuDevice.device_.productName || "Unknown"}\n` +
             `Manufacturer: ${dfuDevice.device_.manufacturerName || "Unknown"}\n` +
             `Serial: ${dfuDevice.device_.serialNumber || "Unknown"}\n` +
+            `Mode: ${isRuntimeMode ? "Runtime (Configuration Mode)" : "DFU (Flashing Mode)"}\n` +
             (memorySummary ? `${memorySummary}\n` : "");
             
-        enableDFUControls(true);
-        const firmwareSelect = document.querySelector("#firmware-select");
-        if (firmwareSelect && firmwareSelect.value !== "custom") {
-            await loadServerFirmware(firmwareSelect.value);
+        const detachBtn = document.querySelector("#btn-detach-dfu");
+        if (isRuntimeMode) {
+            logWarning("Device is in DFU Runtime mode (normal configuration). Click 'Enter Flashing Mode (Detach)' to reboot the cable to DFU bootloader mode.");
+            if (detachBtn) {
+                detachBtn.style.display = "block";
+                detachBtn.disabled = false;
+            }
+            enableDFUControls(false); // Keep flash/upload disabled since we aren't in DFU bootloader mode
+        } else {
+            if (detachBtn) {
+                detachBtn.style.display = "none";
+                detachBtn.disabled = true;
+            }
+            enableDFUControls(true);
+            const firmwareSelect = document.querySelector("#firmware-select");
+            if (firmwareSelect && firmwareSelect.value !== "custom") {
+                await loadServerFirmware(firmwareSelect.value);
+            }
         }
         logSuccess("DFU Interface opened successfully.");
     } catch (err) {
@@ -645,29 +669,73 @@ async function connectDFU() {
 }
 
 function disconnectDFU() {
+    const btn = document.querySelector("#btn-connect-dfu");
+    if (btn) btn.disabled = true;
+    
+    const cleanupUI = () => {
+        document.querySelector("#dfu-status").textContent = "Disconnected";
+        document.querySelector("#dfu-status").className = "status-disconnected";
+        if (btn) {
+            btn.textContent = "Connect Flasher (DFU)";
+            btn.disabled = false;
+        }
+        document.querySelector("#dfu-device-info").textContent = "";
+        
+        const detachBtn = document.querySelector("#btn-detach-dfu");
+        if (detachBtn) {
+            detachBtn.disabled = true;
+            detachBtn.style.display = "none";
+        }
+        
+        enableDFUControls(false);
+    };
+
     if (dfuDevice) {
-        const btn = document.querySelector("#btn-connect-dfu");
-        if (btn) btn.disabled = true;
         dfuDevice.close().then(() => {
             logInfo("DFU interface closed.");
             dfuDevice = null;
-            document.querySelector("#dfu-status").textContent = "Disconnected";
-            document.querySelector("#dfu-status").className = "status-disconnected";
-            if (btn) {
-                btn.textContent = "Connect Flasher (DFU)";
-                btn.disabled = false;
-            }
-            document.querySelector("#dfu-device-info").textContent = "";
-            enableDFUControls(false);
+            cleanupUI();
         }).catch(err => {
             logError(`Error closing DFU: ${err.message}`);
-            if (btn) btn.disabled = false;
+            dfuDevice = null;
+            cleanupUI();
         });
+    } else {
+        dfuDevice = null;
+        cleanupUI();
+    }
+}
+
+async function detachDevice() {
+    if (!dfuDevice) return;
+    const btn = document.querySelector("#btn-detach-dfu");
+    if (btn) btn.disabled = true;
+    try {
+        logInfo("Sending DFU detach command to reboot device into DFU mode...");
+        await dfuDevice.detach();
+        logSuccess("Detach command sent successfully. Device should reboot into DFU mode.");
+        
+        // Close interface
+        await dfuDevice.close();
+        logInfo("DFU runtime interface closed.");
+        
+        // Wait for disconnect
+        try {
+            await dfuDevice.waitDisconnected(5000);
+            logSuccess("Device disconnected.");
+        } catch (err) {
+            logWarning("Timeout waiting for disconnect.");
+        }
+        
+        disconnectDFU();
+    } catch (err) {
+        logError(`Failed to detach: ${err}`);
+        if (btn) btn.disabled = false;
     }
 }
 
 function enableDFUControls(enable) {
-    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu)");
+    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu):not(#btn-detach-dfu)");
     controls.forEach(el => el.disabled = !enable);
     
     // Also manage the drop zone visibility and input disabled state based on selection
@@ -851,6 +919,8 @@ document.addEventListener("DOMContentLoaded", () => {
             connectDFU();
         }
     });
+    
+    document.querySelector("#btn-detach-dfu").addEventListener("click", detachDevice);
     
     // Handle DFU parameter changes
     document.querySelector("#dfu-xfer-size").addEventListener("change", (e) => {
