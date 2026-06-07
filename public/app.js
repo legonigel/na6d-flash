@@ -643,6 +643,10 @@ async function startDownload() {
         return;
     }
     
+    const connectBtn = document.querySelector("#btn-connect-dfu");
+    if (connectBtn) connectBtn.disabled = true;
+    enableDFUControls(false);
+    
     try {
         logInfo("Preparing device status...");
         let status = await dfuDevice.getStatus();
@@ -673,6 +677,9 @@ async function startDownload() {
         }
     } catch (err) {
         logError(`Error during download: ${err}`);
+    } finally {
+        if (connectBtn) connectBtn.disabled = false;
+        enableDFUControls(true);
     }
 }
 
@@ -681,6 +688,10 @@ async function startUpload() {
         logError("DFU Device not connected.");
         return;
     }
+    
+    const connectBtn = document.querySelector("#btn-connect-dfu");
+    if (connectBtn) connectBtn.disabled = true;
+    enableDFUControls(false);
     
     try {
         const sizeField = document.querySelector("#dfu-upload-size");
@@ -703,6 +714,9 @@ async function startUpload() {
         saveAs(blob, "aioc_firmware_backup.bin");
     } catch (err) {
         logError(`Error during upload: ${err}`);
+    } finally {
+        if (connectBtn) connectBtn.disabled = false;
+        enableDFUControls(true);
     }
 }
 
