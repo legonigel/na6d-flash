@@ -489,6 +489,41 @@ async function loadServerFirmware(url) {
     }
 }
 
+async function trySoftwareRebootToDFU() {
+    try {
+        logInfo("Checking if AIOC is connected in normal configuration mode...");
+        
+        // Check if we already have an active HID connection
+        if (hidDevice && hidDevice.opened) {
+            logInfo("Active configuration connection found. Sending reboot command...");
+            await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
+            logSuccess("Reboot command sent. Waiting for DFU bootloader...");
+            disconnectHID();
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            return true;
+        }
+        
+        const hid_devices = await navigator.hid.getDevices();
+        const aioc_hid = hid_devices.find(d => d.vendorId === 0x1209 && d.productId === 0x7388);
+        
+        if (aioc_hid) {
+            logInfo("Found paired AIOC in configuration mode. Attempting automatic reboot to DFU bootloader...");
+            if (!aioc_hid.opened) {
+                await aioc_hid.open();
+            }
+            await sendHIDFeature(aioc_hid, Command.REBOOT, 0, 0);
+            logSuccess("Reboot command sent to AIOC. Waiting for DFU bootloader to enumerate...");
+            await aioc_hid.close();
+            
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            return true;
+        }
+    } catch (err) {
+        logWarning(`Software reboot attempt failed: ${err.message}`);
+    }
+    return false;
+}
+
 async function connectDFU() {
     const btn = document.querySelector("#btn-connect-dfu");
     if (btn) btn.disabled = true;
@@ -501,9 +536,21 @@ async function connectDFU() {
             d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11
         );
         
+        if (dfu_devices.length === 0) {
+            const rebooted = await trySoftwareRebootToDFU();
+            if (rebooted) {
+                logInfo("Scanning again for DFU bootloader...");
+                dfu_devices = await dfu.findAllDfuInterfaces();
+                dfu_devices = dfu_devices.filter(d => 
+                    d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11
+                );
+            }
+        }
+        
         let selected_device = null;
         if (dfu_devices.length === 0) {
-            logInfo("Requesting USB DFU device from user...");
+            logInfo("No active DFU bootloader found. Requesting USB DFU device from user...");
+            logInfo("Tip: If your cable is in normal mode, you can connect it under the 'Register Configuration' tab and click 'Reboot Cable', or physically short the DFU pins and replug.");
             const rawUsbDevice = await navigator.usb.requestDevice({
                 filters: [{ vendorId: 0x0483, productId: 0xDF11 }]
             });
