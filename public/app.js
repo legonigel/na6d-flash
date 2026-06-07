@@ -299,7 +299,6 @@ function disconnectHID() {
         if (btn) btn.disabled = true;
         hidDevice.close().then(() => {
             logInfo("HID interface closed.");
-            hideAlert("hid");
             hidDevice = null;
             originalDeviceVid = null;
             originalDevicePid = null;
@@ -831,7 +830,9 @@ async function connectDFU() {
         }
         logSuccess("DFU Interface opened successfully.");
     } catch (err) {
-        logError(`DFU Connection failed: ${err.message}`);
+        if (!err.message.includes("Timeout opening USB device")) {
+            logError(`DFU Connection failed: ${err.message}`);
+        }
         disconnectDFU();
         if (btn) {
             btn.textContent = "Connect Flasher (DFU)";
@@ -853,7 +854,6 @@ function disconnectDFU() {
         }
         document.querySelector("#dfu-device-info").textContent = "";
         enableDFUControls(false);
-        hideAlert("dfu");
     };
 
     if (dfuDevice) {
@@ -1023,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-connect-hid").addEventListener("click", () => {
         if (hidDevice) {
             disconnectHID();
+            hideAlert("hid");
         } else {
             connectHID();
         }
@@ -1137,6 +1138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-connect-dfu").addEventListener("click", () => {
         if (dfuDevice) {
             disconnectDFU();
+            hideAlert("dfu");
         } else {
             connectDFU();
         }
