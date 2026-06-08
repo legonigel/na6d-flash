@@ -160,18 +160,6 @@ function logProgress(done, total) {
     const progressEl = document.querySelector("#dfu-progress");
     if (!progressEl) return;
     
-    if (currentFlashPhase === "erase") {
-        progressEl.value = 0;
-        
-        const alertEl = document.querySelector("#dfu-alert");
-        if (alertEl && !alertEl.hidden) {
-            alertEl.className = "alert-box info";
-            const pct = total ? Math.round((done / total) * 100) : 0;
-            alertEl.innerHTML = `<p>Erasing device memory... <strong>${pct}%</strong></p>`;
-        }
-        return;
-    }
-    
     if (typeof total === "undefined") {
         progressEl.removeAttribute("value");
         logDebug(`Progress: ${done} bytes`);
@@ -181,19 +169,42 @@ function logProgress(done, total) {
             alertEl.className = "alert-box info";
             alertEl.innerHTML = `<p>Operation in progress... (Processed <strong>${niceSize(done)}</strong>)</p>`;
         }
-    } else {
-        progressEl.max = total;
-        progressEl.value = done;
-        const pct = Math.round((done / total) * 100);
-        logDebug(`Progress: ${done}/${total} bytes (${pct}%)`);
+        return;
+    }
+
+    progressEl.max = 100;
+    let pct = 0;
+    
+    if (currentFlashPhase === "erase") {
+        // Erase phase: scale from 0% to 20%
+        pct = Math.round((done / total) * 20);
+        progressEl.value = pct;
         
         const alertEl = document.querySelector("#dfu-alert");
         if (alertEl && !alertEl.hidden) {
             alertEl.className = "alert-box info";
-            let actionText = currentFlashPhase === "backup" ? "Reading from AIOC..." : "Writing to AIOC...";
-            alertEl.innerHTML = `<p>${actionText} <strong>${pct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
+            const erasePct = Math.round((done / total) * 100);
+            alertEl.innerHTML = `<p>Erasing device memory... <strong>${erasePct}%</strong></p>`;
+        }
+    } else {
+        // Write/Backup phase: scale from 20% to 100% (or 0-100% if backup)
+        const isBackup = currentFlashPhase === "backup";
+        const base = isBackup ? 0 : 20;
+        const scale = isBackup ? 100 : 80;
+        
+        const subPct = Math.round((done / total) * scale);
+        pct = base + subPct;
+        progressEl.value = pct;
+        
+        const alertEl = document.querySelector("#dfu-alert");
+        if (alertEl && !alertEl.hidden) {
+            alertEl.className = "alert-box info";
+            const phasePct = Math.round((done / total) * 100);
+            let actionText = isBackup ? "Reading from AIOC..." : "Writing to AIOC...";
+            alertEl.innerHTML = `<p>${actionText} <strong>${phasePct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
         }
     }
+    logDebug(`Progress: ${pct}%`);
 }
 
 // Helper: formats hex numbers nicely
