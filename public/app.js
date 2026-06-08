@@ -1148,6 +1148,90 @@ async function startUpload() {
     }
 }
 
+async function leaveDFUMode() {
+    if (!dfuDevice) {
+        logError("DFU Device not connected.");
+        return;
+    }
+    
+    const connectBtn = document.querySelector("#btn-connect-dfu");
+    if (connectBtn) connectBtn.disabled = true;
+    enableDFUControls(false);
+    
+    try {
+        logInfo("Attempting to exit DFU mode and reboot the device...");
+        
+        let startAddress = dfuDevice.startAddress;
+        if (isNaN(startAddress)) {
+            if (dfuDevice.memoryInfo && dfuDevice.memoryInfo.segments && dfuDevice.memoryInfo.segments.length > 0) {
+                let firstWritable = dfuDevice.getFirstWritableSegment();
+                startAddress = firstWritable ? firstWritable.start : dfuDevice.memoryInfo.segments[0].start;
+            } else {
+                startAddress = 0x08000000;
+            }
+        }
+        
+        let status = await dfuDevice.getStatus();
+        if (status.state === dfu.dfuERROR) {
+            await dfuDevice.clearStatus();
+        }
+        
+        expectingDisconnect = true;
+        deviceDisconnectedDuringFlash = false;
+        
+        if (dfuDevice instanceof dfuse.Device) {
+            logInfo(`Sending Go command (SET_ADDRESS 0x${startAddress.toString(16)})...`);
+            await dfuDevice.dfuseCommand(dfuse.SET_ADDRESS, startAddress, 4);
+            logInfo("Sending 0-length block to trigger manifestation...");
+            await dfuDevice.download(new ArrayBuffer(), 0);
+            
+            try {
+                await dfuDevice.poll_until(state => (state == dfu.dfuMANIFEST));
+            } catch (error) {
+                logDebug("Manifestation polling finished/error: " + error);
+            }
+        } else {
+            logInfo("Sending empty download block to trigger manifestation...");
+            await dfuDevice.download(new ArrayBuffer(), 0);
+            
+            try {
+                await dfuDevice.poll_until(state => (state == dfu.dfuMANIFEST || state == dfu.dfuMANIFEST_WAIT_RESET));
+            } catch (error) {
+                logDebug("Manifestation polling finished/error: " + error);
+            }
+        }
+        
+        logInfo("Triggering USB reset...");
+        try {
+            await dfuDevice.device_.reset();
+        } catch (error) {
+            logDebug("Ignored reset error during exit: " + error);
+        }
+        
+        logSuccess("Exit command sent successfully. Device should reboot into normal mode.");
+        
+        // Wait for disconnect
+        try {
+            if (deviceDisconnectedDuringFlash) {
+                logSuccess("Device disconnected.");
+                disconnectDFU();
+            } else {
+                await dfuDevice.waitDisconnected(2500);
+                logSuccess("Device disconnected.");
+                disconnectDFU();
+            }
+        } catch (err) {
+            logWarning("Timeout waiting for device disconnect. Connection will be closed.");
+            disconnectDFU();
+        }
+    } catch (err) {
+        logError(`Failed to exit DFU mode: ${err.message}`);
+        expectingDisconnect = false;
+        if (connectBtn) connectBtn.disabled = false;
+        enableDFUControls(true);
+    }
+}
+
 /* ==========================================================================
    Main Event Listeners & Bootstrapping
    ========================================================================== */
@@ -1385,6 +1469,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.querySelector("#btn-flash").addEventListener("click", startDownload);
     document.querySelector("#btn-upload").addEventListener("click", startUpload);
+    document.querySelector("#btn-leave-dfu").addEventListener("click", leaveDFUMode);
     
     // Handle Firmware selection changes
     const firmwareSelect = document.querySelector("#firmware-select");
