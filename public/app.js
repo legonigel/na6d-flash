@@ -72,6 +72,8 @@ let dfuDevice = null;
 let firmwareFile = null;
 let dfuManifestationTolerant = true;
 let dfuTransferSize = 1024;
+let expectingDisconnect = false;
+let deviceDisconnectedDuringFlash = false;
 let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 
 // Settings state status variables
@@ -890,6 +892,8 @@ function disconnectDFU() {
         enableDFUControls(false);
         document.querySelector("#step-select")?.classList.add("inactive");
         document.querySelector("#step-write")?.classList.add("inactive");
+        expectingDisconnect = false;
+        deviceDisconnectedDuringFlash = false;
     };
 
     if (dfuDevice) {
@@ -953,6 +957,8 @@ async function startDownload() {
         if (progressEl) progressEl.value = 0;
         
         const startTime = performance.now();
+        expectingDisconnect = true;
+        deviceDisconnectedDuringFlash = false;
         await dfuDevice.do_download(dfuTransferSize, firmwareFile, dfuManifestationTolerant);
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         
@@ -962,9 +968,17 @@ async function startDownload() {
         if (!dfuManifestationTolerant) {
             logInfo("Waiting for device reset...");
             try {
-                await dfuDevice.waitDisconnected(5000);
-                logSuccess("Device disconnected and rebooted.");
-                disconnectDFU();
+                if (deviceDisconnectedDuringFlash) {
+                    logSuccess("Device disconnected and rebooted.");
+                    disconnectDFU();
+                } else if (dfuDevice) {
+                    await dfuDevice.waitDisconnected(5000);
+                    logSuccess("Device disconnected and rebooted.");
+                    disconnectDFU();
+                } else {
+                    logSuccess("Device disconnected and rebooted.");
+                    disconnectDFU();
+                }
             } catch (err) {
                 logWarning("Timeout waiting for device disconnect.");
             }
@@ -972,6 +986,7 @@ async function startDownload() {
     } catch (err) {
         logError(`Error during download: ${err}`);
     } finally {
+        expectingDisconnect = false;
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
     }
@@ -1193,6 +1208,19 @@ document.addEventListener("DOMContentLoaded", () => {
         input.addEventListener("input", markDirty);
         input.addEventListener("change", markDirty);
     });
+
+    // Morse code message input sanitization and auto-uppercase
+    const foxMsgInput = document.querySelector("#fox-message");
+    if (foxMsgInput) {
+        foxMsgInput.addEventListener("input", (e) => {
+            let val = e.target.value.toUpperCase();
+            // Retain letters, digits, spaces, slashes, periods, and dashes
+            val = val.replace(/[^A-Z0-9\s/.-]/g, "");
+            if (e.target.value !== val) {
+                e.target.value = val;
+            }
+        });
+    }
     
     // 4. WebUSB DFU Flashing buttons
     document.querySelector("#btn-connect-dfu").addEventListener("click", () => {
@@ -1265,9 +1293,20 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // WebUSB disconnect event
     navigator.usb?.addEventListener("disconnect", (event) => {
-        if (dfuDevice && dfuDevice.device_ === event.device) {
-            logWarning("DFU device disconnected unexpectedly.");
-            disconnectDFU();
+        if (dfuDevice) {
+            const isMatch = dfuDevice.device_ === event.device || (
+                dfuDevice.device_.vendorId === event.device.vendorId &&
+                dfuDevice.device_.productId === event.device.productId &&
+                dfuDevice.device_.serialNumber === event.device.serialNumber
+            );
+            if (isMatch) {
+                if (expectingDisconnect) {
+                    deviceDisconnectedDuringFlash = true;
+                } else {
+                    logWarning("DFU device disconnected unexpectedly.");
+                    disconnectDFU();
+                }
+            }
         }
     });
 });
