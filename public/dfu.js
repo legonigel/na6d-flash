@@ -493,11 +493,16 @@ var dfu = {};
                         reject("Disconnect timeout expired");
                     }
                 }
-                timeoutID = setTimeout(reject, timeout);
+                timeoutID = setTimeout(onTimeout, timeout);
             }
 
             function onDisconnect(event) {
-                if (event.device === usbDevice) {
+                const isMatch = event.device === usbDevice || (
+                    event.device.vendorId === usbDevice.vendorId &&
+                    event.device.productId === usbDevice.productId &&
+                    event.device.serialNumber === usbDevice.serialNumber
+                );
+                if (isMatch) {
                     if (timeout > 0) {
                         clearTimeout(timeoutID);
                     }
@@ -701,10 +706,12 @@ var dfu = {};
         try {
             await this.device_.reset();
         } catch (error) {
-            if (error == "NetworkError: Unable to reset the device." ||
-                error == "NotFoundError: Device unavailable." ||
-                error == "NotFoundError: The device was disconnected.") {
-                this.logDebug("Ignored reset error");
+            const errStr = error.toString();
+            if (errStr.includes("NetworkError") || 
+                errStr.includes("NotFoundError") || 
+                errStr.includes("device was disconnected") ||
+                errStr.includes("Unable to reset")) {
+                this.logDebug("Ignored reset error: " + errStr);
             } else {
                 throw "Error during reset for manifestation: " + error;
             }

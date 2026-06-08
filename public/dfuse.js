@@ -305,6 +305,21 @@ var dfuse = {};
         } catch (error) {
             this.logError(error);
         }
+
+        // Reset to exit DFU mode
+        try {
+            await this.device_.reset();
+        } catch (error) {
+            const errStr = error.toString();
+            if (errStr.includes("NetworkError") || 
+                errStr.includes("NotFoundError") || 
+                errStr.includes("device was disconnected") ||
+                errStr.includes("Unable to reset")) {
+                this.logDebug("Ignored reset error: " + errStr);
+            } else {
+                throw "Error during reset for manifestation: " + error;
+            }
+        }
     }
 
     dfuse.Device.prototype.do_upload = async function(xfer_size, max_size) {
