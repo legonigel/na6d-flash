@@ -160,14 +160,17 @@ function logProgress(done, total) {
     const progressEl = document.querySelector("#dfu-progress");
     if (!progressEl) return;
     
+    const statusEl = document.querySelector("#dfu-progress-status");
+    if (statusEl) {
+        statusEl.style.display = "block";
+    }
+    
     if (typeof total === "undefined") {
         progressEl.removeAttribute("value");
         logDebug(`Progress: ${done} bytes`);
         
-        const alertEl = document.querySelector("#dfu-alert");
-        if (alertEl && !alertEl.hidden) {
-            alertEl.className = "alert-box info";
-            alertEl.innerHTML = `<p>Operation in progress... (Processed <strong>${niceSize(done)}</strong>)</p>`;
+        if (statusEl) {
+            statusEl.innerHTML = `Operation in progress... (Processed <strong>${niceSize(done)}</strong>)`;
         }
         return;
     }
@@ -180,11 +183,9 @@ function logProgress(done, total) {
         pct = Math.round((done / total) * 20);
         progressEl.value = pct;
         
-        const alertEl = document.querySelector("#dfu-alert");
-        if (alertEl && !alertEl.hidden) {
-            alertEl.className = "alert-box info";
+        if (statusEl) {
             const erasePct = Math.round((done / total) * 100);
-            alertEl.innerHTML = `<p>Erasing device memory... <strong>${erasePct}%</strong></p>`;
+            statusEl.innerHTML = `Erasing device memory... <strong>${erasePct}%</strong>`;
         }
     } else {
         // Write/Backup phase: scale from 20% to 100% (or 0-100% if backup)
@@ -196,12 +197,10 @@ function logProgress(done, total) {
         pct = base + subPct;
         progressEl.value = pct;
         
-        const alertEl = document.querySelector("#dfu-alert");
-        if (alertEl && !alertEl.hidden) {
-            alertEl.className = "alert-box info";
+        if (statusEl) {
             const phasePct = Math.round((done / total) * 100);
             let actionText = isBackup ? "Reading from AIOC..." : "Writing to AIOC...";
-            alertEl.innerHTML = `<p>${actionText} <strong>${phasePct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
+            statusEl.innerHTML = `${actionText} <strong>${phasePct}%</strong> (${niceSize(done)} of ${niceSize(total)})`;
         }
     }
     logDebug(`Progress: ${pct}%`);
@@ -1105,6 +1104,8 @@ async function startDownload() {
         expectingDisconnect = false;
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
+        const statusEl = document.querySelector("#dfu-progress-status");
+        if (statusEl) statusEl.style.display = "none";
     }
 }
 
@@ -1142,6 +1143,8 @@ async function startUpload() {
     } finally {
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
+        const statusEl = document.querySelector("#dfu-progress-status");
+        if (statusEl) statusEl.style.display = "none";
     }
 }
 
