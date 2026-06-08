@@ -370,14 +370,12 @@
                             <div id="dfu-progress-status" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; display: none; color: var(--text-secondary);"></div>
                             <progress id="dfu-progress" value="0"></progress>
                             
-                            <div class="form-row" style="margin-top: 1rem;">
-                                <div class="form-group">
+                            <div class="form-row dfu-actions-row">
+                                <div class="form-group btn-primary-col">
                                     <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
                                 </div>
-                                <div class="form-group">
-                                    <button id="btn-upload" class="btn btn-secondary" disabled>Backup (Read Firmware)</button>
-                                </div>
-                                <div class="form-group">
+                                <div class="form-group btn-secondary-col">
+                                    <button id="btn-upload" class="btn btn-secondary" disabled>Backup Firmware</button>
                                     <button id="btn-leave-dfu" class="btn btn-danger" disabled>Exit Update Mode</button>
                                 </div>
                             </div>
