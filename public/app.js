@@ -430,8 +430,90 @@ async function readAllSettings() {
         showSettingsStatus(null);
         settingsModified = false;
         settingsAppliedTemporarily = false;
+        checkMatchingPreset();
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
+    }
+}
+
+function checkMatchingPreset() {
+    // Clear all active presets first
+    document.querySelectorAll(".btn-preset").forEach(btn => btn.classList.remove("active"));
+    
+    const ptt1Val = collectPTTValue("ptt1");
+    const ptt2Val = collectPTTValue("ptt2");
+    const rxGain = parseInt(document.querySelector("#audio-rx-gain").value);
+    const txBoost = document.querySelector("#audio-tx-boost").checked;
+    const vcosLvl = parseInt(document.querySelector("#vcos-level").value) || 0;
+    const vcosTim = parseInt(document.querySelector("#vcos-timeout").value) || 0;
+    const vpttLvl = parseInt(document.querySelector("#vptt-level").value) || 0;
+    const vpttTim = parseInt(document.querySelector("#vptt-timeout").value) || 0;
+    const vidVal = document.querySelector("#usb-vid").value.trim().toLowerCase();
+    const pidVal = document.querySelector("#usb-pid").value.trim().toLowerCase();
+
+    // Standardize hex strings (e.g. 0x1209 vs 1209)
+    const normalizeHex = (str) => {
+        if (!str) return "";
+        if (str.startsWith("0x")) return str;
+        return "0x" + str;
+    };
+    const vid = normalizeHex(vidVal);
+    const pid = normalizeHex(pidVal);
+
+    // 1. Default Config preset
+    const isDefault = (
+        ptt1Val === (PTTSource.CM108GPIO3 | PTTSource.SERIALDTRNRTS) &&
+        ptt2Val === PTTSource.CM108GPIO4 &&
+        rxGain === 0 && !txBoost &&
+        vcosLvl === 256 && vcosTim === 3200 &&
+        vpttLvl === 16 && vpttTim === 320 &&
+        vid === "0x1209" && pid === "0x7388"
+    );
+    if (isDefault) {
+        document.querySelector("#preset-defaults")?.classList.add("active");
+        return;
+    }
+
+    // 2. CHIRP Programming preset
+    const isChirp = (
+        ptt1Val === (PTTSource.SERIALRTS | PTTSource.SERIALDTR) &&
+        ptt2Val === 0 &&
+        rxGain === 0 && !txBoost &&
+        vcosLvl === 256 && vcosTim === 3200 &&
+        vpttLvl === 16 && vpttTim === 320 &&
+        vid === "0x1209" && pid === "0x7388"
+    );
+    if (isChirp) {
+        document.querySelector("#preset-chirp")?.classList.add("active");
+        return;
+    }
+
+    // 3. Digital Modes preset
+    const isSoundcard = (
+        ptt1Val === PTTSource.CM108GPIO1 &&
+        ptt2Val === 0 &&
+        rxGain === 0 && !txBoost &&
+        vcosLvl === 256 && vcosTim === 3200 &&
+        vpttLvl === 16 && vpttTim === 320 &&
+        vid === "0x1209" && pid === "0x7388"
+    );
+    if (isSoundcard) {
+        document.querySelector("#preset-soundcard")?.classList.add("active");
+        return;
+    }
+
+    // 4. AllStarLink preset
+    const isASL = (
+        ptt1Val === PTTSource.CM108GPIO1 &&
+        ptt2Val === 0 &&
+        rxGain === 0 && !txBoost &&
+        vcosLvl === 256 && vcosTim === 1500 &&
+        vpttLvl === 16 && vpttTim === 320 &&
+        vid === "0x0d8c" && pid === "0x000c"
+    );
+    if (isASL) {
+        document.querySelector("#preset-asl")?.classList.add("active");
+        return;
     }
 }
 
