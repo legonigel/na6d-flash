@@ -79,6 +79,7 @@ let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 // Settings state status variables
 let settingsModified = false;
 let settingsAppliedTemporarily = false;
+let currentFlashPhase = "";
 
 function showSettingsStatus(state, msg) {
     const banner = document.querySelector("#settings-status-banner");
@@ -103,6 +104,15 @@ function niceSize(n) {
 function log(type, msg, module = null) {
     const targetModule = module || currentModule;
     const time = new Date().toLocaleTimeString();
+    
+    // Detect download/erase/backup phase from logs
+    if (msg.includes("Erasing DFU device memory") || msg.includes("Erasing DFU device")) {
+        currentFlashPhase = "erase";
+    } else if (msg.includes("Copying data") || msg.includes("Writing firmware")) {
+        currentFlashPhase = "write";
+    } else if (msg.includes("Reading")) {
+        currentFlashPhase = "backup";
+    }
     
     // Strip HTML tags for developer console logs
     const plainTextMsg = msg.replace(/<[^>]*>/g, "");
@@ -150,6 +160,18 @@ function logProgress(done, total) {
     const progressEl = document.querySelector("#dfu-progress");
     if (!progressEl) return;
     
+    if (currentFlashPhase === "erase") {
+        progressEl.value = 0;
+        
+        const alertEl = document.querySelector("#dfu-alert");
+        if (alertEl && !alertEl.hidden) {
+            alertEl.className = "alert-box info";
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            alertEl.innerHTML = `<p>Erasing device memory... <strong>${pct}%</strong></p>`;
+        }
+        return;
+    }
+    
     if (typeof total === "undefined") {
         progressEl.removeAttribute("value");
         logDebug(`Progress: ${done} bytes`);
@@ -168,7 +190,8 @@ function logProgress(done, total) {
         const alertEl = document.querySelector("#dfu-alert");
         if (alertEl && !alertEl.hidden) {
             alertEl.className = "alert-box info";
-            alertEl.innerHTML = `<p>Operation in progress... <strong>${pct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
+            let actionText = currentFlashPhase === "backup" ? "Reading from AIOC..." : "Writing to AIOC...";
+            alertEl.innerHTML = `<p>${actionText} <strong>${pct}%</strong> (${niceSize(done)} of ${niceSize(total)})</p>`;
         }
     }
 }
