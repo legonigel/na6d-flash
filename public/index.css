@@ -555,9 +555,64 @@ button:disabled {
 /* Action Buttons Grid */
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: 1rem;
     margin-top: 2rem;
+}
+
+.actions-grid .btn {
+    text-align: center;
+}
+
+#btn-read-settings {
+    grid-column: span 2;
+}
+
+#btn-write-settings {
+    grid-column: span 2;
+}
+
+#btn-save-settings {
+    grid-column: span 2;
+}
+
+#btn-load-defaults {
+    grid-column: span 3;
+}
+
+#btn-reboot-hid {
+    grid-column: span 3;
+}
+
+@media (max-width: 768px) {
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #btn-read-settings {
+        grid-column: span 2;
+    }
+    
+    #btn-write-settings,
+    #btn-save-settings,
+    #btn-load-defaults,
+    #btn-reboot-hid {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #btn-read-settings,
+    #btn-write-settings,
+    #btn-save-settings,
+    #btn-load-defaults,
+    #btn-reboot-hid {
+        grid-column: span 1;
+    }
 }
 
 .btn {
