@@ -576,6 +576,10 @@ button:disabled {
     grid-column: span 2;
 }
 
+#btn-share-link {
+    grid-column: span 6;
+}
+
 #btn-load-defaults {
     grid-column: span 3;
 }
@@ -589,7 +593,8 @@ button:disabled {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    #btn-read-settings {
+    #btn-read-settings,
+    #btn-share-link {
         grid-column: span 2;
     }
     
@@ -610,7 +615,8 @@ button:disabled {
     #btn-write-settings,
     #btn-save-settings,
     #btn-load-defaults,
-    #btn-reboot-hid {
+    #btn-reboot-hid,
+    #btn-share-link {
         grid-column: span 1;
     }
 }

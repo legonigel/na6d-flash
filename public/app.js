@@ -211,6 +211,93 @@ function applyUrlParameters() {
     }
 }
 
+function generateShareableLink() {
+    const url = new URL(window.location.origin + window.location.pathname);
+    
+    // 1. Active Tab
+    const activeTab = currentModule === "hid" ? "config" : "flash";
+    url.hash = activeTab;
+    
+    // 2. Firmware
+    const fwSelect = document.querySelector("#firmware-select");
+    if (fwSelect && fwSelect.value && fwSelect.value !== "firmware/aioc-v1.4.1.bin") {
+        url.searchParams.set("fw", fwSelect.value);
+    }
+    
+    // 3. Preset
+    const activePresetBtn = document.querySelector(".btn-preset.active");
+    if (activePresetBtn) {
+        const presetId = activePresetBtn.id.replace("preset-", "");
+        url.searchParams.set("preset", presetId);
+        // Since settings match this preset exactly, we don't need individual overrides!
+        return url.toString();
+    }
+    
+    // 4. Custom Configuration (Individual overrides that differ from factory defaults)
+    const currentSettings = collectUISettings();
+    const defaults = {
+        ptt1: 0x404,
+        ptt2: 0x8,
+        audioRxGain: 0,
+        audioTxBoost: false,
+        vcosLevel: 256,
+        vcosTimeout: 3200,
+        vpttLevel: 16,
+        vpttTimeout: 320,
+        foxVolume: 32768,
+        foxWpm: 20,
+        foxInterval: 0,
+        foxMessage: "",
+        usbVid: "0x1209",
+        usbPid: "0x7388"
+    };
+    
+    if (currentSettings.ptt1 !== defaults.ptt1) {
+        url.searchParams.set("ptt1", "0x" + currentSettings.ptt1.toString(16));
+    }
+    if (currentSettings.ptt2 !== defaults.ptt2) {
+        url.searchParams.set("ptt2", "0x" + currentSettings.ptt2.toString(16));
+    }
+    if (currentSettings.audioRxGain !== defaults.audioRxGain) {
+        url.searchParams.set("rxGain", currentSettings.audioRxGain);
+    }
+    if (currentSettings.audioTxBoost !== defaults.audioTxBoost) {
+        url.searchParams.set("txBoost", currentSettings.audioTxBoost ? "1" : "0");
+    }
+    if (currentSettings.vcosLevel !== defaults.vcosLevel) {
+        url.searchParams.set("vcosLvl", currentSettings.vcosLevel);
+    }
+    if (currentSettings.vcosTimeout !== defaults.vcosTimeout) {
+        url.searchParams.set("vcosTim", currentSettings.vcosTimeout);
+    }
+    if (currentSettings.vpttLevel !== defaults.vpttLevel) {
+        url.searchParams.set("vpttLvl", currentSettings.vpttLevel);
+    }
+    if (currentSettings.vpttTimeout !== defaults.vpttTimeout) {
+        url.searchParams.set("vpttTim", currentSettings.vpttTimeout);
+    }
+    if (currentSettings.foxVolume !== defaults.foxVolume) {
+        url.searchParams.set("foxVol", currentSettings.foxVolume);
+    }
+    if (currentSettings.foxWpm !== defaults.foxWpm) {
+        url.searchParams.set("foxWpm", currentSettings.foxWpm);
+    }
+    if (currentSettings.foxInterval !== defaults.foxInterval) {
+        url.searchParams.set("foxInt", currentSettings.foxInterval);
+    }
+    if (currentSettings.foxMessage !== defaults.foxMessage) {
+        url.searchParams.set("foxMsg", currentSettings.foxMessage);
+    }
+    if (normalizeHex(currentSettings.usbVid) !== normalizeHex(defaults.usbVid)) {
+        url.searchParams.set("vid", currentSettings.usbVid);
+    }
+    if (normalizeHex(currentSettings.usbPid) !== normalizeHex(defaults.usbPid)) {
+        url.searchParams.set("pid", currentSettings.usbPid);
+    }
+    
+    return url.toString();
+}
+
 function collectUISettings() {
     return {
         ptt1: collectPTTValue("ptt1"),
@@ -567,7 +654,7 @@ function disconnectHID() {
 }
 
 function enableHIDControls(enable) {
-    const fields = document.querySelectorAll("#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid)");
+    const fields = document.querySelectorAll("#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid):not(#btn-share-link)");
     fields.forEach(el => el.disabled = !enable);
 }
 
@@ -1545,6 +1632,30 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-save-settings").addEventListener("click", () => writeAllSettings(true));
     document.querySelector("#btn-load-defaults").addEventListener("click", loadDefaults);
     document.querySelector("#btn-reboot-hid").addEventListener("click", rebootDevice);
+    
+    document.querySelector("#btn-share-link").addEventListener("click", () => {
+        try {
+            const url = generateShareableLink();
+            navigator.clipboard.writeText(url);
+            
+            // Visual feedback
+            const btn = document.querySelector("#btn-share-link");
+            const originalText = btn.textContent;
+            btn.textContent = "Copied to Clipboard! ✓";
+            btn.classList.add("btn-accent");
+            btn.classList.remove("btn-primary");
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove("btn-accent");
+                btn.classList.add("btn-primary");
+            }, 2000);
+            
+            logSuccess("Shareable configuration link copied to clipboard.");
+        } catch (err) {
+            logError(`Failed to copy link: ${err.message}`);
+        }
+    });
     
     // Device Presets & Configuration View Helpers
     function setActivePreset(buttonId) {
