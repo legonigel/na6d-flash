@@ -88,6 +88,129 @@ function normalizeHex(str) {
     return "0x" + str;
 }
 
+function applyUrlParameters() {
+    const params = new URLSearchParams(window.location.search);
+    
+    // 1. Preset
+    const preset = params.get("preset");
+    if (preset) {
+        const presetBtn = document.querySelector(`#preset-${preset}`);
+        if (presetBtn) {
+            const wasDisabled = presetBtn.disabled;
+            presetBtn.disabled = false;
+            presetBtn.click();
+            presetBtn.disabled = wasDisabled;
+        }
+    }
+    
+    // 2. Firmware select
+    const fw = params.get("fw");
+    if (fw) {
+        const fwSelect = document.querySelector("#firmware-select");
+        if (fwSelect) {
+            for (let option of fwSelect.options) {
+                if (option.value === fw || option.value.includes(fw) || option.text.includes(fw)) {
+                    fwSelect.value = option.value;
+                    fwSelect.dispatchEvent(new Event("change"));
+                    break;
+                }
+            }
+        }
+    }
+    
+    // 3. Individual overrides
+    const ptt1Str = params.get("ptt1");
+    if (ptt1Str) {
+        const ptt1Val = parseInt(ptt1Str, ptt1Str.toLowerCase().startsWith("0x") ? 16 : 10);
+        if (!isNaN(ptt1Val)) {
+            updatePTTCheckboxes("ptt1", ptt1Val);
+        }
+    }
+    
+    const ptt2Str = params.get("ptt2");
+    if (ptt2Str) {
+        const ptt2Val = parseInt(ptt2Str, ptt2Str.toLowerCase().startsWith("0x") ? 16 : 10);
+        if (!isNaN(ptt2Val)) {
+            updatePTTCheckboxes("ptt2", ptt2Val);
+        }
+    }
+    
+    const rxGain = params.get("rxGain");
+    if (rxGain !== null) {
+        const rxGainVal = parseInt(rxGain, 10);
+        if (!isNaN(rxGainVal)) {
+            const el = document.querySelector("#audio-rx-gain");
+            if (el) el.value = rxGainVal;
+        }
+    }
+    
+    const txBoost = params.get("txBoost");
+    if (txBoost !== null) {
+        const el = document.querySelector("#audio-tx-boost");
+        if (el) el.checked = (txBoost === "true" || txBoost === "1");
+    }
+    
+    const vcosLvl = params.get("vcosLvl");
+    if (vcosLvl !== null) {
+        const el = document.querySelector("#vcos-level");
+        if (el) el.value = vcosLvl;
+    }
+    
+    const vcosTim = params.get("vcosTim");
+    if (vcosTim !== null) {
+        const el = document.querySelector("#vcos-timeout");
+        if (el) el.value = vcosTim;
+    }
+    
+    const vpttLvl = params.get("vpttLvl");
+    if (vpttLvl !== null) {
+        const el = document.querySelector("#vptt-level");
+        if (el) el.value = vpttLvl;
+    }
+    
+    const vpttTim = params.get("vpttTim");
+    if (vpttTim !== null) {
+        const el = document.querySelector("#vptt-timeout");
+        if (el) el.value = vpttTim;
+    }
+    
+    const foxVol = params.get("foxVol");
+    if (foxVol !== null) {
+        const el = document.querySelector("#fox-volume");
+        if (el) el.value = foxVol;
+    }
+    
+    const foxWpm = params.get("foxWpm");
+    if (foxWpm !== null) {
+        const el = document.querySelector("#fox-wpm");
+        if (el) el.value = foxWpm;
+    }
+    
+    const foxInt = params.get("foxInt");
+    if (foxInt !== null) {
+        const el = document.querySelector("#fox-interval");
+        if (el) el.value = foxInt;
+    }
+    
+    const foxMsg = params.get("foxMsg");
+    if (foxMsg !== null) {
+        const el = document.querySelector("#fox-message");
+        if (el) el.value = foxMsg;
+    }
+    
+    const vid = params.get("vid");
+    if (vid !== null) {
+        const el = document.querySelector("#usb-vid");
+        if (el) el.value = vid;
+    }
+    
+    const pid = params.get("pid");
+    if (pid !== null) {
+        const el = document.querySelector("#usb-pid");
+        if (el) el.value = pid;
+    }
+}
+
 function collectUISettings() {
     return {
         ptt1: collectPTTValue("ptt1"),
@@ -400,6 +523,13 @@ async function connectHID() {
         
         // Read everything
         await readAllSettings();
+
+        // Overlay URL parameters if present
+        if (window.location.search) {
+            applyUrlParameters();
+            logInfo("Applied URL configurations on top of connected device settings.");
+            updateSettingsStatus(true);
+        }
     } catch (err) {
         logError(`HID connection failed: ${err.message}`);
         if (btn) {
@@ -1364,8 +1494,41 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector(`#${tab.dataset.tab}`).classList.add("active");
             currentModule = tab.dataset.tab === "hid-panel" ? "hid" : "dfu";
             logDebug(`Switched to tab: ${tab.dataset.tab}`);
+
+            // Update URL hash without adding multiple duplicate items to history stack
+            const newHash = tab.dataset.tab === "hid-panel" ? "#config" : "#flash";
+            if (window.location.hash !== newHash) {
+                history.replaceState(null, null, newHash);
+            }
         });
     });
+
+    // Handle hash routing
+    function handleHashRouting() {
+        const hash = window.location.hash;
+        if (hash === "#config" || hash === "#hid-panel") {
+            const tabConfig = document.querySelector("#tab-config");
+            if (tabConfig && !tabConfig.classList.contains("active")) {
+                tabConfig.click();
+            }
+        } else if (hash === "#flash" || hash === "#dfu-panel") {
+            const tabFlash = document.querySelector("#tab-flash");
+            if (tabFlash && !tabFlash.classList.contains("active")) {
+                tabFlash.click();
+            }
+        }
+    }
+
+    // Listen for hash change (for back/forward browser navigation)
+    window.addEventListener("hashchange", handleHashRouting);
+
+    // Initial check on load
+    handleHashRouting();
+
+    // Apply URL parameters if present
+    if (window.location.search) {
+        applyUrlParameters();
+    }
     
     // 3. WebHID configuration buttons
     document.querySelector("#btn-connect-hid").addEventListener("click", () => {
