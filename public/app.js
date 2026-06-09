@@ -862,7 +862,7 @@ async function connectDFU() {
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
                         <ul>
                             <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>AIOC DFU Runtime (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
-                            <li><strong>Alternative:</strong> Bypass the normal-mode driver block by manually entering update mode: unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in.</li>
+                            <li><strong>Alternative:</strong> Bypass the normal-mode driver block by manually entering update mode: unplug the USB cable, short the two hardware DFU pins (labeled <strong>BOOT</strong>, which are the two outermost pins), and plug the USB cable back in.</li>
                         </ul>
                     `;
                 } else {

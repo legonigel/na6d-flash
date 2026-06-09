@@ -331,9 +331,9 @@
                             <!-- Connected DFU Device summary -->
                             <div id="dfu-device-info" class="device-info-box" style="display:block;">Device not connected. Connect the AIOC in update mode to program.
  
- <strong>How to connect:</strong>
- • <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect AIOC for Update</em> above and select your device in the browser prompt. The app will automatically restart your AIOC into update mode.
- • <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on the Configure Settings tab).</div>
+  <strong>How to connect:</strong>
+  • <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect AIOC for Update</em> above and select your device in the browser prompt. The app will automatically restart your AIOC into update mode.
+  • <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the USB cable, short the two hardware DFU pins (labeled <em>BOOT</em>, the two outermost pins), and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on the Configure Settings tab).</div>
 
                             <!-- Troubleshooting / Driver Guide -->
                             <details id="dfu-troubleshoot-details" style="margin-top: 1rem; margin-bottom: 2rem;">
@@ -360,8 +360,8 @@
                                     <p style="margin-bottom: 0.5rem;">If the software reboot fails or the device is unresponsive, you can manually trigger update mode:</p>
                                     <ol style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
                                         <li>Unplug the USB cable from the AIOC.</li>
-                                        <li>Use a paperclip or tweezers to <strong>short (connect) the two bootloader pads</strong> on the board (labeled <em>BOOT</em> or <em>BOOTLOADER</em>).</li>
-                                        <li>While holding the pads shorted, plug the USB cable back in. The LED will change state (usually off or solid dim), indicating it is in update mode. You can now release the short and click <strong>Connect AIOC for Update</strong>.</li>
+                                        <li>Use a paperclip or tweezers to <strong>short (connect) the two bootloader pins</strong> on the board (labeled <em>BOOT</em>, which are the two outermost pins).</li>
+                                        <li>While holding the pins shorted, plug the USB cable back in. The LED will change state (usually off or solid dim), indicating it is in update mode. You can now release the short and click <strong>Connect AIOC for Update</strong>.</li>
                                     </ol>
                                     
                                     <h4 style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">3. Check Browser Compatibility</h4>
