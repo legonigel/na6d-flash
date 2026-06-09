@@ -326,7 +326,7 @@ async function connectHID() {
         }
         
         document.querySelector("#hid-status").textContent = "Connected";
-        document.querySelector("#hid-status").className = "status-connected";
+        document.querySelector("#hid-status").className = "status-pill status-connected";
         if (btn) {
             btn.textContent = "Disconnect";
             btn.disabled = false;
@@ -354,7 +354,7 @@ function disconnectHID() {
             originalDeviceVid = null;
             originalDevicePid = null;
             document.querySelector("#hid-status").textContent = "Disconnected";
-            document.querySelector("#hid-status").className = "status-disconnected";
+            document.querySelector("#hid-status").className = "status-pill status-disconnected";
             if (btn) {
                 btn.textContent = "Connect AIOC Settings";
                 btn.disabled = false;
@@ -966,7 +966,7 @@ async function connectDFU() {
         }
         
         document.querySelector("#dfu-status").textContent = "Connected";
-        document.querySelector("#dfu-status").className = "status-connected";
+        document.querySelector("#dfu-status").className = "status-pill status-connected";
         if (btn) {
             btn.textContent = "Disconnect";
             btn.disabled = false;
@@ -1011,7 +1011,7 @@ function disconnectDFU() {
     
     const cleanupUI = () => {
         document.querySelector("#dfu-status").textContent = "Disconnected";
-        document.querySelector("#dfu-status").className = "status-disconnected";
+        document.querySelector("#dfu-status").className = "status-pill status-disconnected";
         if (btn) {
             btn.textContent = "Connect AIOC for Update";
             btn.disabled = false;
