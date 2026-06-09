@@ -864,6 +864,9 @@ async function connectDFU() {
                             <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>AIOC DFU Runtime (Interface 6)</strong>, and install/replace the driver with <strong>WinUSB</strong>.</li>
                             <li><strong>Alternative:</strong> Bypass the normal-mode driver block by manually entering update mode: unplug the USB cable, short the two hardware DFU pins (labeled <strong>BOOT</strong>, which are the two outermost pins), and plug the USB cable back in (the green LED will remain off in DFU mode, whereas it is dim green in normal mode).</li>
                         </ul>
+                        <div style="margin-top: 0.75rem; border-top: 1px dashed rgba(239, 68, 68, 0.3); padding-top: 0.5rem;">
+                            ℹ️ <strong>If your device becomes unresponsive or stuck:</strong> Simply unplug the USB cable and plug it back in to reboot back to normal operation.
+                        </div>
                     `;
                 } else {
                     warningHtml = `
@@ -873,6 +876,9 @@ async function connectDFU() {
                         <ul>
                             <li>Open <a href="https://zadig.akeo.ie" target="_blank" rel="noopener">Zadig</a>, select <em>Options > List All Devices</em>, select <strong>STM32 BOOTLOADER</strong>, and install/replace driver with <strong>WinUSB</strong>.</li>
                         </ul>
+                        <div style="margin-top: 0.75rem; border-top: 1px dashed rgba(239, 68, 68, 0.3); padding-top: 0.5rem;">
+                            ℹ️ <strong>To exit update mode at any time:</strong> Simply unplug the USB cable and plug it back in to reboot back to normal operation.
+                        </div>
                     `;
                 }
                 log("error", warningHtml, "dfu");
@@ -966,12 +972,14 @@ async function connectDFU() {
             btn.disabled = false;
         }
         
-        document.querySelector("#dfu-device-info").textContent = 
+        const deviceInfoEl = document.querySelector("#dfu-device-info");
+        deviceInfoEl.textContent = 
             `Device: ${dfuDevice.device_.productName || "Unknown"}\n` +
             `Manufacturer: ${dfuDevice.device_.manufacturerName || "Unknown"}\n` +
             `Serial: ${dfuDevice.device_.serialNumber || "Unknown"}\n` +
             `Mode: DFU (Flashing Mode)\n` +
             (memorySummary ? `${memorySummary}\n` : "");
+        deviceInfoEl.style.display = "block";
             
         enableDFUControls(true);
         document.querySelector("#step-select")?.classList.remove("inactive");
@@ -1003,7 +1011,11 @@ function disconnectDFU() {
             btn.textContent = "Connect AIOC for Update";
             btn.disabled = false;
         }
-        document.querySelector("#dfu-device-info").textContent = "";
+        const deviceInfoEl = document.querySelector("#dfu-device-info");
+        if (deviceInfoEl) {
+            deviceInfoEl.textContent = "";
+            deviceInfoEl.style.display = "none";
+        }
         enableDFUControls(false);
         document.querySelector("#step-select")?.classList.add("inactive");
         document.querySelector("#step-write")?.classList.add("inactive");
@@ -1080,23 +1092,22 @@ async function startDownload() {
         logSuccess(`Flashing completed successfully in ${duration} seconds.`);
         
         // Wait for disconnect or reset
-        if (!dfuManifestationTolerant) {
-            logInfo("Waiting for device reset...");
-            try {
-                if (deviceDisconnectedDuringFlash) {
-                    logSuccess("Device disconnected and rebooted.");
-                    disconnectDFU();
-                } else if (dfuDevice) {
-                    await dfuDevice.waitDisconnected(5000);
-                    logSuccess("Device disconnected and rebooted.");
-                    disconnectDFU();
-                } else {
-                    logSuccess("Device disconnected and rebooted.");
-                    disconnectDFU();
-                }
-            } catch (err) {
-                logWarning("Timeout waiting for device disconnect.");
+        logInfo("Waiting for device reset...");
+        try {
+            if (deviceDisconnectedDuringFlash) {
+                logSuccess("Device disconnected and rebooted.");
+                disconnectDFU();
+            } else if (dfuDevice) {
+                await dfuDevice.waitDisconnected(5000);
+                logSuccess("Device disconnected and rebooted.");
+                disconnectDFU();
+            } else {
+                logSuccess("Device disconnected and rebooted.");
+                disconnectDFU();
             }
+        } catch (err) {
+            logWarning("Timeout waiting for device disconnect. Connection will be closed.");
+            disconnectDFU();
         }
     } catch (err) {
         logError(`Error during download: ${err}`);
