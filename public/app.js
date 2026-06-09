@@ -980,6 +980,11 @@ async function connectDFU() {
             `Mode: DFU (Flashing Mode)\n` +
             (memorySummary ? `${memorySummary}\n` : "");
         deviceInfoEl.style.display = "block";
+        
+        const connectGuideEl = document.querySelector("#dfu-connect-guide");
+        if (connectGuideEl) {
+            connectGuideEl.style.display = "none";
+        }
             
         enableDFUControls(true);
         document.querySelector("#step-select")?.classList.remove("inactive");
@@ -1015,6 +1020,10 @@ function disconnectDFU() {
         if (deviceInfoEl) {
             deviceInfoEl.textContent = "";
             deviceInfoEl.style.display = "none";
+        }
+        const connectGuideEl = document.querySelector("#dfu-connect-guide");
+        if (connectGuideEl) {
+            connectGuideEl.style.display = "block";
         }
         enableDFUControls(false);
         document.querySelector("#step-select")?.classList.add("inactive");
