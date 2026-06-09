@@ -75,7 +75,7 @@
                         </div>
                         <!-- Device Presets -->
                         <div class="form-section presets-section">
-                            <div class="form-section-title" style="color: var(--text-primary); font-size: 0.95rem; border-bottom: 2px solid var(--color-charcoal); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
+                            <div class="form-section-title" style="color: var(--text-primary); font-size: 1.05rem; border-bottom: 2px solid var(--color-charcoal); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
                                 Quick Presets (Applies settings to fields below)
                             </div>
                             <div class="preset-row" style="margin-bottom: 0;">
@@ -287,7 +287,7 @@
                                         <input type="text" id="usb-pid" placeholder="0x7388" disabled />
                                     </div>
                                 </div>
-                                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem;">
+                                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">
                                     ⚠️ Changing USB VID/PID takes effect after reboot. If you change this, your OS/browser will detect a different device.
                                 </p>
                             </div>
@@ -338,17 +338,17 @@
                             <!-- Troubleshooting / Driver Guide -->
                             <details id="dfu-troubleshoot-details" style="margin-top: 1rem; margin-bottom: 2rem;">
                                 <summary style="font-weight: 700; color: var(--color-orange);">❓ Don't see your device or having connection issues?</summary>
-                                <div style="margin-top: 1rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-primary);">
+                                <div style="margin-top: 1rem; font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);">
                                     <p style="margin-bottom: 0.75rem;">Here are the most common solutions to get your AIOC connected:</p>
                                     
-                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">1. Windows Driver Installation (Zadig)</h4>
+                                    <h4 style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">1. Windows Driver Installation (Zadig)</h4>
                                     <p style="margin-bottom: 0.5rem;">Windows requires a <strong>WinUSB</strong> driver for the browser to communicate with the device. If your device is not found or fails to connect:</p>
                                     <ul style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
                                         <li>Download and run <a href="https://zadig.akeo.ie/" target="_blank" rel="noopener">Zadig</a>.</li>
                                         <li>Click <strong>Options</strong> > check <strong>List All Devices</strong>.</li>
                                         <li>Select the target device from the dropdown:
                                             <ul>
-                                                <li>If the AIOC is in normal mode: Select <strong>All-In-One-Cable (Interface 6)</strong>.</li>
+                                                <li>If the AIOC is in normal mode: Select <strong>AIOC DFU Runtime (Interface 6)</strong>.</li>
                                                 <li>If the AIOC is in bootloader/update mode: Select <strong>STM32 BOOTLOADER</strong>.</li>
                                             </ul>
                                         </li>
@@ -356,7 +356,7 @@
                                         <li>Click <strong>Replace Driver</strong> or <strong>Install Driver</strong>.</li>
                                     </ul>
                                     
-                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">2. Manually Enter Firmware Update (DFU) Mode</h4>
+                                    <h4 style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">2. Manually Enter Firmware Update (DFU) Mode</h4>
                                     <p style="margin-bottom: 0.5rem;">If the software reboot fails or the device is unresponsive, you can manually trigger update mode:</p>
                                     <ol style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
                                         <li>Unplug the USB cable from the AIOC.</li>
@@ -364,7 +364,7 @@
                                         <li>While holding the pads shorted, plug the USB cable back in. The LED will change state (usually off or solid dim), indicating it is in update mode. You can now release the short and click <strong>Connect AIOC for Update</strong>.</li>
                                     </ol>
                                     
-                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">3. Check Browser Compatibility</h4>
+                                    <h4 style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">3. Check Browser Compatibility</h4>
                                     <p>Ensure you are using a Chromium-based browser like <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>. Firefox, Safari, and Brave (unless Shields are disabled) do not support WebUSB/WebHID.</p>
                                 </div>
                             </details>
@@ -401,7 +401,7 @@
                                 <span class="stepper-title">Write Firmware to AIOC</span>
                             </div>
                             
-                            <div id="dfu-progress-status" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; display: none; color: var(--text-secondary);"></div>
+                            <div id="dfu-progress-status" style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; display: none; color: var(--text-secondary);"></div>
                             <progress id="dfu-progress" value="0"></progress>
                             
                             <div class="form-row dfu-actions-row">
