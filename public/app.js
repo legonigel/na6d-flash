@@ -298,6 +298,38 @@ function generateShareableLink() {
     return url.toString();
 }
 
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+    }
+    
+    // Fallback method for older browsers or non-secure HTTP contexts
+    return new Promise((resolve, reject) => {
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            const successful = document.execCommand("copy");
+            document.body.removeChild(textArea);
+            
+            if (successful) {
+                resolve();
+            } else {
+                reject(new Error("execCommand copy was unsuccessful"));
+            }
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
 function collectUISettings() {
     return {
         ptt1: collectPTTValue("ptt1"),
@@ -654,7 +686,7 @@ function disconnectHID() {
 }
 
 function enableHIDControls(enable) {
-    const fields = document.querySelectorAll("#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid):not(#btn-share-link)");
+    const fields = document.querySelectorAll("#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid)");
     fields.forEach(el => el.disabled = !enable);
 }
 
@@ -1634,10 +1666,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#btn-reboot-hid").addEventListener("click", rebootDevice);
     
     document.querySelector("#btn-share-link").addEventListener("click", () => {
-        try {
-            const url = generateShareableLink();
-            navigator.clipboard.writeText(url);
-            
+        const url = generateShareableLink();
+        copyToClipboard(url).then(() => {
             // Visual feedback
             const btn = document.querySelector("#btn-share-link");
             const originalText = btn.textContent;
@@ -1652,9 +1682,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 2000);
             
             logSuccess("Shareable configuration link copied to clipboard.");
-        } catch (err) {
+        }).catch(err => {
             logError(`Failed to copy link: ${err.message}`);
-        }
+        });
     });
     
     // Device Presets & Configuration View Helpers

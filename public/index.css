@@ -562,6 +562,8 @@ button:disabled {
 
 .actions-grid .btn {
     text-align: center;
+    font-size: 0.8rem;
+    padding: 0.8rem 0.8rem;
 }
 
 #btn-read-settings {
@@ -577,15 +579,15 @@ button:disabled {
 }
 
 #btn-share-link {
-    grid-column: span 6;
+    grid-column: span 2;
 }
 
 #btn-load-defaults {
-    grid-column: span 3;
+    grid-column: span 2;
 }
 
 #btn-reboot-hid {
-    grid-column: span 3;
+    grid-column: span 2;
 }
 
 @media (max-width: 768px) {
@@ -593,16 +595,8 @@ button:disabled {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    #btn-read-settings,
-    #btn-share-link {
-        grid-column: span 2;
-    }
-    
-    #btn-write-settings,
-    #btn-save-settings,
-    #btn-load-defaults,
-    #btn-reboot-hid {
-        grid-column: span 1;
+    .actions-grid .btn {
+        grid-column: span 1 !important;
     }
 }
 
@@ -611,13 +605,8 @@ button:disabled {
         grid-template-columns: 1fr;
     }
     
-    #btn-read-settings,
-    #btn-write-settings,
-    #btn-save-settings,
-    #btn-load-defaults,
-    #btn-reboot-hid,
-    #btn-share-link {
-        grid-column: span 1;
+    .actions-grid .btn {
+        grid-column: span 1 !important;
     }
 }
 
