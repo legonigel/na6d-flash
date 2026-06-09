@@ -334,6 +334,40 @@
  <strong>How to connect:</strong>
  • <strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect AIOC for Update</em> above and select your device in the browser prompt. The app will automatically restart your AIOC into update mode.
  • <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the USB cable, short the two hardware DFU pins on the board, and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on the Configure Settings tab).</div>
+
+                            <!-- Troubleshooting / Driver Guide -->
+                            <details id="dfu-troubleshoot-details" style="margin-top: 1rem; margin-bottom: 2rem;">
+                                <summary style="font-weight: 700; color: var(--color-orange);">❓ Don't see your device or having connection issues?</summary>
+                                <div style="margin-top: 1rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-primary);">
+                                    <p style="margin-bottom: 0.75rem;">Here are the most common solutions to get your AIOC connected:</p>
+                                    
+                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">1. Windows Driver Installation (Zadig)</h4>
+                                    <p style="margin-bottom: 0.5rem;">Windows requires a <strong>WinUSB</strong> driver for the browser to communicate with the device. If your device is not found or fails to connect:</p>
+                                    <ul style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
+                                        <li>Download and run <a href="https://zadig.akeo.ie/" target="_blank" rel="noopener">Zadig</a>.</li>
+                                        <li>Click <strong>Options</strong> > check <strong>List All Devices</strong>.</li>
+                                        <li>Select the target device from the dropdown:
+                                            <ul>
+                                                <li>If the AIOC is in normal mode: Select <strong>All-In-One-Cable (Interface 6)</strong>.</li>
+                                                <li>If the AIOC is in bootloader/update mode: Select <strong>STM32 BOOTLOADER</strong>.</li>
+                                            </ul>
+                                        </li>
+                                        <li>Select <strong>WinUSB</strong> in the target driver field (to the right of the green arrow).</li>
+                                        <li>Click <strong>Replace Driver</strong> or <strong>Install Driver</strong>.</li>
+                                    </ul>
+                                    
+                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">2. Manually Enter Firmware Update (DFU) Mode</h4>
+                                    <p style="margin-bottom: 0.5rem;">If the software reboot fails or the device is unresponsive, you can manually trigger update mode:</p>
+                                    <ol style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
+                                        <li>Unplug the USB cable from the AIOC.</li>
+                                        <li>Use a paperclip or tweezers to <strong>short (connect) the two bootloader pads</strong> on the board (labeled <em>BOOT</em> or <em>BOOTLOADER</em>).</li>
+                                        <li>While holding the pads shorted, plug the USB cable back in. The LED will change state (usually off or solid dim), indicating it is in update mode. You can now release the short and click <strong>Connect AIOC for Update</strong>.</li>
+                                    </ol>
+                                    
+                                    <h4 style="margin-top: 1rem; margin-bottom: 0.25rem; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; color: var(--color-blue);">3. Check Browser Compatibility</h4>
+                                    <p>Ensure you are using a Chromium-based browser like <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>. Firefox, Safari, and Brave (unless Shields are disabled) do not support WebUSB/WebHID.</p>
+                                </div>
+                            </details>
                         </div>
 
                         <!-- Step 2: Select Firmware -->
