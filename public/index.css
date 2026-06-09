@@ -76,7 +76,7 @@ body {
     box-shadow: 4px 4px 0px var(--color-charcoal);
 }
 
-.warning-banner[hidden] {
+[hidden] {
     display: none !important;
 }
 

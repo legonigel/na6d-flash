@@ -77,9 +77,74 @@ let deviceDisconnectedDuringFlash = false;
 let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 
 // Settings state status variables
-let settingsModified = false;
-let settingsAppliedTemporarily = false;
+let appliedSettings = null;
+let matchStatus = { state: null, msg: "" };
 let currentFlashPhase = "";
+
+function normalizeHex(str) {
+    if (!str) return "";
+    str = str.trim().toLowerCase();
+    if (str.startsWith("0x")) return str;
+    return "0x" + str;
+}
+
+function collectUISettings() {
+    return {
+        ptt1: collectPTTValue("ptt1"),
+        ptt2: collectPTTValue("ptt2"),
+        audioRxGain: parseInt(document.querySelector("#audio-rx-gain")?.value || 0),
+        audioTxBoost: !!document.querySelector("#audio-tx-boost")?.checked,
+        vcosLevel: parseInt(document.querySelector("#vcos-level")?.value || 0),
+        vcosTimeout: parseInt(document.querySelector("#vcos-timeout")?.value || 0),
+        vpttLevel: parseInt(document.querySelector("#vptt-level")?.value || 0),
+        vpttTimeout: parseInt(document.querySelector("#vptt-timeout")?.value || 0),
+        foxVolume: parseInt(document.querySelector("#fox-volume")?.value || 0),
+        foxWpm: parseInt(document.querySelector("#fox-wpm")?.value || 0),
+        foxInterval: parseInt(document.querySelector("#fox-interval")?.value || 0),
+        foxMessage: document.querySelector("#fox-message")?.value || "",
+        usbVid: document.querySelector("#usb-vid")?.value || "",
+        usbPid: document.querySelector("#usb-pid")?.value || ""
+    };
+}
+
+function areSettingsEqual(s1, s2) {
+    if (!s1 || !s2) return false;
+    return (
+        s1.ptt1 === s2.ptt1 &&
+        s1.ptt2 === s2.ptt2 &&
+        s1.audioRxGain === s2.audioRxGain &&
+        s1.audioTxBoost === s2.audioTxBoost &&
+        s1.vcosLevel === s2.vcosLevel &&
+        s1.vcosTimeout === s2.vcosTimeout &&
+        s1.vpttLevel === s2.vpttLevel &&
+        s1.vpttTimeout === s2.vpttTimeout &&
+        s1.foxVolume === s2.foxVolume &&
+        s1.foxWpm === s2.foxWpm &&
+        s1.foxInterval === s2.foxInterval &&
+        s1.foxMessage === s2.foxMessage &&
+        normalizeHex(s1.usbVid) === normalizeHex(s2.usbVid) &&
+        normalizeHex(s1.usbPid) === normalizeHex(s2.usbPid)
+    );
+}
+
+function updateSettingsStatus(isPresetLoaded = false) {
+    if (!hidDevice) {
+        showSettingsStatus(null);
+        return;
+    }
+    
+    const current = collectUISettings();
+    if (areSettingsEqual(current, appliedSettings)) {
+        showSettingsStatus(matchStatus.state, matchStatus.msg);
+    } else {
+        if (isPresetLoaded) {
+            showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
+        } else {
+            showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> You have edited settings on this page that are not yet sent to the AIOC. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below.");
+        }
+    }
+    checkMatchingPreset();
+}
 
 function showSettingsStatus(state, msg) {
     const banner = document.querySelector("#settings-status-banner");
@@ -353,6 +418,8 @@ function disconnectHID() {
             hidDevice = null;
             originalDeviceVid = null;
             originalDevicePid = null;
+            appliedSettings = null;
+            matchStatus = { state: null, msg: "" };
             document.querySelector("#hid-status").textContent = "Disconnected";
             document.querySelector("#hid-status").className = "status-pill status-disconnected";
             if (btn) {
@@ -460,10 +527,9 @@ async function readAllSettings() {
         originalDevicePid = pid;
         
         logSuccess("Registers loaded successfully.");
-        showSettingsStatus(null);
-        settingsModified = false;
-        settingsAppliedTemporarily = false;
-        checkMatchingPreset();
+        appliedSettings = collectUISettings();
+        matchStatus = { state: null, msg: "" };
+        updateSettingsStatus();
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
     }
@@ -669,13 +735,19 @@ async function writeAllSettings(store = false) {
             await sendHIDFeature(hidDevice, Command.STORE, 0, 0);
             logSuccess("Settings permanently saved.");
             
-            settingsModified = false;
-            settingsAppliedTemporarily = false;
-            showSettingsStatus("success", "<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting.");
+            appliedSettings = collectUISettings();
+            matchStatus = {
+                state: "success",
+                msg: "<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting."
+            };
+            updateSettingsStatus();
         } else {
-            settingsModified = false;
-            settingsAppliedTemporarily = true;
-            showSettingsStatus("info", "<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently.");
+            appliedSettings = collectUISettings();
+            matchStatus = {
+                state: "info",
+                msg: "<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently."
+            };
+            updateSettingsStatus();
         }
     } catch (err) {
         logError(`Failed writing settings: ${err.message}`);
@@ -689,9 +761,11 @@ async function loadDefaults() {
         await sendHIDFeature(hidDevice, Command.DEFAULTS, 0, 0);
         logSuccess("Factory defaults loaded. Reading registers...");
         await readAllSettings();
-        showSettingsStatus("info", "<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently.");
-        settingsModified = true;
-        settingsAppliedTemporarily = false;
+        matchStatus = {
+            state: "info",
+            msg: "<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently."
+        };
+        updateSettingsStatus();
     } catch (err) {
         logError(`Failed to load defaults: ${err.message}`);
     }
@@ -1361,9 +1435,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setActivePreset("#preset-defaults");
         logInfo("Applied preset: Default HID Configuration");
         
-        settingsModified = true;
-        settingsAppliedTemporarily = false;
-        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
+        updateSettingsStatus(true);
     });
 
     document.querySelector("#preset-chirp").addEventListener("click", () => {
@@ -1376,9 +1448,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setActivePreset("#preset-chirp");
         logInfo("Applied preset: CHIRP Programming (RTS & DTR)");
         
-        settingsModified = true;
-        settingsAppliedTemporarily = false;
-        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
+        updateSettingsStatus(true);
     });
     
     document.querySelector("#preset-soundcard").addEventListener("click", () => {
@@ -1390,9 +1460,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setActivePreset("#preset-soundcard");
         logInfo("Applied preset: Soundcard Digital Modes (CM108 GPIO 1)");
         
-        settingsModified = true;
-        settingsAppliedTemporarily = false;
-        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
+        updateSettingsStatus(true);
     });
 
     document.querySelector("#preset-asl").addEventListener("click", () => {
@@ -1407,9 +1475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setActivePreset("#preset-asl");
         logInfo("Applied preset: AllStarLink (CM108 Emulation)");
         
-        settingsModified = true;
-        settingsAppliedTemporarily = false;
-        showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
+        updateSettingsStatus(true);
     });
 
     document.querySelector("#preset-custom").addEventListener("click", () => {
@@ -1422,11 +1488,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("#hid-panel input, #hid-panel select").forEach(input => {
         const markDirty = () => {
             clearActivePresets();
-            if (!settingsModified) {
-                settingsModified = true;
-                settingsAppliedTemporarily = false;
-                showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> You have edited settings on this page that are not yet sent to the AIOC. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below.");
-            }
+            updateSettingsStatus();
         };
         input.addEventListener("input", markDirty);
         input.addEventListener("change", markDirty);
