@@ -99,14 +99,14 @@
                         <details style="margin-top: 1.5rem;">
                             <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Transmit PTT Sources</summary>
                             <div style="margin-top: 1.25rem;">
-                                <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <div class="label-wrapper">
-                                        <label>PTT 1 Transmit Triggers</label>
+                                <fieldset class="form-group-fieldset" style="margin-bottom: 1.5rem;">
+                                    <legend>
+                                        PTT 1 Transmit Triggers
                                         <span class="tooltip-container">
                                             <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt1-triggers" aria-label="More information about PTT 1 triggers">?</button>
                                             <span id="tooltip-ptt1-triggers" class="tooltip-text" role="tooltip">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
                                         </span>
-                                    </div>
+                                    </legend>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -118,16 +118,16 @@
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR RTS</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label>
                                     </div>
-                                </div>
+                                </fieldset>
                                 
-                                <div class="form-group">
-                                    <div class="label-wrapper">
-                                        <label>PTT 2 Transmit Triggers</label>
+                                <fieldset class="form-group-fieldset">
+                                    <legend>
+                                        PTT 2 Transmit Triggers
                                         <span class="tooltip-container">
                                             <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt2-triggers" aria-label="More information about PTT 2 triggers">?</button>
                                             <span id="tooltip-ptt2-triggers" class="tooltip-text" role="tooltip">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
                                         </span>
-                                    </div>
+                                    </legend>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -139,7 +139,7 @@
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR RTS</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label>
                                     </div>
-                                </div>
+                                </fieldset>
                             </div>
                         </details>
                         

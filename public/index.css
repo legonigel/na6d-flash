@@ -429,6 +429,28 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Fieldset and Legend styling resets for checkbox groups */
+.form-group-fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group-fieldset legend {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+}
+
 /* Checkbox Grid styling */
 .checkbox-grid {
     display: grid;
