@@ -65,14 +65,14 @@
                     <div class="card glass">
                         <div class="card-title">
                             <span>AIOC Configuration</span>
-                            <span id="hid-status" class="status-pill status-disconnected">Disconnected</span>
+                            <span id="hid-status" class="status-pill status-disconnected" role="status" aria-live="polite">Disconnected</span>
                         </div>
                         
                         <!-- Status Alert Box -->
-                        <div id="hid-alert" class="alert-box" hidden></div>
+                        <div id="hid-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
                         
                         <!-- Unsaved changes & status tracking banner -->
-                        <div id="settings-status-banner" class="alert-box" hidden></div>
+                        <div id="settings-status-banner" class="alert-box" role="status" aria-live="polite" hidden></div>
                         
                         <div class="form-section">
                             <div class="form-row">
@@ -323,11 +323,11 @@
                     <div class="card glass">
                         <div class="card-title">
                             <span>Firmware Updater</span>
-                            <span id="dfu-status" class="status-pill status-disconnected">Disconnected</span>
+                            <span id="dfu-status" class="status-pill status-disconnected" role="status" aria-live="polite">Disconnected</span>
                         </div>
                         
                         <!-- Status Alert Box -->
-                        <div id="dfu-alert" class="alert-box" hidden></div>
+                        <div id="dfu-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
                         
                         <!-- Step 1: Connect -->
                         <div class="stepper-step" id="step-connect">
@@ -439,8 +439,8 @@
 
                             <!-- DFU Progress Section (Moved below buttons) -->
                             <div id="dfu-progress-container" style="display: none;">
-                                <div id="dfu-progress-status" style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; color: var(--text-secondary);"></div>
-                                <progress id="dfu-progress" value="0"></progress>
+                                <div id="dfu-progress-status" role="status" aria-live="polite" style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; color: var(--text-secondary);"></div>
+                                <progress id="dfu-progress" aria-describedby="dfu-progress-status" value="0"></progress>
                             </div>
                         </div>
                         
