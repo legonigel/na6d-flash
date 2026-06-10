@@ -1755,10 +1755,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function setActivePreset(buttonId) {
         document.querySelectorAll(".btn-preset").forEach(btn => {
             btn.classList.remove("active");
+            btn.setAttribute("aria-pressed", "false");
         });
         if (buttonId) {
             const el = document.querySelector(buttonId);
-            if (el) el.classList.add("active");
+            if (el) {
+                el.classList.add("active");
+                el.setAttribute("aria-pressed", "true");
+            }
         }
     }
 
@@ -1771,6 +1775,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function clearActivePresets() {
         document.querySelectorAll(".btn-preset").forEach(btn => {
             btn.classList.remove("active");
+            btn.setAttribute("aria-pressed", "false");
         });
     }
 
