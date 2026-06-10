@@ -1033,4 +1033,21 @@ summary:hover {
     margin: 0;
 }
 
+/* Visible keyboard focus outline style for brutalist theme */
+summary:focus-visible,
+.tab-btn:focus-visible,
+.btn:focus-visible,
+.btn-preset:focus-visible,
+.tooltip-icon-btn:focus-visible {
+    outline: var(--border-width-thick) solid var(--color-blue);
+    outline-offset: 4px;
+}
+
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
+select:focus-visible {
+    outline: var(--border-width-thick) solid var(--color-blue);
+    outline-offset: 1px;
+}
+
 
