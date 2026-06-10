@@ -425,9 +425,6 @@
                                 <span class="stepper-title">Write Firmware to AIOC</span>
                             </div>
                             
-                            <div id="dfu-progress-status" style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; display: none; color: var(--text-secondary);"></div>
-                            <progress id="dfu-progress" value="0"></progress>
-                            
                             <div class="form-row dfu-actions-row">
                                 <div class="form-group btn-primary-col">
                                     <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
@@ -436,6 +433,12 @@
                                     <button id="btn-upload" class="btn btn-secondary" disabled>Backup Firmware</button>
                                     <button id="btn-leave-dfu" class="btn btn-danger" disabled>Exit Update Mode</button>
                                 </div>
+                            </div>
+
+                            <!-- DFU Progress Section (Moved below buttons) -->
+                            <div id="dfu-progress-container" style="display: none;">
+                                <div id="dfu-progress-status" style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; color: var(--text-secondary);"></div>
+                                <progress id="dfu-progress" value="0"></progress>
                             </div>
                         </div>
                         

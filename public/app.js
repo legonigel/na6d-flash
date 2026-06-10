@@ -80,6 +80,7 @@ let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
 let appliedSettings = null;
 let matchStatus = { state: null, msg: "" };
 let currentFlashPhase = "";
+let progressHideTimeout = null;
 
 function normalizeHex(str) {
     if (!str) return "";
@@ -462,8 +463,34 @@ function hideAlert(module) {
     }
 }
 
+function hideProgressContainerDelay(ms = 5000) {
+    if (progressHideTimeout) {
+        clearTimeout(progressHideTimeout);
+    }
+    progressHideTimeout = setTimeout(() => {
+        const container = document.querySelector("#dfu-progress-container");
+        if (container) {
+            container.style.display = "none";
+        }
+        const progressEl = document.querySelector("#dfu-progress");
+        if (progressEl) {
+            progressEl.value = 0;
+        }
+        progressHideTimeout = null;
+    }, ms);
+}
+
 // UI Progress logger interface for DFU
 function logProgress(done, total) {
+    if (progressHideTimeout) {
+        clearTimeout(progressHideTimeout);
+        progressHideTimeout = null;
+    }
+    const container = document.querySelector("#dfu-progress-container");
+    if (container) {
+        container.style.display = "block";
+    }
+
     const progressEl = document.querySelector("#dfu-progress");
     if (!progressEl) return;
     
@@ -1353,6 +1380,7 @@ function disconnectDFU() {
         document.querySelector("#step-write")?.classList.add("inactive");
         expectingDisconnect = false;
         deviceDisconnectedDuringFlash = false;
+        hideProgressContainerDelay(5000);
     };
 
     if (dfuDevice) {
@@ -1412,6 +1440,17 @@ async function startDownload() {
         }
         
         logInfo("Writing firmware to device...");
+        if (progressHideTimeout) {
+            clearTimeout(progressHideTimeout);
+            progressHideTimeout = null;
+        }
+        const container = document.querySelector("#dfu-progress-container");
+        if (container) container.style.display = "block";
+        const statusEl = document.querySelector("#dfu-progress-status");
+        if (statusEl) {
+            statusEl.style.display = "block";
+            statusEl.innerHTML = "Initializing write...";
+        }
         const progressEl = document.querySelector("#dfu-progress");
         if (progressEl) progressEl.value = 0;
         
@@ -1447,8 +1486,7 @@ async function startDownload() {
         expectingDisconnect = false;
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
-        const statusEl = document.querySelector("#dfu-progress-status");
-        if (statusEl) statusEl.style.display = "none";
+        hideProgressContainerDelay(5000);
     }
 }
 
@@ -1467,6 +1505,17 @@ async function startUpload() {
         const maxSize = parseInt(sizeField.value) || 1024 * 128; // Default 128KiB
         
         logInfo(`Reading ${maxSize} bytes from device...`);
+        if (progressHideTimeout) {
+            clearTimeout(progressHideTimeout);
+            progressHideTimeout = null;
+        }
+        const container = document.querySelector("#dfu-progress-container");
+        if (container) container.style.display = "block";
+        const statusEl = document.querySelector("#dfu-progress-status");
+        if (statusEl) {
+            statusEl.style.display = "block";
+            statusEl.innerHTML = "Initializing upload...";
+        }
         const progressEl = document.querySelector("#dfu-progress");
         if (progressEl) progressEl.value = 0;
         
@@ -1486,8 +1535,7 @@ async function startUpload() {
     } finally {
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
-        const statusEl = document.querySelector("#dfu-progress-status");
-        if (statusEl) statusEl.style.display = "none";
+        hideProgressContainerDelay(5000);
     }
 }
 

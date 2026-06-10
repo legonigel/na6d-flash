@@ -983,4 +983,13 @@ summary:hover {
     opacity: 1;
 }
 
+/* DFU Progress Bar Container */
+#dfu-progress-container {
+    margin-top: 1.5rem;
+}
+
+#dfu-progress {
+    margin: 0;
+}
+
 
