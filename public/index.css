@@ -923,6 +923,19 @@ summary:hover {
     margin-bottom: 1.5rem;
 }
 
+/* Label and Tooltip layout wrapper */
+.label-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.label-wrapper label {
+    margin-bottom: 0 !important;
+    display: block;
+}
+
 /* Tooltip styles in Shopify Brutalist Theme */
 .tooltip-container {
     position: relative;
@@ -933,7 +946,8 @@ summary:hover {
     vertical-align: middle;
 }
 
-.tooltip-icon {
+.tooltip-icon-btn {
+    font-family: var(--font-sans);
     font-size: 0.75rem;
     font-weight: 700;
     background: #ffffff;
@@ -946,11 +960,15 @@ summary:hover {
     align-items: center;
     justify-content: center;
     transition: var(--transition-fast);
+    cursor: help;
+    padding: 0;
 }
 
-.tooltip-container:hover .tooltip-icon {
+.tooltip-container:hover .tooltip-icon-btn,
+.tooltip-icon-btn:focus-visible {
     background: var(--color-blue);
     color: #ffffff;
+    outline: none;
 }
 
 .tooltip-text {
@@ -978,7 +996,8 @@ summary:hover {
     letter-spacing: normal;
 }
 
-.tooltip-container:hover .tooltip-text {
+.tooltip-container:hover .tooltip-text,
+.tooltip-container:focus-within .tooltip-text {
     visibility: visible;
     opacity: 1;
 }

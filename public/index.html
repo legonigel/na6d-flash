@@ -100,13 +100,13 @@
                             <summary class="form-section-title" style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Transmit PTT Sources</summary>
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <label style="margin-bottom: 0.5rem; display: block;">
-                                        PTT 1 Transmit Triggers
+                                    <div class="label-wrapper">
+                                        <label>PTT 1 Transmit Triggers</label>
                                         <span class="tooltip-container">
-                                            <span class="tooltip-icon">?</span>
-                                            <span class="tooltip-text">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
+                                            <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt1-triggers" aria-label="More information about PTT 1 triggers">?</button>
+                                            <span id="tooltip-ptt1-triggers" class="tooltip-text" role="tooltip">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
                                         </span>
-                                    </label>
+                                    </div>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -121,13 +121,13 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label style="margin-bottom: 0.5rem; display: block;">
-                                        PTT 2 Transmit Triggers
+                                    <div class="label-wrapper">
+                                        <label>PTT 2 Transmit Triggers</label>
                                         <span class="tooltip-container">
-                                            <span class="tooltip-icon">?</span>
-                                            <span class="tooltip-text">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
+                                            <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt2-triggers" aria-label="More information about PTT 2 triggers">?</button>
+                                            <span id="tooltip-ptt2-triggers" class="tooltip-text" role="tooltip">Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.</span>
                                         </span>
-                                    </label>
+                                    </div>
                                     <div class="checkbox-grid">
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label>
                                         <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label>
@@ -149,14 +149,14 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="audio-rx-gain">
-                                            RX Audio Gain (From Radio)
+                                        <div class="label-wrapper">
+                                            <label for="audio-rx-gain">RX Audio Gain (From Radio)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Sets the amplification level for audio incoming from your radio transceiver. 1x Gain is default.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-audio-rx-gain" aria-label="More information about RX Audio Gain">?</button>
+                                                <span id="tooltip-audio-rx-gain" class="tooltip-text" role="tooltip">Sets the amplification level for audio incoming from your radio transceiver. 1x Gain is default.</span>
                                             </span>
-                                        </label>
-                                        <select id="audio-rx-gain" disabled>
+                                        </div>
+                                        <select id="audio-rx-gain" aria-describedby="tooltip-audio-rx-gain" disabled>
                                             <option value="0">1x Gain (0 dB)</option>
                                             <option value="1">2x Gain (+6 dB)</option>
                                             <option value="2">4x Gain (+12 dB)</option>
@@ -165,14 +165,16 @@
                                         </select>
                                     </div>
                                     <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
-                                        <label class="checkbox-item" style="font-size: 1rem;">
-                                            <input type="checkbox" id="audio-tx-boost" disabled />
-                                            Enable TX Audio Boost (+20 dB, To Radio)
-                                            <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Applies a +20 dB boost to the audio sent to your radio's microphone input. Enable this if your transmit audio is too quiet.</span>
+                                        <div class="label-wrapper" style="font-size: 1rem;">
+                                            <label class="checkbox-item" for="audio-tx-boost" style="font-size: 1rem;">
+                                                <input type="checkbox" id="audio-tx-boost" disabled />
+                                                Enable TX Audio Boost (+20 dB, To Radio)
+                                            </label>
+                                            <span class="tooltip-container" style="margin-left: 6px;">
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-audio-tx-boost" aria-label="More information about TX Audio Boost">?</button>
+                                                <span id="tooltip-audio-tx-boost" class="tooltip-text" role="tooltip">Applies a +20 dB boost to the audio sent to your radio's microphone input. Enable this if your transmit audio is too quiet.</span>
                                             </span>
-                                        </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -184,47 +186,47 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vcos-level">
-                                            Auto Squelch (VCOS) Sensitivity Level
+                                        <div class="label-wrapper">
+                                            <label for="vcos-level">Auto Squelch (VCOS) Sensitivity Level</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Threshold for the Virtual Carrier Operated Squelch. Lower values make it more sensitive to incoming signals.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vcos-level" aria-label="More information about Auto Squelch sensitivity">?</button>
+                                                <span id="tooltip-vcos-level" class="tooltip-text" role="tooltip">Threshold for the Virtual Carrier Operated Squelch. Lower values make it more sensitive to incoming signals.</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="vcos-level" min="0" max="65535" placeholder="0 - 65535 (Default: 256)" disabled />
+                                        </div>
+                                        <input type="number" id="vcos-level" aria-describedby="tooltip-vcos-level" min="0" max="65535" placeholder="0 - 65535 (Default: 256)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vcos-timeout">
-                                            Auto Squelch Delay (ms)
+                                        <div class="label-wrapper">
+                                            <label for="vcos-timeout">Auto Squelch Delay (ms)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">How long the squelch remains open after audio signal stops (squelch tail).</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vcos-timeout" aria-label="More information about Auto Squelch delay">?</button>
+                                                <span id="tooltip-vcos-timeout" class="tooltip-text" role="tooltip">How long the squelch remains open after audio signal stops (squelch tail).</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="vcos-timeout" min="0" placeholder="e.g. 3200" disabled />
+                                        </div>
+                                        <input type="number" id="vcos-timeout" aria-describedby="tooltip-vcos-timeout" min="0" placeholder="e.g. 3200" disabled />
                                     </div>
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="vptt-level">
-                                            Auto Transmit (VPTT) Sensitivity Level
+                                        <div class="label-wrapper">
+                                            <label for="vptt-level">Auto Transmit (VPTT) Sensitivity Level</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Threshold for Virtual PTT. If the computer output audio exceeds this level, the AIOC will automatically key the transmitter.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vptt-level" aria-label="More information about Auto Transmit sensitivity">?</button>
+                                                <span id="tooltip-vptt-level" class="tooltip-text" role="tooltip">Threshold for Virtual PTT. If the computer output audio exceeds this level, the AIOC will automatically key the transmitter.</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="vptt-level" min="0" max="65535" placeholder="0 - 65535 (Default: 16)" disabled />
+                                        </div>
+                                        <input type="number" id="vptt-level" aria-describedby="tooltip-vptt-level" min="0" max="65535" placeholder="0 - 65535 (Default: 16)" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="vptt-timeout">
-                                            Auto Transmit Hold Time (ms)
+                                        <div class="label-wrapper">
+                                            <label for="vptt-timeout">Auto Transmit Hold Time (ms)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">How long the AIOC keeps transmitting after computer audio stops, to prevent transmitter drops between words.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vptt-timeout" aria-label="More information about Auto Transmit hold time">?</button>
+                                                <span id="tooltip-vptt-timeout" class="tooltip-text" role="tooltip">How long the AIOC keeps transmitting after computer audio stops, to prevent transmitter drops between words.</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="vptt-timeout" min="0" placeholder="e.g. 320" disabled />
+                                        </div>
+                                        <input type="number" id="vptt-timeout" aria-describedby="tooltip-vptt-timeout" min="0" placeholder="e.g. 320" disabled />
                                     </div>
                                 </div>
                             </div>
@@ -236,46 +238,46 @@
                             <div style="margin-top: 1.25rem;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="fox-message">
-                                            Morse Code ID Message (Max 16 chars)
+                                        <div class="label-wrapper">
+                                            <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Morse code string sent by the beacon (A-Z, 0-9, and space only).</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-message" aria-label="More information about Morse beacon message">?</button>
+                                                <span id="tooltip-fox-message" class="tooltip-text" role="tooltip">Morse code string sent by the beacon (A-Z, 0-9, and space only).</span>
                                             </span>
-                                        </label>
-                                        <input type="text" id="fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
+                                        </div>
+                                        <input type="text" id="fox-message" aria-describedby="tooltip-fox-message" maxlength="16" placeholder="e.g. DE NA6D FOX" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="fox-wpm">
-                                            Morse Speed (WPM)
+                                        <div class="label-wrapper">
+                                            <label for="fox-wpm">Morse Speed (WPM)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Morse code speed in Words Per Minute.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-wpm" aria-label="More information about Morse speed">?</button>
+                                                <span id="tooltip-fox-wpm" class="tooltip-text" role="tooltip">Morse code speed in Words Per Minute.</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
+                                        </div>
+                                        <input type="number" id="fox-wpm" aria-describedby="tooltip-fox-wpm" min="5" max="40" placeholder="e.g. 20" disabled />
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="fox-interval">
-                                            Beacon Interval (seconds, 0 = Disabled)
+                                        <div class="label-wrapper">
+                                            <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Time between automatic Morse beacon transmissions. Set to 0 to disable the beacon completely.</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-interval" aria-label="More information about Beacon interval">?</button>
+                                                <span id="tooltip-fox-interval" class="tooltip-text" role="tooltip">Time between automatic Morse beacon transmissions. Set to 0 to disable the beacon completely.</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="fox-interval" min="0" placeholder="e.g. 60" disabled />
+                                        </div>
+                                        <input type="number" id="fox-interval" aria-describedby="tooltip-fox-interval" min="0" placeholder="e.g. 60" disabled />
                                     </div>
                                     <div class="form-group">
-                                        <label for="fox-volume">
-                                            Beacon Audio Volume (0 - 65535)
+                                        <div class="label-wrapper">
+                                            <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
                                             <span class="tooltip-container">
-                                                <span class="tooltip-icon">?</span>
-                                                <span class="tooltip-text">Audio volume for the Morse beacon tone (0 is silent, 65535 is maximum).</span>
+                                                <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-volume" aria-label="More information about Beacon volume">?</button>
+                                                <span id="tooltip-fox-volume" class="tooltip-text" role="tooltip">Audio volume for the Morse beacon tone (0 is silent, 65535 is maximum).</span>
                                             </span>
-                                        </label>
-                                        <input type="number" id="fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
+                                        </div>
+                                        <input type="number" id="fox-volume" aria-describedby="tooltip-fox-volume" min="0" max="65535" placeholder="e.g. 32768" disabled />
                                     </div>
                                 </div>
                             </div>
