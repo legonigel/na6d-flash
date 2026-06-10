@@ -46,9 +46,9 @@
         </div>
         
         <!-- Tab navigation -->
-        <div class="tab-nav">
-            <button class="tab-btn active" data-tab="dfu-panel" id="tab-flash">Update Firmware</button>
-            <button class="tab-btn" data-tab="hid-panel" id="tab-config">Configure AIOC</button>
+        <div class="tab-nav" role="tablist" aria-label="AIOC Utility Tabs">
+            <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="dfu-panel" data-tab="dfu-panel" id="tab-flash">Update Firmware</button>
+            <button class="tab-btn" role="tab" aria-selected="false" aria-controls="hid-panel" data-tab="hid-panel" id="tab-config">Configure AIOC</button>
         </div>
         
         <!-- Main Layout Grid -->
@@ -58,7 +58,7 @@
             <main>
                 
                 <!-- HID Panel -->
-                <div id="hid-panel" class="panel">
+                <div id="hid-panel" class="panel" role="tabpanel" aria-labelledby="tab-config">
                     <div id="hid-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
                         Your browser does not support WebHID. Configuration features are unavailable. Please use Google Chrome, Edge, or another Chromium-based browser on a desktop computer. (Note: WebHID is not supported on mobile browsers, including Chrome for Android).
                     </div>
@@ -314,7 +314,7 @@
                 </div>
                 
                 <!-- DFU Panel -->
-                <div id="dfu-panel" class="panel active">
+                <div id="dfu-panel" class="panel active" role="tabpanel" aria-labelledby="tab-flash">
                     <div id="dfu-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
                         Your browser does not support WebUSB. Firmware update features are unavailable. Please use Google Chrome, Edge, or another Chromium-based browser on desktop or Android.
                     </div>

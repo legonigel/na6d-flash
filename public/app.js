@@ -1666,10 +1666,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
-            tabs.forEach(t => t.classList.remove("active"));
+            tabs.forEach(t => {
+                t.classList.remove("active");
+                t.setAttribute("aria-selected", "false");
+            });
             panels.forEach(p => p.classList.remove("active"));
             
             tab.classList.add("active");
+            tab.setAttribute("aria-selected", "true");
             document.querySelector(`#${tab.dataset.tab}`).classList.add("active");
             currentModule = tab.dataset.tab === "hid-panel" ? "hid" : "dfu";
             logDebug(`Switched to tab: ${tab.dataset.tab}`);
