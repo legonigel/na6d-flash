@@ -414,9 +414,9 @@
                             </div>
                             
                             <div class="upload-zone disabled" id="drop-zone" hidden>
-                                <span class="upload-icon">⤓</span>
+                                <span class="upload-icon" aria-hidden="true">⤓</span>
                                 <div id="file-info">Drag & drop your firmware file or click to browse</div>
-                                <input type="file" id="dfu-file-input" accept=".bin" disabled />
+                                <input type="file" id="dfu-file-input" aria-labelledby="file-info" accept=".bin" disabled />
                             </div>
                         </div>
 

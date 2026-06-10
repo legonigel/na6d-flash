@@ -716,9 +716,15 @@ button:disabled {
     box-shadow: 4px 4px 0px var(--color-charcoal);
 }
 
-.upload-zone:hover:not(.disabled) {
+.upload-zone:hover:not(.disabled),
+.upload-zone:focus-within:not(.disabled) {
     background: rgba(75, 154, 210, 0.05);
     border-style: solid;
+}
+
+.upload-zone:focus-within:not(.disabled) {
+    outline: var(--border-width-thick) solid var(--color-blue);
+    outline-offset: 4px;
 }
 
 .upload-zone.disabled {
