@@ -30,11 +30,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Browser incompatibility banner -->
-        <div id="browser-warning" class="warning-banner" hidden>
-            Your browser does not support WebUSB or WebHID. Please use Google Chrome or Microsoft Edge.
-        </div>
-        
         <!-- Header -->
         <header class="site-header">
             <div class="header-center">
@@ -64,6 +59,9 @@
                 
                 <!-- HID Panel -->
                 <div id="hid-panel" class="panel">
+                    <div id="hid-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
+                        Your browser does not support WebHID. Configuration features are unavailable. Please use Google Chrome, Edge, or another Chromium-based browser on a desktop computer. (Note: WebHID is not supported on mobile browsers, including Chrome for Android).
+                    </div>
                     <div class="card glass">
                         <div class="card-title">
                             <span>AIOC Configuration</span>
@@ -317,6 +315,9 @@
                 
                 <!-- DFU Panel -->
                 <div id="dfu-panel" class="panel active">
+                    <div id="dfu-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
+                        Your browser does not support WebUSB. Firmware update features are unavailable. Please use Google Chrome, Edge, or another Chromium-based browser on desktop or Android.
+                    </div>
                     <div class="card glass">
                         <div class="card-title">
                             <span>Firmware Updater</span>

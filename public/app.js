@@ -1584,20 +1584,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const webusbSupported = (typeof navigator.usb !== "undefined");
     const webhidSupported = (typeof navigator.hid !== "undefined");
     
-    if (!webusbSupported || !webhidSupported) {
-        const warningBanner = document.querySelector("#browser-warning");
-        if (warningBanner) {
-            warningBanner.hidden = false;
-            let missing = [];
-            if (!webusbSupported) missing.push("WebUSB");
-            if (!webhidSupported) missing.push("WebHID");
-            warningBanner.textContent = `Your browser does not support: ${missing.join(" & ")}. Please use Google Chrome, Edge, or another Chromium-based browser.`;
+    if (!webusbSupported) {
+        const dfuWarning = document.querySelector("#dfu-browser-warning");
+        if (dfuWarning) {
+            dfuWarning.hidden = false;
         }
-        logError("WebUSB/WebHID not supported in this browser. Flashing and configuration features will be unavailable.");
-        document.querySelector("#btn-connect-hid").disabled = true;
-        document.querySelector("#btn-connect-dfu").disabled = true;
+        logError("WebUSB not supported in this browser. Flashing features will be unavailable.");
+        const btnConnectDfu = document.querySelector("#btn-connect-dfu");
+        if (btnConnectDfu) {
+            btnConnectDfu.disabled = true;
+        }
     } else {
-        console.log("[DFU] WebUSB and WebHID interfaces loaded. Browser is compatible.");
+        console.log("[DFU] WebUSB interface loaded. Flasher is compatible.");
+    }
+
+    if (!webhidSupported) {
+        const hidWarning = document.querySelector("#hid-browser-warning");
+        if (hidWarning) {
+            hidWarning.hidden = false;
+        }
+        logError("WebHID not supported in this browser. Configuration features will be unavailable.");
+        const btnConnectHid = document.querySelector("#btn-connect-hid");
+        if (btnConnectHid) {
+            btnConnectHid.disabled = true;
+        }
+    } else {
+        console.log("[DFU] WebHID interface loaded. Configurator is compatible.");
     }
     
     // 2. Tab switching logic
