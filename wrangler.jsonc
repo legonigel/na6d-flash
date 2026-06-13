@@ -8,7 +8,11 @@
 	"compatibility_date": "2026-06-07",
 	"assets": {
 		// The path to the directory containing the `index.html` file to be served at `/`
-		"directory": "./public"
+		"directory": "./dist"
+	},
+	"build": {
+		"command": "npm run build",
+		"watch_dir": "src"
 	},
 	"observability": {
 		"enabled": true
