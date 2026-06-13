@@ -82,6 +82,26 @@ let matchStatus = { state: null, msg: "" };
 let currentFlashPhase = "";
 let progressHideTimeout = null;
 
+// Analytics Event Tracking Helpers
+function trackPostHog(eventName, params = {}) {
+    if (typeof posthog !== "undefined" && typeof posthog.capture === "function") {
+        posthog.capture(eventName, params);
+    }
+}
+
+function trackException(err, extraParams = {}) {
+    if (typeof posthog !== "undefined" && typeof posthog.captureException === "function") {
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        posthog.captureException(errorObj, extraParams);
+    }
+}
+
+function trackGA(eventName, params = {}) {
+    if (typeof gtag === "function") {
+        gtag('event', eventName, params);
+    }
+}
+
 function normalizeHex(str) {
     if (!str) return "";
     str = str.trim().toLowerCase();
@@ -610,12 +630,15 @@ async function connectHID() {
     if (btn) btn.disabled = true;
     try {
         logInfo("Requesting AIOC HID device...");
+        trackPostHog("connect_device_attempt", { mode: "hid" });
+        trackGA("connect_hid_attempt");
         const devices = await navigator.hid.requestDevice({
             filters: [{ vendorId: 0x1209, productId: 0x7388 }]
         });
         
         if (devices.length === 0) {
             logWarning("No device selected.");
+            trackException(new Error("No device selected during HID connection request"), { module: "hid", action: "connect_hid" });
             if (btn) btn.disabled = false;
             return;
         }
@@ -623,6 +646,10 @@ async function connectHID() {
         hidDevice = devices[0];
         await hidDevice.open();
         logSuccess(`Connected to HID: ${hidDevice.productName}`);
+        trackPostHog("connect_device_success", {
+            mode: "hid",
+            device_name: hidDevice.productName
+        });
         
         // Validate if this interface supports feature reports (i.e. is the AIOC configuration interface)
         const hasFeatureReports = hidDevice.collections && hidDevice.collections.some(
@@ -639,6 +666,7 @@ async function connectHID() {
                 </ul>
             `;
             log("error", warningHtml, "hid");
+            trackException(new Error("Selected HID interface does not support configuration"), { module: "hid", action: "connect_hid" });
             await hidDevice.close();
             hidDevice = null;
             if (btn) btn.disabled = false;
@@ -657,6 +685,7 @@ async function connectHID() {
         logInfo(`Device Magic: "${magicStr}" (${hex32(magicVal)})`);
         if (magicStr !== "AIOC") {
             logWarning("Device magic does not match 'AIOC'. Settings might not behave correctly.");
+            trackPostHog("device_magic_mismatch", { magic: magicStr });
         }
         
         document.querySelector("#hid-status").textContent = "Connected";
@@ -678,6 +707,7 @@ async function connectHID() {
         }
     } catch (err) {
         logError(`HID connection failed: ${err.message}`);
+        trackException(err, { module: "hid", action: "connect_hid" });
         if (btn) {
             btn.textContent = "Connect AIOC Settings";
             btn.disabled = false;
@@ -691,6 +721,7 @@ function disconnectHID() {
         if (btn) btn.disabled = true;
         hidDevice.close().then(() => {
             logInfo("HID interface closed.");
+            trackPostHog("disconnect_device", { mode: "hid" });
             hidDevice = null;
             originalDeviceVid = null;
             originalDevicePid = null;
@@ -707,6 +738,7 @@ function disconnectHID() {
             showSettingsStatus(null);
         }).catch(err => {
             logError(`Error closing HID device: ${err.message}`);
+            trackException(err, { module: "hid", action: "disconnect_hid" });
             if (btn) btn.disabled = false;
         });
     }
@@ -727,6 +759,7 @@ async function readAllSettings() {
     if (!hidDevice) return;
     try {
         logInfo("Reading settings from AIOC registers...");
+        trackPostHog("read_settings_attempt");
         
         // Clear active presets class on read
         document.querySelectorAll(".btn-preset").forEach(btn => btn.classList.remove("active"));
@@ -806,8 +839,10 @@ async function readAllSettings() {
         appliedSettings = collectUISettings();
         matchStatus = { state: null, msg: "" };
         updateSettingsStatus();
+        trackPostHog("read_settings_success");
     } catch (err) {
         logError(`Failed reading registers: ${err.message}`);
+        trackException(err, { module: "hid", action: "read_settings" });
     }
 }
 
@@ -919,6 +954,7 @@ async function writeAllSettings(store = false) {
         logError("Device not connected.");
         return;
     }
+    trackPostHog("write_settings_attempt", { persistent: store });
     
     // Check if USB ID has been modified from original value read from device
     const vidStr = document.querySelector("#usb-vid").value.trim();
@@ -1017,6 +1053,8 @@ async function writeAllSettings(store = false) {
                 msg: "<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting."
             };
             updateSettingsStatus();
+            trackPostHog("write_settings_success", { persistent: true, ...appliedSettings });
+            trackGA("save_settings_permanent", appliedSettings);
         } else {
             appliedSettings = collectUISettings();
             matchStatus = {
@@ -1024,9 +1062,11 @@ async function writeAllSettings(store = false) {
                 msg: "<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently."
             };
             updateSettingsStatus();
+            trackPostHog("write_settings_success", { persistent: false, ...appliedSettings });
         }
     } catch (err) {
         logError(`Failed writing settings: ${err.message}`);
+        trackException(err, { module: "hid", action: "write_settings", persistent: store });
     }
 }
 
@@ -1034,6 +1074,7 @@ async function loadDefaults() {
     if (!hidDevice) return;
     try {
         logInfo("Resetting AIOC registers to factory defaults...");
+        trackPostHog("load_defaults_attempt");
         await sendHIDFeature(hidDevice, Command.DEFAULTS, 0, 0);
         logSuccess("Factory defaults loaded. Reading registers...");
         await readAllSettings();
@@ -1042,8 +1083,10 @@ async function loadDefaults() {
             msg: "<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently."
         };
         updateSettingsStatus();
+        trackPostHog("load_defaults_success");
     } catch (err) {
         logError(`Failed to load defaults: ${err.message}`);
+        trackException(err, { module: "hid", action: "load_defaults" });
     }
 }
 
@@ -1051,11 +1094,14 @@ async function rebootDevice() {
     if (!hidDevice) return;
     try {
         logInfo("Rebooting device...");
+        trackPostHog("reboot_device_attempt");
         await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
         logSuccess("Reboot command sent.");
         disconnectHID();
+        trackPostHog("reboot_device_success");
     } catch (err) {
         logError(`Failed to reboot: ${err.message}`);
+        trackException(err, { module: "hid", action: "reboot" });
     }
 }
 
@@ -1157,6 +1203,8 @@ async function connectDFU() {
     if (btn) btn.disabled = true;
     try {
         logInfo("Scanning for USB DFU interfaces...");
+        trackPostHog("connect_device_attempt", { mode: "dfu" });
+        trackGA("connect_dfu_attempt");
         let dfu_devices = await dfu.findAllDfuInterfaces();
         
         // Filter to match DFU bootloader (0483:df11) AND normal-mode AIOC DFU runtime interface (1209:7388)
@@ -1336,17 +1384,24 @@ async function connectDFU() {
             connectGuideEl.style.display = "none";
         }
             
-        enableDFUControls(true);
+                enableDFUControls(true);
         document.querySelector("#step-select")?.classList.remove("inactive");
         const firmwareSelect = document.querySelector("#firmware-select");
         if (firmwareSelect && firmwareSelect.value !== "custom") {
             await loadServerFirmware(firmwareSelect.value);
         }
         logSuccess("DFU Interface opened successfully.");
+        trackPostHog("connect_device_success", {
+            mode: "dfu",
+            device_name: dfuDevice.device_.productName || "Unknown",
+            manufacturer: dfuDevice.device_.manufacturerName || "Unknown",
+            serial: dfuDevice.device_.serialNumber || "Unknown"
+        });
     } catch (err) {
         if (!err.message.includes("Timeout opening USB device")) {
             logError(`DFU Connection failed: ${err.message}`);
         }
+        trackException(err, { module: "dfu", action: "connect_dfu" });
         disconnectDFU();
         if (btn) {
             btn.textContent = "Connect AIOC for Update";
@@ -1386,10 +1441,12 @@ function disconnectDFU() {
     if (dfuDevice) {
         dfuDevice.close().then(() => {
             logInfo("DFU interface closed.");
+            trackPostHog("disconnect_device", { mode: "dfu" });
             dfuDevice = null;
             cleanupUI();
         }).catch(err => {
             logError(`Error closing DFU: ${err.message}`);
+            trackException(err, { module: "dfu", action: "disconnect_dfu" });
             dfuDevice = null;
             cleanupUI();
         });
@@ -1432,8 +1489,12 @@ async function startDownload() {
     if (connectBtn) connectBtn.disabled = true;
     enableDFUControls(false);
     
+    const firmwareSelect = document.querySelector("#firmware-select");
+    const firmwareName = firmwareSelect.value === "custom" ? "custom_file" : firmwareSelect.value;
+    
     try {
         logInfo("Preparing device status...");
+        trackPostHog("flash_firmware_attempt", { firmware_version: firmwareName });
         let status = await dfuDevice.getStatus();
         if (status.state === dfu.dfuERROR) {
             await dfuDevice.clearStatus();
@@ -1461,6 +1522,14 @@ async function startDownload() {
         const duration = ((performance.now() - startTime) / 1000).toFixed(1);
         
         logSuccess(`Flashing completed successfully in ${duration} seconds.`);
+        trackPostHog("flash_firmware_success", {
+            firmware_version: firmwareName,
+            duration_seconds: parseFloat(duration)
+        });
+        trackGA("flash_firmware_success", {
+            firmware_version: firmwareName,
+            duration_seconds: parseFloat(duration)
+        });
         
         // Wait for disconnect or reset
         logInfo("Waiting for device reset...");
@@ -1482,6 +1551,7 @@ async function startDownload() {
         }
     } catch (err) {
         logError(`Error during download: ${err}`);
+        trackException(err, { module: "dfu", action: "flash", firmware_version: firmwareName });
     } finally {
         expectingDisconnect = false;
         if (connectBtn) connectBtn.disabled = false;
@@ -1505,6 +1575,7 @@ async function startUpload() {
         const maxSize = parseInt(sizeField.value) || 1024 * 128; // Default 128KiB
         
         logInfo(`Reading ${maxSize} bytes from device...`);
+        trackPostHog("backup_firmware_attempt", { max_size: maxSize });
         if (progressHideTimeout) {
             clearTimeout(progressHideTimeout);
             progressHideTimeout = null;
@@ -1530,8 +1601,13 @@ async function startUpload() {
         
         logSuccess(`Upload completed in ${duration} seconds.`);
         saveAs(blob, "aioc_firmware_backup.bin");
+        trackPostHog("backup_firmware_success", {
+            duration_seconds: parseFloat(duration),
+            file_size: blob.size
+        });
     } catch (err) {
         logError(`Error during upload: ${err}`);
+        trackException(err, { module: "dfu", action: "backup" });
     } finally {
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
@@ -1551,6 +1627,7 @@ async function leaveDFUMode() {
     
     try {
         logInfo("Attempting to exit DFU mode and reboot the device...");
+        trackPostHog("leave_dfu_attempt");
         
         let startAddress = dfuDevice.startAddress;
         if (isNaN(startAddress)) {
@@ -1600,6 +1677,7 @@ async function leaveDFUMode() {
         }
         
         logSuccess("Exit command sent successfully. Device should reboot into normal mode.");
+        trackPostHog("leave_dfu_success");
         
         // Wait for disconnect
         try {
@@ -1617,6 +1695,7 @@ async function leaveDFUMode() {
         }
     } catch (err) {
         logError(`Failed to exit DFU mode: ${err.message}`);
+        trackException(err, { module: "dfu", action: "leave_dfu" });
         expectingDisconnect = false;
         if (connectBtn) connectBtn.disabled = false;
         enableDFUControls(true);
@@ -1631,6 +1710,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Browser capability checks
     const webusbSupported = (typeof navigator.usb !== "undefined");
     const webhidSupported = (typeof navigator.hid !== "undefined");
+    
+    trackPostHog("app_load", {
+        webusb_supported: webusbSupported,
+        webhid_supported: webhidSupported
+    });
     
     if (!webusbSupported) {
         const dfuWarning = document.querySelector("#dfu-browser-warning");
@@ -1746,8 +1830,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 2000);
             
             logSuccess("Shareable configuration link copied to clipboard.");
+            trackPostHog("copy_shareable_link");
         }).catch(err => {
             logError(`Failed to copy link: ${err.message}`);
+            trackException(err, { module: "hid", action: "copy_shareable_link" });
         });
     });
     
@@ -1910,6 +1996,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const file = fileInput.files[0];
             document.querySelector("#file-info").textContent = `Selected: ${file.name} (${niceSize(file.size)})`;
             
+            trackPostHog("upload_custom_firmware", {
+                file_name: file.name,
+                file_size: file.size
+            });
+            
             const reader = new FileReader();
             reader.onload = () => {
                 firmwareFile = reader.result;
@@ -1933,6 +2024,9 @@ document.addEventListener("DOMContentLoaded", () => {
     firmwareSelect.addEventListener("change", async () => {
         firmwareFile = null;
         document.querySelector("#step-write")?.classList.add("inactive");
+        
+        trackPostHog("select_firmware_version", { firmware_version: firmwareSelect.value });
+        
         if (firmwareSelect.value === "custom") {
             dropZone.hidden = false;
             if (fileInput) fileInput.disabled = false;
