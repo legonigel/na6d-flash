@@ -55,7 +55,65 @@ async function runBuild() {
     logLevel: 'info',
   });
 
+  // 4. Generate sitemap.xml and robots.txt
+  generateSitemapAndRobots();
+
   console.log('Build completed successfully!');
+}
+
+function generateSitemapAndRobots() {
+  const baseUrl = 'https://flash.na6d.com';
+  const srcDir = 'src';
+  const distDir = 'dist';
+
+  if (!fs.existsSync(distDir)) {
+    fs.mkdirSync(distDir, { recursive: true });
+  }
+
+  // Find all .html files in src/
+  const files = fs.readdirSync(srcDir);
+  const htmlFiles = files.filter((file) => file.endsWith('.html'));
+
+  let sitemapEntries = '';
+
+  htmlFiles.forEach((file) => {
+    const filePath = path.join(srcDir, file);
+    const stats = fs.statSync(filePath);
+    const lastmod = stats.mtime.toISOString().split('T')[0];
+
+    // Map filename to URL path. index.html -> /, other.html -> /other.html (or worker route)
+    let urlPath = '/' + file;
+    if (file === 'index.html') {
+      urlPath = '/';
+    }
+
+    const url = `${baseUrl}${urlPath}`;
+    const priority = file === 'index.html' ? '1.0' : '0.8';
+    const changefreq = 'monthly';
+
+    sitemapEntries += `  <url>
+    <loc>${url}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>\n`;
+  });
+
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapEntries}</urlset>`;
+
+  fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemapXml.trim() + '\n');
+  console.log('Generated sitemap.xml');
+
+  const robotsTxt = `User-agent: *
+Allow: /
+
+Sitemap: ${baseUrl}/sitemap.xml
+`;
+
+  fs.writeFileSync(path.join(distDir, 'robots.txt'), robotsTxt);
+  console.log('Generated robots.txt');
 }
 
 runBuild().catch((err) => {
