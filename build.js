@@ -34,7 +34,7 @@ async function runBuild() {
 
   // 2. Copy static files
   const staticFiles = ['index.html', 'favicon.png', 'logo.svg'];
-  staticFiles.forEach(file => {
+  staticFiles.forEach((file) => {
     const srcPath = path.join('src', file);
     if (fs.existsSync(srcPath)) {
       fs.copyFileSync(srcPath, path.join('dist', file));
@@ -48,13 +48,7 @@ async function runBuild() {
 
   // 3. Minify JS and CSS using esbuild (without bundling to preserve individual global scopes)
   await esbuild.build({
-    entryPoints: [
-      'src/app.js',
-      'src/dfu.js',
-      'src/dfuse.js',
-      'src/FileSaver.js',
-      'src/index.css'
-    ],
+    entryPoints: ['src/app.js', 'src/dfu.js', 'src/dfuse.js', 'src/FileSaver.js', 'src/index.css'],
     bundle: false,
     minify: true,
     outdir: 'dist',
@@ -64,7 +58,7 @@ async function runBuild() {
   console.log('Build completed successfully!');
 }
 
-runBuild().catch(err => {
+runBuild().catch((err) => {
   console.error('Build failed:', err);
   process.exit(1);
 });

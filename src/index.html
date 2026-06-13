@@ -1,630 +1,1089 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <!-- PostHog Analytics -->
+    <script>
+      !(function (t, e) {
+        var o, n, p, r;
+        e.__SV ||
+          (window.posthog && window.posthog.__loaded) ||
+          ((window.posthog = e),
+          (e._i = []),
+          (e.init = function (i, s, a) {
+            function g(t, e) {
+              var o = e.split('.');
+              (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                (t[e] = function () {
+                  t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+                }));
+            }
+            (((p = t.createElement('script')).type = 'text/javascript'),
+              (p.crossOrigin = 'anonymous'),
+              (p.async = !0),
+              (p.src =
+                s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js'),
+              (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r));
+            var u = e;
+            for (
+              void 0 !== a ? (u = e[a] = []) : (a = 'posthog'),
+                u.people = u.people || [],
+                u.toString = function (t) {
+                  var e = 'posthog';
+                  return ('posthog' !== a && (e += '.' + a), t || (e += ' (stub)'), e);
+                },
+                u.people.toString = function () {
+                  return u.toString(1) + '.people (stub)';
+                },
+                o =
+                  'rn sn init kn Qr wn Cn yn capture calculateEventProperties Rn register register_once register_for_session unregister unregister_for_session An getFeatureFlag getFeatureFlagPayload getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Fn identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty On En createPersonProfile setInternalOrTestUser Ln gn $n opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing In debug Kr Pn getPageViewId captureTraceFeedback captureTraceMetric vn'.split(
+                    ' '
+                  ),
+                n = 0;
+              n < o.length;
+              n++
+            )
+              g(u, o[n]);
+            e._i.push([i, s, a]);
+          }),
+          (e.__SV = 1));
+      })(document, window.posthog || []);
+      posthog.init('phc_tqu8XZaHtWoESx4FjZpmHXWeD8QoQ78JRQWwuM5pwsdS', {
+        api_host: 'https://d.na6d.com',
+        ui_host: 'https://us.posthog.com',
+        defaults: '2026-05-30',
+        person_profiles: 'identified_only',
+      });
+    </script>
 
-<head>
-  <!-- PostHog Analytics -->
-  <script>
-    !function (t, e) { var o, n, p, r; e.__SV || (window.posthog && window.posthog.__loaded) || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]), t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); }; } (p = t.createElement("script")).type = "text/javascript", p.crossOrigin = "anonymous", p.async = !0, p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e; }, u.people.toString = function () { return u.toString(1) + ".people (stub)"; }, o = "rn sn init kn Qr wn Cn yn capture calculateEventProperties Rn register register_once register_for_session unregister unregister_for_session An getFeatureFlag getFeatureFlagPayload getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Fn identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty On En createPersonProfile setInternalOrTestUser Ln gn $n opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing In debug Kr Pn getPageViewId captureTraceFeedback captureTraceMetric vn".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]); }, e.__SV = 1); }(document, window.posthog || []);
-    posthog.init('phc_tqu8XZaHtWoESx4FjZpmHXWeD8QoQ78JRQWwuM5pwsdS', {
-      api_host: 'https://d.na6d.com',
-      ui_host: 'https://us.posthog.com',
-      defaults: '2026-05-30',
-      person_profiles: 'identified_only',
-    })
-  </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQ6XFZ8938"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQ6XFZ8938"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+      gtag('config', 'G-LQ6XFZ8938');
+    </script>
 
-    gtag('config', 'G-LQ6XFZ8938');
-  </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NA6D AIOC Web Flasher & Configurator</title>
+    <meta
+      name="description"
+      content="Configure PTT sources, audio gain, virtual COS, and flash firmware onto the All-In-One Cable (AIOC) directly from your web browser using WebUSB and WebHID."
+    />
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NA6D AIOC Web Flasher & Configurator</title>
-  <meta name="description"
-    content="Configure PTT sources, audio gain, virtual COS, and flash firmware onto the All-In-One Cable (AIOC) directly from your web browser using WebUSB and WebHID." />
-  <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Premium Stylesheet -->
+    <link rel="stylesheet" href="index.css" />
 
-  <!-- Premium Stylesheet -->
-  <link rel="stylesheet" href="index.css" />
+    <!-- External libraries copied locally -->
+    <script src="dfu.js"></script>
+    <script src="dfuse.js"></script>
+    <script src="FileSaver.js"></script>
 
-  <!-- External libraries copied locally -->
-  <script src="dfu.js"></script>
-  <script src="dfuse.js"></script>
-  <script src="FileSaver.js"></script>
+    <!-- Main App Logic -->
+    <script src="app.js"></script>
+  </head>
 
-  <!-- Main App Logic -->
-  <script src="app.js"></script>
-</head>
-
-<body>
-  <div class="container">
-    <!-- Header -->
-    <header class="site-header">
-      <div class="header-center">
-        <a href="https://na6d.com/" class="header-logo-link">
-          <img src="logo.svg" alt="NA6D Logo" width="300" height="126.89906347554631" loading="eager"
-            class="header-logo" />
-        </a>
-      </div>
-    </header>
-
-    <!-- Page Title Section -->
-    <div class="page-title-section">
-      <h1 class="page-title">AIOC Web Flasher & Configurator</h1>
-      <p class="page-subtitle">Configure settings, audio gains, and easily update firmware on your AIOC</p>
-    </div>
-
-    <!-- Tab navigation -->
-    <div class="tab-nav" role="tablist" aria-label="AIOC Utility Tabs">
-      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="dfu-panel" data-tab="dfu-panel"
-        id="tab-flash">Update Firmware</button>
-      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="hid-panel" data-tab="hid-panel"
-        id="tab-config">Configure AIOC</button>
-    </div>
-
-    <!-- Main Layout Grid -->
-    <div class="layout-grid">
-
-      <!-- Left Side: Interactive Panels -->
-      <main>
-
-        <!-- HID Panel -->
-        <div id="hid-panel" class="panel" role="tabpanel" aria-labelledby="tab-config">
-          <div id="hid-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
-            Your browser does not support WebHID. Configuration features are unavailable. Please use Google Chrome,
-            Edge, or another Chromium-based browser on a desktop computer. (Note: WebHID is not supported on mobile
-            browsers, including Chrome for Android).
-          </div>
-          <div class="card glass">
-            <div class="card-title">
-              <span>AIOC Configuration</span>
-              <span id="hid-status" class="status-pill status-disconnected" role="status"
-                aria-live="polite">Disconnected</span>
-            </div>
-
-            <!-- Status Alert Box -->
-            <div id="hid-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
-
-            <!-- Unsaved changes & status tracking banner -->
-            <div id="settings-status-banner" class="alert-box" role="status" aria-live="polite" hidden></div>
-
-            <div class="form-section">
-              <div class="form-row">
-                <div class="form-group">
-                  <button id="btn-connect-hid" class="btn btn-primary">Connect AIOC Settings</button>
-                </div>
-              </div>
-            </div>
-            <!-- Device Presets -->
-            <div class="form-section presets-section">
-              <div class="form-section-title"
-                style="color: var(--text-primary); font-size: 1.05rem; border-bottom: 2px solid var(--color-charcoal); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">
-                Quick Presets (Applies settings to fields below)
-              </div>
-              <div class="preset-row" style="margin-bottom: 0;">
-                <button id="preset-defaults" class="btn-preset" aria-pressed="false" disabled>Default Config</button>
-                <button id="preset-chirp" class="btn-preset" aria-pressed="false" disabled>CHIRP Programming
-                  (RTS+DTR)</button>
-                <button id="preset-soundcard" class="btn-preset" aria-pressed="false" disabled>Digital Modes (CM108 GPIO
-                  1)</button>
-                <button id="preset-asl" class="btn-preset" aria-pressed="false" disabled>AllStarLink (CM108
-                  Emulation)</button>
-                <button id="preset-custom" class="btn-preset" aria-pressed="false" disabled>Custom (Show All)</button>
-              </div>
-            </div>
-
-            <!-- PTT Configuration -->
-            <details style="margin-top: 1.5rem;">
-              <summary class="form-section-title"
-                style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Transmit PTT Sources
-              </summary>
-              <div style="margin-top: 1.25rem;">
-                <fieldset class="form-group-fieldset" style="margin-bottom: 1.5rem;">
-                  <legend>
-                    PTT 1 Transmit Triggers
-                    <span class="tooltip-container">
-                      <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt1-triggers"
-                        aria-label="More information about PTT 1 triggers">?</button>
-                      <span id="tooltip-ptt1-triggers" class="tooltip-text" role="tooltip">Select the trigger signals
-                        (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.
-                        (aioc-util: --ptt1 / Register: AIOC_IOMUX0)</span>
-                    </span>
-                  </legend>
-                  <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO
-                      1</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO
-                      2</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio3" disabled /> CM108 GPIO
-                      3</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-cm108gpio4" disabled /> CM108 GPIO
-                      4</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtr" disabled /> Serial
-                      DTR</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialrts" disabled /> Serial
-                      RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialdtrnrts" disabled /> DTR
-                      !RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR
-                      RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label>
-                  </div>
-                </fieldset>
-
-                <fieldset class="form-group-fieldset">
-                  <legend>
-                    PTT 2 Transmit Triggers
-                    <span class="tooltip-container">
-                      <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-ptt2-triggers"
-                        aria-label="More information about PTT 2 triggers">?</button>
-                      <span id="tooltip-ptt2-triggers" class="tooltip-text" role="tooltip">Select the trigger signals
-                        (CM108 GPIO 1 or Serial RTS) that tell the AIOC to key the transmitter for this channel.
-                        (aioc-util: --ptt2 / Register: AIOC_IOMUX1)</span>
-                    </span>
-                  </legend>
-                  <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO
-                      1</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO
-                      2</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio3" disabled /> CM108 GPIO
-                      3</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-cm108gpio4" disabled /> CM108 GPIO
-                      4</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtr" disabled /> Serial
-                      DTR</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialrts" disabled /> Serial
-                      RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialdtrnrts" disabled /> DTR
-                      !RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR
-                      RTS</label>
-                    <label class="checkbox-item"><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label>
-                  </div>
-                </fieldset>
-              </div>
-            </details>
-
-            <!-- Audio levels -->
-            <details>
-              <summary class="form-section-title"
-                style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Audio Configuration
-              </summary>
-              <div style="margin-top: 1.25rem;">
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="audio-rx-gain">RX Audio Gain (From Radio)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-audio-rx-gain"
-                          aria-label="More information about RX Audio Gain">?</button>
-                        <span id="tooltip-audio-rx-gain" class="tooltip-text" role="tooltip">Sets the amplification
-                          level for audio incoming from your radio transceiver. 1x Gain is default. (aioc-util:
-                          --audio-rx-gain / Register: AUDIO_RX)</span>
-                      </span>
-                    </div>
-                    <select id="audio-rx-gain" aria-describedby="tooltip-audio-rx-gain" disabled>
-                      <option value="0">1x Gain (0 dB)</option>
-                      <option value="1">2x Gain (+6 dB)</option>
-                      <option value="2">4x Gain (+12 dB)</option>
-                      <option value="3">8x Gain (+18 dB)</option>
-                      <option value="4">16x Gain (+24 dB)</option>
-                    </select>
-                  </div>
-                  <div class="form-group" style="justify-content: center; padding-top: 1.5rem;">
-                    <div class="label-wrapper" style="font-size: 1rem;">
-                      <label class="checkbox-item" for="audio-tx-boost" style="font-size: 1rem;">
-                        <input type="checkbox" id="audio-tx-boost" disabled />
-                        Enable TX Audio Boost (+20 dB, To Radio)
-                      </label>
-                      <span class="tooltip-container" style="margin-left: 6px;">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-audio-tx-boost"
-                          aria-label="More information about TX Audio Boost">?</button>
-                        <span id="tooltip-audio-tx-boost" class="tooltip-text" role="tooltip">Applies a +20 dB boost to
-                          the audio sent to your radio's microphone input. Enable this if your transmit audio is too
-                          quiet. (aioc-util: --audio-tx-boost / Register: AUDIO_TX)</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </details>
-
-            <!-- Squelch and Virtual PTT Levels -->
-            <details style="margin-top: 1.5rem;">
-              <summary class="form-section-title"
-                style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Auto Squelch (VCOS) & Auto
-                Transmit (VPTT)</summary>
-              <div style="margin-top: 1.25rem;">
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="vcos-level">Auto Squelch (VCOS) Sensitivity Level</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vcos-level"
-                          aria-label="More information about Auto Squelch sensitivity">?</button>
-                        <span id="tooltip-vcos-level" class="tooltip-text" role="tooltip">Threshold for the Virtual
-                          Carrier Operated Squelch. Lower values make it more sensitive to incoming signals. (aioc-util:
-                          --vcos-lvlctrl / Register: VCOS_LVLCTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="vcos-level" aria-describedby="tooltip-vcos-level" min="0" max="65535"
-                      placeholder="0 - 65535 (Default: 256)" disabled />
-                  </div>
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="vcos-timeout">Auto Squelch Delay (ms)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vcos-timeout"
-                          aria-label="More information about Auto Squelch delay">?</button>
-                        <span id="tooltip-vcos-timeout" class="tooltip-text" role="tooltip">How long the squelch remains
-                          open after audio signal stops (squelch tail). (aioc-util: --vcos-timctrl / Register:
-                          VCOS_TIMCTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="vcos-timeout" aria-describedby="tooltip-vcos-timeout" min="0"
-                      placeholder="e.g. 3200" disabled />
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="vptt-level">Auto Transmit (VPTT) Sensitivity Level</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vptt-level"
-                          aria-label="More information about Auto Transmit sensitivity">?</button>
-                        <span id="tooltip-vptt-level" class="tooltip-text" role="tooltip">Threshold for Virtual PTT. If
-                          the computer output audio exceeds this level, the AIOC will automatically key the transmitter.
-                          (aioc-util: --vptt-lvlctrl / Register: VPTT_LVLCTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="vptt-level" aria-describedby="tooltip-vptt-level" min="0" max="65535"
-                      placeholder="0 - 65535 (Default: 16)" disabled />
-                  </div>
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="vptt-timeout">Auto Transmit Hold Time (ms)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-vptt-timeout"
-                          aria-label="More information about Auto Transmit hold time">?</button>
-                        <span id="tooltip-vptt-timeout" class="tooltip-text" role="tooltip">How long the AIOC keeps
-                          transmitting after computer audio stops, to prevent transmitter drops between words.
-                          (aioc-util: --vptt-timctrl / Register: VPTT_TIMCTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="vptt-timeout" aria-describedby="tooltip-vptt-timeout" min="0"
-                      placeholder="e.g. 320" disabled />
-                  </div>
-                </div>
-              </div>
-            </details>
-
-            <!-- Standalone Foxhunt Beacon -->
-            <details>
-              <summary class="form-section-title"
-                style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">Standalone Beacon (Foxhunt
-                Mode, v1.4+)</summary>
-              <div style="margin-top: 1.25rem;">
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-message"
-                          aria-label="More information about Morse beacon message">?</button>
-                        <span id="tooltip-fox-message" class="tooltip-text" role="tooltip">Morse code string sent by the
-                          beacon (A-Z, 0-9, and space only). (aioc-util: --foxhunt-message / Registers: FOXHUNT_MSG0 to
-                          FOXHUNT_MSG3)</span>
-                      </span>
-                    </div>
-                    <input type="text" id="fox-message" aria-describedby="tooltip-fox-message" maxlength="16"
-                      placeholder="e.g. DE NA6D FOX" disabled />
-                  </div>
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="fox-wpm">Morse Speed (WPM)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-wpm"
-                          aria-label="More information about Morse speed">?</button>
-                        <span id="tooltip-fox-wpm" class="tooltip-text" role="tooltip">Morse code speed in Words Per
-                          Minute. (aioc-util: --foxhunt-wpm / Register: FOXHUNT_CTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="fox-wpm" aria-describedby="tooltip-fox-wpm" min="5" max="40"
-                      placeholder="e.g. 20" disabled />
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-interval"
-                          aria-label="More information about Beacon interval">?</button>
-                        <span id="tooltip-fox-interval" class="tooltip-text" role="tooltip">Time between automatic Morse
-                          beacon transmissions. Set to 0 to disable the beacon completely. (aioc-util:
-                          --foxhunt-interval / Register: FOXHUNT_CTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="fox-interval" aria-describedby="tooltip-fox-interval" min="0"
-                      placeholder="e.g. 60" disabled />
-                  </div>
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-fox-volume"
-                          aria-label="More information about Beacon volume">?</button>
-                        <span id="tooltip-fox-volume" class="tooltip-text" role="tooltip">Audio volume for the Morse
-                          beacon tone (0 is silent, 65535 is maximum). (aioc-util: --foxhunt-volume / Register:
-                          FOXHUNT_CTRL)</span>
-                      </span>
-                    </div>
-                    <input type="number" id="fox-volume" aria-describedby="tooltip-fox-volume" min="0" max="65535"
-                      placeholder="e.g. 32768" disabled />
-                  </div>
-                </div>
-              </div>
-            </details>
-
-            <!-- USB VID/PID Override -->
-            <details style="margin-bottom: 2rem;">
-              <summary class="form-section-title"
-                style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer;">USB VID/PID Override
-                (Caution)</summary>
-              <div style="margin-top: 1.25rem;">
-                <div class="form-row">
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="usb-vid">Custom Vendor ID (hex, e.g. 0x1209)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-usb-vid"
-                          aria-label="More information about custom USB VID">?</button>
-                        <span id="tooltip-usb-vid" class="tooltip-text" role="tooltip">Custom USB Vendor ID. (aioc-util:
-                          --set-usb / Register: USBID)</span>
-                      </span>
-                    </div>
-                    <input type="text" id="usb-vid" placeholder="0x1209" disabled />
-                  </div>
-                  <div class="form-group">
-                    <div class="label-wrapper">
-                      <label for="usb-pid">Custom Product ID (hex, e.g. 0x7388)</label>
-                      <span class="tooltip-container">
-                        <button type="button" class="tooltip-icon-btn" aria-describedby="tooltip-usb-pid"
-                          aria-label="More information about custom USB PID">?</button>
-                        <span id="tooltip-usb-pid" class="tooltip-text" role="tooltip">Custom USB Product ID.
-                          (aioc-util: --set-usb / Register: USBID)</span>
-                      </span>
-                    </div>
-                    <input type="text" id="usb-pid" placeholder="0x7388" disabled />
-                  </div>
-                </div>
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">
-                  ⚠️ Changing USB VID/PID takes effect after reboot. If you change this, your OS/browser will detect a
-                  different device.
-                </p>
-              </div>
-            </details>
-
-            <!-- Registers action buttons -->
-            <div class="actions-grid">
-              <button id="btn-read-settings" class="btn btn-secondary" disabled>Read Settings</button>
-              <button id="btn-write-settings" class="btn btn-secondary" disabled>Apply Temporarily (Resets on
-                Unplug)</button>
-              <button id="btn-save-settings" class="btn btn-accent" disabled>Save Permanently to AIOC</button>
-              <button id="btn-share-link" class="btn btn-primary" disabled>Copy Shareable Link</button>
-              <button id="btn-load-defaults" class="btn btn-danger" disabled>Restore Factory Defaults</button>
-              <button id="btn-reboot-hid" class="btn btn-danger" disabled>Restart AIOC</button>
-            </div>
-          </div>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="site-header">
+        <div class="header-center">
+          <a href="https://na6d.com/" class="header-logo-link">
+            <img
+              src="logo.svg"
+              alt="NA6D Logo"
+              width="300"
+              height="126.89906347554631"
+              loading="eager"
+              class="header-logo"
+            />
+          </a>
         </div>
+      </header>
 
-        <!-- DFU Panel -->
-        <div id="dfu-panel" class="panel active" role="tabpanel" aria-labelledby="tab-flash">
-          <div id="dfu-browser-warning" class="warning-banner" style="margin-bottom: 0;" hidden>
-            Your browser does not support WebUSB. Firmware update features are unavailable. Please use Google Chrome,
-            Edge, or another Chromium-based browser on desktop or Android.
-          </div>
-          <div class="card glass">
-            <div class="card-title">
-              <span>Firmware Updater</span>
-              <span id="dfu-status" class="status-pill status-disconnected" role="status"
-                aria-live="polite">Disconnected</span>
-            </div>
-
-            <!-- Status Alert Box -->
-            <div id="dfu-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
-
-            <!-- Step 1: Connect -->
-            <div class="stepper-step" id="step-connect">
-              <div class="stepper-header">
-                <span class="stepper-badge">1</span>
-                <span class="stepper-title">Connect your AIOC</span>
-              </div>
-              <div class="form-section" style="border-bottom: none; padding-bottom: 0; margin-bottom: 1rem;">
-                <div class="form-row">
-                  <div class="form-group">
-                    <button id="btn-connect-dfu" class="btn btn-primary">Connect AIOC for Update</button>
-                  </div>
-                </div>
-              </div>
-              <!-- Connected DFU Device summary -->
-              <div id="dfu-device-info" class="device-info-box" style="display:none; margin-bottom: 1.5rem;"></div>
-
-              <!-- How to Connect Guide -->
-              <div id="dfu-connect-guide" class="device-info-box" style="margin-bottom: 2rem; white-space: normal;">
-                <p style="margin-bottom: 0.75rem;"><strong>Device not connected.</strong> Connect the AIOC in update
-                  mode to program.</p>
-                <p style="margin-bottom: 0.5rem;"><strong>How to connect:</strong></p>
-                <ul style="margin-left: 1.25rem; margin-bottom: 0.75rem; font-size: 0.85rem; line-height: 1.5;">
-                  <li style="margin-bottom: 0.5rem;"><strong>Automatic (v1.2.0+ firmware):</strong> Click <em>Connect
-                      AIOC for Update</em> above and select your device in the browser prompt. The app will
-                    automatically restart your AIOC into update mode.</li>
-                  <li style="margin-bottom: 0.5rem;"><strong>Manual (Older firmware or unresponsive devices):</strong>
-                    Unplug the USB cable, short the two hardware DFU pins (labeled <em>BOOT</em>, the two outermost
-                    pins), and plug the USB cable back in. (Or, keep the pins shorted and click <em>Restart AIOC</em> on
-                    the Configure Settings tab).</li>
-                </ul>
-                <div
-                  style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed rgba(42, 43, 42, 0.2); font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
-                  ⚠️ <strong>Stuck in Update Mode?</strong> If your device is in update/bootloader mode but the browser
-                  fails to connect, simply <strong>unplug the USB cable and plug it back in</strong> to reboot the AIOC
-                  back to normal mode.
-                </div>
-              </div>
-
-              <!-- Troubleshooting / Driver Guide -->
-              <details id="dfu-troubleshoot-details" style="margin-top: 1rem; margin-bottom: 2rem;">
-                <summary style="font-weight: 700; color: var(--color-orange);">❓ Don't see your device or having
-                  connection issues?</summary>
-                <div style="margin-top: 1rem; font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);">
-                  <p style="margin-bottom: 0.75rem;">Here are the most common solutions to get your AIOC connected:</p>
-
-                  <h4
-                    style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">
-                    1. Windows Driver Installation (Zadig)</h4>
-                  <p style="margin-bottom: 0.5rem;">Windows requires a <strong>WinUSB</strong> driver for the browser to
-                    communicate with the device. If your device is not found or fails to connect:</p>
-                  <ul style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
-                    <li>Download and run <a href="https://zadig.akeo.ie/" target="_blank" rel="noopener">Zadig</a>.</li>
-                    <li>Click <strong>Options</strong> > check <strong>List All Devices</strong>.</li>
-                    <li>Select the target device from the dropdown:
-                      <ul>
-                        <li>If the AIOC is in normal mode: Select <strong>AIOC DFU Runtime (Interface 6)</strong>.</li>
-                        <li>If the AIOC is in bootloader/update mode: Select <strong>STM32 BOOTLOADER</strong>.</li>
-                      </ul>
-                    </li>
-                    <li>Select <strong>WinUSB</strong> in the target driver field (to the right of the green arrow).
-                    </li>
-                    <li>Click <strong>Replace Driver</strong> or <strong>Install Driver</strong>.</li>
-                  </ul>
-                  <p
-                    style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 1.25rem; background: rgba(75, 154, 210, 0.08); padding: 0.5rem; border-left: 3px solid var(--color-blue);">
-                    💡 <strong>Exit Update Mode Tip:</strong> If the device is stuck in update mode during driver
-                    installation, simply unplug the USB cable and plug it back in to reboot back to normal operation.
-                  </p>
-
-                  <h4
-                    style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">
-                    2. Manually Enter Firmware Update (DFU) Mode</h4>
-                  <p style="margin-bottom: 0.5rem;">If the software reboot fails or the device is unresponsive, you can
-                    manually trigger update mode:</p>
-                  <ol style="margin-left: 1.25rem; margin-bottom: 0.75rem;">
-                    <li>Unplug the USB cable from the AIOC.</li>
-                    <li>Use a paperclip or tweezers to <strong>short (connect) the two bootloader pins</strong> on the
-                      board (labeled <em>BOOT</em>, which are the two outermost pins).</li>
-                    <li>While holding the pins shorted, plug the USB cable back in. The green LED will remain off (in
-                      normal mode, the green LED is dim when plugged in), indicating it has successfully entered DFU
-                      mode. You can now release the short and click <strong>Connect AIOC for Update</strong>.</li>
-                  </ol>
-
-                  <h4
-                    style="margin-top: 1.25rem; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; font-size: 0.95rem; color: var(--color-blue);">
-                    3. Check Browser Compatibility</h4>
-                  <p>Ensure you are using a Chromium-based browser like <strong>Google Chrome</strong> or
-                    <strong>Microsoft Edge</strong>. Firefox, Safari, and Brave (unless Shields are disabled) do not
-                    support WebUSB/WebHID.
-                  </p>
-                </div>
-              </details>
-            </div>
-
-            <!-- Step 2: Select Firmware -->
-            <div class="stepper-step inactive" id="step-select">
-              <div class="stepper-header">
-                <span class="stepper-badge">2</span>
-                <span class="stepper-title">Select Firmware Version</span>
-              </div>
-              <div class="form-group firmware-select-group">
-                <label for="firmware-select">Select Firmware Version</label>
-                <select id="firmware-select" disabled>
-                  <option value="firmware/aioc-v1.4.1.bin">AIOC Firmware v1.4.1 (Recommended)</option>
-                  <option value="firmware/aioc-v1.4.0.bin">AIOC Firmware v1.4.0</option>
-                  <option value="firmware/aioc-v1.3.0.bin">AIOC Firmware v1.3.0</option>
-                  <option value="firmware/aioc-v1.2.0.bin">AIOC Firmware v1.2.0</option>
-                  <option value="custom">Upload Local File...</option>
-                </select>
-              </div>
-
-              <div class="upload-zone disabled" id="drop-zone" hidden>
-                <span class="upload-icon" aria-hidden="true">⤓</span>
-                <div id="file-info">Drag & drop your firmware file or click to browse</div>
-                <input type="file" id="dfu-file-input" aria-labelledby="file-info" accept=".bin" disabled />
-              </div>
-            </div>
-
-            <!-- Step 3: Write Firmware -->
-            <div class="stepper-step inactive" id="step-write">
-              <div class="stepper-header">
-                <span class="stepper-badge">3</span>
-                <span class="stepper-title">Write Firmware to AIOC</span>
-              </div>
-
-              <div class="form-row dfu-actions-row">
-                <div class="form-group btn-primary-col">
-                  <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
-                </div>
-                <div class="form-group btn-secondary-col">
-                  <button id="btn-upload" class="btn btn-secondary" disabled>Backup Firmware</button>
-                  <button id="btn-leave-dfu" class="btn btn-danger" disabled>Exit Update Mode</button>
-                </div>
-              </div>
-
-              <!-- DFU Progress Section (Moved below buttons) -->
-              <div id="dfu-progress-container" style="display: none;">
-                <div id="dfu-progress-status" role="status" aria-live="polite"
-                  style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.05em; color: var(--text-secondary);">
-                </div>
-                <progress id="dfu-progress" aria-describedby="dfu-progress-status" value="0"></progress>
-              </div>
-            </div>
-
-            <!-- DFU parameters (Keep collapsed details at the bottom of the card) -->
-            <div class="form-section" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
-              <details id="dfu-settings-details">
-                <summary>Advanced DFU Settings</summary>
-                <div class="form-row" style="margin-top: 1rem;">
-                  <div class="form-group">
-                    <label for="dfu-xfer-size">Block size (bytes)</label>
-                    <input type="number" id="dfu-xfer-size" value="1024" disabled />
-                  </div>
-                  <div class="form-group">
-                    <label for="dfu-start-addr">DfuSe Start Address (hex)</label>
-                    <input type="text" id="dfu-start-addr" value="0x08000000" pattern="0x[A-Fa-f0-9]+" disabled />
-                  </div>
-                  <div class="form-group">
-                    <label for="dfu-upload-size">Upload Backup Size (bytes)</label>
-                    <input type="number" id="dfu-upload-size" value="131072" min="1" disabled />
-                  </div>
-                </div>
-              </details>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <!-- Site Footer -->
-    <footer class="site-footer">
-      <p>&copy; 2025-2026 Nigel Armstrong. All rights reserved.</p>
-      <details class="footer-license-details">
-        <summary>Open Source Licenses & Credits</summary>
-        <p>
-          This application utilizes the open-source <a href="https://github.com/devanlai/webdfu" target="_blank"
-            rel="noopener noreferrer">webdfu</a> library (ISC License) and <a
-            href="https://github.com/eligrey/FileSaver.js" target="_blank" rel="noopener noreferrer">FileSaver.js</a>
-          (MIT License).
+      <!-- Page Title Section -->
+      <div class="page-title-section">
+        <h1 class="page-title">AIOC Web Flasher & Configurator</h1>
+        <p class="page-subtitle">
+          Configure settings, audio gains, and easily update firmware on your AIOC
         </p>
-      </details>
-    </footer>
-  </div>
-</body>
+      </div>
 
+      <!-- Tab navigation -->
+      <div class="tab-nav" role="tablist" aria-label="AIOC Utility Tabs">
+        <button
+          class="tab-btn active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="dfu-panel"
+          data-tab="dfu-panel"
+          id="tab-flash"
+        >
+          Update Firmware
+        </button>
+        <button
+          class="tab-btn"
+          role="tab"
+          aria-selected="false"
+          aria-controls="hid-panel"
+          data-tab="hid-panel"
+          id="tab-config"
+        >
+          Configure AIOC
+        </button>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="layout-grid">
+        <!-- Left Side: Interactive Panels -->
+        <main>
+          <!-- HID Panel -->
+          <div id="hid-panel" class="panel" role="tabpanel" aria-labelledby="tab-config">
+            <div id="hid-browser-warning" class="warning-banner" style="margin-bottom: 0" hidden>
+              Your browser does not support WebHID. Configuration features are unavailable. Please
+              use Google Chrome, Edge, or another Chromium-based browser on a desktop computer.
+              (Note: WebHID is not supported on mobile browsers, including Chrome for Android).
+            </div>
+            <div class="card glass">
+              <div class="card-title">
+                <span>AIOC Configuration</span>
+                <span
+                  id="hid-status"
+                  class="status-pill status-disconnected"
+                  role="status"
+                  aria-live="polite"
+                  >Disconnected</span
+                >
+              </div>
+
+              <!-- Status Alert Box -->
+              <div id="hid-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
+
+              <!-- Unsaved changes & status tracking banner -->
+              <div
+                id="settings-status-banner"
+                class="alert-box"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></div>
+
+              <div class="form-section">
+                <div class="form-row">
+                  <div class="form-group">
+                    <button id="btn-connect-hid" class="btn btn-primary">
+                      Connect AIOC Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- Device Presets -->
+              <div class="form-section presets-section">
+                <div
+                  class="form-section-title"
+                  style="
+                    color: var(--text-primary);
+                    font-size: 1.05rem;
+                    border-bottom: 2px solid var(--color-charcoal);
+                    padding-bottom: 0.5rem;
+                    margin-bottom: 1.25rem;
+                  "
+                >
+                  Quick Presets (Applies settings to fields below)
+                </div>
+                <div class="preset-row" style="margin-bottom: 0">
+                  <button id="preset-defaults" class="btn-preset" aria-pressed="false" disabled>
+                    Default Config
+                  </button>
+                  <button id="preset-chirp" class="btn-preset" aria-pressed="false" disabled>
+                    CHIRP Programming (RTS+DTR)
+                  </button>
+                  <button id="preset-soundcard" class="btn-preset" aria-pressed="false" disabled>
+                    Digital Modes (CM108 GPIO 1)
+                  </button>
+                  <button id="preset-asl" class="btn-preset" aria-pressed="false" disabled>
+                    AllStarLink (CM108 Emulation)
+                  </button>
+                  <button id="preset-custom" class="btn-preset" aria-pressed="false" disabled>
+                    Custom (Show All)
+                  </button>
+                </div>
+              </div>
+
+              <!-- PTT Configuration -->
+              <details style="margin-top: 1.5rem">
+                <summary
+                  class="form-section-title"
+                  style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer"
+                >
+                  Transmit PTT Sources
+                </summary>
+                <div style="margin-top: 1.25rem">
+                  <fieldset class="form-group-fieldset" style="margin-bottom: 1.5rem">
+                    <legend>
+                      PTT 1 Transmit Triggers
+                      <span class="tooltip-container">
+                        <button
+                          type="button"
+                          class="tooltip-icon-btn"
+                          aria-describedby="tooltip-ptt1-triggers"
+                          aria-label="More information about PTT 1 triggers"
+                        >
+                          ?
+                        </button>
+                        <span id="tooltip-ptt1-triggers" class="tooltip-text" role="tooltip"
+                          >Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the
+                          AIOC to key the transmitter for this channel. (aioc-util: --ptt1 /
+                          Register: AIOC_IOMUX0)</span
+                        >
+                      </span>
+                    </legend>
+                    <div class="checkbox-grid">
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-cm108gpio1" disabled /> CM108 GPIO 1</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-cm108gpio2" disabled /> CM108 GPIO 2</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-cm108gpio3" disabled /> CM108 GPIO 3</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-cm108gpio4" disabled /> CM108 GPIO 4</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-serialdtr" disabled /> Serial DTR</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-serialrts" disabled /> Serial RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-serialdtrnrts" disabled /> DTR !RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-serialndtrrts" disabled /> !DTR RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt1-vptt" disabled /> Virtual PTT</label
+                      >
+                    </div>
+                  </fieldset>
+
+                  <fieldset class="form-group-fieldset">
+                    <legend>
+                      PTT 2 Transmit Triggers
+                      <span class="tooltip-container">
+                        <button
+                          type="button"
+                          class="tooltip-icon-btn"
+                          aria-describedby="tooltip-ptt2-triggers"
+                          aria-label="More information about PTT 2 triggers"
+                        >
+                          ?
+                        </button>
+                        <span id="tooltip-ptt2-triggers" class="tooltip-text" role="tooltip"
+                          >Select the trigger signals (CM108 GPIO 1 or Serial RTS) that tell the
+                          AIOC to key the transmitter for this channel. (aioc-util: --ptt2 /
+                          Register: AIOC_IOMUX1)</span
+                        >
+                      </span>
+                    </legend>
+                    <div class="checkbox-grid">
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-cm108gpio1" disabled /> CM108 GPIO 1</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-cm108gpio2" disabled /> CM108 GPIO 2</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-cm108gpio3" disabled /> CM108 GPIO 3</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-cm108gpio4" disabled /> CM108 GPIO 4</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-serialdtr" disabled /> Serial DTR</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-serialrts" disabled /> Serial RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-serialdtrnrts" disabled /> DTR !RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-serialndtrrts" disabled /> !DTR RTS</label
+                      >
+                      <label class="checkbox-item"
+                        ><input type="checkbox" id="ptt2-vptt" disabled /> Virtual PTT</label
+                      >
+                    </div>
+                  </fieldset>
+                </div>
+              </details>
+
+              <!-- Audio levels -->
+              <details>
+                <summary
+                  class="form-section-title"
+                  style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer"
+                >
+                  Audio Configuration
+                </summary>
+                <div style="margin-top: 1.25rem">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="audio-rx-gain">RX Audio Gain (From Radio)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-audio-rx-gain"
+                            aria-label="More information about RX Audio Gain"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-audio-rx-gain" class="tooltip-text" role="tooltip"
+                            >Sets the amplification level for audio incoming from your radio
+                            transceiver. 1x Gain is default. (aioc-util: --audio-rx-gain / Register:
+                            AUDIO_RX)</span
+                          >
+                        </span>
+                      </div>
+                      <select id="audio-rx-gain" aria-describedby="tooltip-audio-rx-gain" disabled>
+                        <option value="0">1x Gain (0 dB)</option>
+                        <option value="1">2x Gain (+6 dB)</option>
+                        <option value="2">4x Gain (+12 dB)</option>
+                        <option value="3">8x Gain (+18 dB)</option>
+                        <option value="4">16x Gain (+24 dB)</option>
+                      </select>
+                    </div>
+                    <div class="form-group" style="justify-content: center; padding-top: 1.5rem">
+                      <div class="label-wrapper" style="font-size: 1rem">
+                        <label class="checkbox-item" for="audio-tx-boost" style="font-size: 1rem">
+                          <input type="checkbox" id="audio-tx-boost" disabled />
+                          Enable TX Audio Boost (+20 dB, To Radio)
+                        </label>
+                        <span class="tooltip-container" style="margin-left: 6px">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-audio-tx-boost"
+                            aria-label="More information about TX Audio Boost"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-audio-tx-boost" class="tooltip-text" role="tooltip"
+                            >Applies a +20 dB boost to the audio sent to your radio's microphone
+                            input. Enable this if your transmit audio is too quiet. (aioc-util:
+                            --audio-tx-boost / Register: AUDIO_TX)</span
+                          >
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Squelch and Virtual PTT Levels -->
+              <details style="margin-top: 1.5rem">
+                <summary
+                  class="form-section-title"
+                  style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer"
+                >
+                  Auto Squelch (VCOS) & Auto Transmit (VPTT)
+                </summary>
+                <div style="margin-top: 1.25rem">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="vcos-level">Auto Squelch (VCOS) Sensitivity Level</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-vcos-level"
+                            aria-label="More information about Auto Squelch sensitivity"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-vcos-level" class="tooltip-text" role="tooltip"
+                            >Threshold for the Virtual Carrier Operated Squelch. Lower values make
+                            it more sensitive to incoming signals. (aioc-util: --vcos-lvlctrl /
+                            Register: VCOS_LVLCTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="vcos-level"
+                        aria-describedby="tooltip-vcos-level"
+                        min="0"
+                        max="65535"
+                        placeholder="0 - 65535 (Default: 256)"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="vcos-timeout">Auto Squelch Delay (ms)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-vcos-timeout"
+                            aria-label="More information about Auto Squelch delay"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-vcos-timeout" class="tooltip-text" role="tooltip"
+                            >How long the squelch remains open after audio signal stops (squelch
+                            tail). (aioc-util: --vcos-timctrl / Register: VCOS_TIMCTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="vcos-timeout"
+                        aria-describedby="tooltip-vcos-timeout"
+                        min="0"
+                        placeholder="e.g. 3200"
+                        disabled
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="vptt-level">Auto Transmit (VPTT) Sensitivity Level</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-vptt-level"
+                            aria-label="More information about Auto Transmit sensitivity"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-vptt-level" class="tooltip-text" role="tooltip"
+                            >Threshold for Virtual PTT. If the computer output audio exceeds this
+                            level, the AIOC will automatically key the transmitter. (aioc-util:
+                            --vptt-lvlctrl / Register: VPTT_LVLCTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="vptt-level"
+                        aria-describedby="tooltip-vptt-level"
+                        min="0"
+                        max="65535"
+                        placeholder="0 - 65535 (Default: 16)"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="vptt-timeout">Auto Transmit Hold Time (ms)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-vptt-timeout"
+                            aria-label="More information about Auto Transmit hold time"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-vptt-timeout" class="tooltip-text" role="tooltip"
+                            >How long the AIOC keeps transmitting after computer audio stops, to
+                            prevent transmitter drops between words. (aioc-util: --vptt-timctrl /
+                            Register: VPTT_TIMCTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="vptt-timeout"
+                        aria-describedby="tooltip-vptt-timeout"
+                        min="0"
+                        placeholder="e.g. 320"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Standalone Foxhunt Beacon -->
+              <details>
+                <summary
+                  class="form-section-title"
+                  style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer"
+                >
+                  Standalone Beacon (Foxhunt Mode, v1.4+)
+                </summary>
+                <div style="margin-top: 1.25rem">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="fox-message">Morse Code ID Message (Max 16 chars)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-fox-message"
+                            aria-label="More information about Morse beacon message"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-fox-message" class="tooltip-text" role="tooltip"
+                            >Morse code string sent by the beacon (A-Z, 0-9, and space only).
+                            (aioc-util: --foxhunt-message / Registers: FOXHUNT_MSG0 to
+                            FOXHUNT_MSG3)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        id="fox-message"
+                        aria-describedby="tooltip-fox-message"
+                        maxlength="16"
+                        placeholder="e.g. DE NA6D FOX"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="fox-wpm">Morse Speed (WPM)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-fox-wpm"
+                            aria-label="More information about Morse speed"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-fox-wpm" class="tooltip-text" role="tooltip"
+                            >Morse code speed in Words Per Minute. (aioc-util: --foxhunt-wpm /
+                            Register: FOXHUNT_CTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="fox-wpm"
+                        aria-describedby="tooltip-fox-wpm"
+                        min="5"
+                        max="40"
+                        placeholder="e.g. 20"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="fox-interval">Beacon Interval (seconds, 0 = Disabled)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-fox-interval"
+                            aria-label="More information about Beacon interval"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-fox-interval" class="tooltip-text" role="tooltip"
+                            >Time between automatic Morse beacon transmissions. Set to 0 to disable
+                            the beacon completely. (aioc-util: --foxhunt-interval / Register:
+                            FOXHUNT_CTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="fox-interval"
+                        aria-describedby="tooltip-fox-interval"
+                        min="0"
+                        placeholder="e.g. 60"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="fox-volume">Beacon Audio Volume (0 - 65535)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-fox-volume"
+                            aria-label="More information about Beacon volume"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-fox-volume" class="tooltip-text" role="tooltip"
+                            >Audio volume for the Morse beacon tone (0 is silent, 65535 is maximum).
+                            (aioc-util: --foxhunt-volume / Register: FOXHUNT_CTRL)</span
+                          >
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        id="fox-volume"
+                        aria-describedby="tooltip-fox-volume"
+                        min="0"
+                        max="65535"
+                        placeholder="e.g. 32768"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- USB VID/PID Override -->
+              <details style="margin-bottom: 2rem">
+                <summary
+                  class="form-section-title"
+                  style="margin-bottom: 0; display: list-item; outline: none; cursor: pointer"
+                >
+                  USB VID/PID Override (Caution)
+                </summary>
+                <div style="margin-top: 1.25rem">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="usb-vid">Custom Vendor ID (hex, e.g. 0x1209)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-usb-vid"
+                            aria-label="More information about custom USB VID"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-usb-vid" class="tooltip-text" role="tooltip"
+                            >Custom USB Vendor ID. (aioc-util: --set-usb / Register: USBID)</span
+                          >
+                        </span>
+                      </div>
+                      <input type="text" id="usb-vid" placeholder="0x1209" disabled />
+                    </div>
+                    <div class="form-group">
+                      <div class="label-wrapper">
+                        <label for="usb-pid">Custom Product ID (hex, e.g. 0x7388)</label>
+                        <span class="tooltip-container">
+                          <button
+                            type="button"
+                            class="tooltip-icon-btn"
+                            aria-describedby="tooltip-usb-pid"
+                            aria-label="More information about custom USB PID"
+                          >
+                            ?
+                          </button>
+                          <span id="tooltip-usb-pid" class="tooltip-text" role="tooltip"
+                            >Custom USB Product ID. (aioc-util: --set-usb / Register: USBID)</span
+                          >
+                        </span>
+                      </div>
+                      <input type="text" id="usb-pid" placeholder="0x7388" disabled />
+                    </div>
+                  </div>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem">
+                    ⚠️ Changing USB VID/PID takes effect after reboot. If you change this, your
+                    OS/browser will detect a different device.
+                  </p>
+                </div>
+              </details>
+
+              <!-- Registers action buttons -->
+              <div class="actions-grid">
+                <button id="btn-read-settings" class="btn btn-secondary" disabled>
+                  Read Settings
+                </button>
+                <button id="btn-write-settings" class="btn btn-secondary" disabled>
+                  Apply Temporarily (Resets on Unplug)
+                </button>
+                <button id="btn-save-settings" class="btn btn-accent" disabled>
+                  Save Permanently to AIOC
+                </button>
+                <button id="btn-share-link" class="btn btn-primary" disabled>
+                  Copy Shareable Link
+                </button>
+                <button id="btn-load-defaults" class="btn btn-danger" disabled>
+                  Restore Factory Defaults
+                </button>
+                <button id="btn-reboot-hid" class="btn btn-danger" disabled>Restart AIOC</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DFU Panel -->
+          <div id="dfu-panel" class="panel active" role="tabpanel" aria-labelledby="tab-flash">
+            <div id="dfu-browser-warning" class="warning-banner" style="margin-bottom: 0" hidden>
+              Your browser does not support WebUSB. Firmware update features are unavailable. Please
+              use Google Chrome, Edge, or another Chromium-based browser on desktop or Android.
+            </div>
+            <div class="card glass">
+              <div class="card-title">
+                <span>Firmware Updater</span>
+                <span
+                  id="dfu-status"
+                  class="status-pill status-disconnected"
+                  role="status"
+                  aria-live="polite"
+                  >Disconnected</span
+                >
+              </div>
+
+              <!-- Status Alert Box -->
+              <div id="dfu-alert" class="alert-box" role="alert" aria-live="assertive" hidden></div>
+
+              <!-- Step 1: Connect -->
+              <div class="stepper-step" id="step-connect">
+                <div class="stepper-header">
+                  <span class="stepper-badge">1</span>
+                  <span class="stepper-title">Connect your AIOC</span>
+                </div>
+                <div
+                  class="form-section"
+                  style="border-bottom: none; padding-bottom: 0; margin-bottom: 1rem"
+                >
+                  <div class="form-row">
+                    <div class="form-group">
+                      <button id="btn-connect-dfu" class="btn btn-primary">
+                        Connect AIOC for Update
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Connected DFU Device summary -->
+                <div
+                  id="dfu-device-info"
+                  class="device-info-box"
+                  style="display: none; margin-bottom: 1.5rem"
+                ></div>
+
+                <!-- How to Connect Guide -->
+                <div
+                  id="dfu-connect-guide"
+                  class="device-info-box"
+                  style="margin-bottom: 2rem; white-space: normal"
+                >
+                  <p style="margin-bottom: 0.75rem">
+                    <strong>Device not connected.</strong> Connect the AIOC in update mode to
+                    program.
+                  </p>
+                  <p style="margin-bottom: 0.5rem"><strong>How to connect:</strong></p>
+                  <ul
+                    style="
+                      margin-left: 1.25rem;
+                      margin-bottom: 0.75rem;
+                      font-size: 0.85rem;
+                      line-height: 1.5;
+                    "
+                  >
+                    <li style="margin-bottom: 0.5rem">
+                      <strong>Automatic (v1.2.0+ firmware):</strong> Click
+                      <em>Connect AIOC for Update</em> above and select your device in the browser
+                      prompt. The app will automatically restart your AIOC into update mode.
+                    </li>
+                    <li style="margin-bottom: 0.5rem">
+                      <strong>Manual (Older firmware or unresponsive devices):</strong> Unplug the
+                      USB cable, short the two hardware DFU pins (labeled <em>BOOT</em>, the two
+                      outermost pins), and plug the USB cable back in. (Or, keep the pins shorted
+                      and click <em>Restart AIOC</em> on the Configure Settings tab).
+                    </li>
+                  </ul>
+                  <div
+                    style="
+                      margin-top: 1rem;
+                      padding-top: 0.75rem;
+                      border-top: 1px dashed rgba(42, 43, 42, 0.2);
+                      font-size: 0.8rem;
+                      line-height: 1.4;
+                      color: var(--text-secondary);
+                    "
+                  >
+                    ⚠️ <strong>Stuck in Update Mode?</strong> If your device is in update/bootloader
+                    mode but the browser fails to connect, simply
+                    <strong>unplug the USB cable and plug it back in</strong> to reboot the AIOC
+                    back to normal mode.
+                  </div>
+                </div>
+
+                <!-- Troubleshooting / Driver Guide -->
+                <details
+                  id="dfu-troubleshoot-details"
+                  style="margin-top: 1rem; margin-bottom: 2rem"
+                >
+                  <summary style="font-weight: 700; color: var(--color-orange)">
+                    ❓ Don't see your device or having connection issues?
+                  </summary>
+                  <div
+                    style="
+                      margin-top: 1rem;
+                      font-size: 0.95rem;
+                      line-height: 1.6;
+                      color: var(--text-primary);
+                    "
+                  >
+                    <p style="margin-bottom: 0.75rem">
+                      Here are the most common solutions to get your AIOC connected:
+                    </p>
+
+                    <h4
+                      style="
+                        margin-top: 1.25rem;
+                        margin-bottom: 0.5rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        font-size: 0.95rem;
+                        color: var(--color-blue);
+                      "
+                    >
+                      1. Windows Driver Installation (Zadig)
+                    </h4>
+                    <p style="margin-bottom: 0.5rem">
+                      Windows requires a <strong>WinUSB</strong> driver for the browser to
+                      communicate with the device. If your device is not found or fails to connect:
+                    </p>
+                    <ul style="margin-left: 1.25rem; margin-bottom: 0.75rem">
+                      <li>
+                        Download and run
+                        <a href="https://zadig.akeo.ie/" target="_blank" rel="noopener">Zadig</a>.
+                      </li>
+                      <li>
+                        Click <strong>Options</strong> > check <strong>List All Devices</strong>.
+                      </li>
+                      <li>
+                        Select the target device from the dropdown:
+                        <ul>
+                          <li>
+                            If the AIOC is in normal mode: Select
+                            <strong>AIOC DFU Runtime (Interface 6)</strong>.
+                          </li>
+                          <li>
+                            If the AIOC is in bootloader/update mode: Select
+                            <strong>STM32 BOOTLOADER</strong>.
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        Select <strong>WinUSB</strong> in the target driver field (to the right of
+                        the green arrow).
+                      </li>
+                      <li>
+                        Click <strong>Replace Driver</strong> or <strong>Install Driver</strong>.
+                      </li>
+                    </ul>
+                    <p
+                      style="
+                        font-size: 0.85rem;
+                        color: var(--text-secondary);
+                        margin-top: 0.5rem;
+                        margin-bottom: 1.25rem;
+                        background: rgba(75, 154, 210, 0.08);
+                        padding: 0.5rem;
+                        border-left: 3px solid var(--color-blue);
+                      "
+                    >
+                      💡 <strong>Exit Update Mode Tip:</strong> If the device is stuck in update
+                      mode during driver installation, simply unplug the USB cable and plug it back
+                      in to reboot back to normal operation.
+                    </p>
+
+                    <h4
+                      style="
+                        margin-top: 1.25rem;
+                        margin-bottom: 0.5rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        font-size: 0.95rem;
+                        color: var(--color-blue);
+                      "
+                    >
+                      2. Manually Enter Firmware Update (DFU) Mode
+                    </h4>
+                    <p style="margin-bottom: 0.5rem">
+                      If the software reboot fails or the device is unresponsive, you can manually
+                      trigger update mode:
+                    </p>
+                    <ol style="margin-left: 1.25rem; margin-bottom: 0.75rem">
+                      <li>Unplug the USB cable from the AIOC.</li>
+                      <li>
+                        Use a paperclip or tweezers to
+                        <strong>short (connect) the two bootloader pins</strong> on the board
+                        (labeled <em>BOOT</em>, which are the two outermost pins).
+                      </li>
+                      <li>
+                        While holding the pins shorted, plug the USB cable back in. The green LED
+                        will remain off (in normal mode, the green LED is dim when plugged in),
+                        indicating it has successfully entered DFU mode. You can now release the
+                        short and click <strong>Connect AIOC for Update</strong>.
+                      </li>
+                    </ol>
+
+                    <h4
+                      style="
+                        margin-top: 1.25rem;
+                        margin-bottom: 0.5rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        font-size: 0.95rem;
+                        color: var(--color-blue);
+                      "
+                    >
+                      3. Check Browser Compatibility
+                    </h4>
+                    <p>
+                      Ensure you are using a Chromium-based browser like
+                      <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>. Firefox,
+                      Safari, and Brave (unless Shields are disabled) do not support WebUSB/WebHID.
+                    </p>
+                  </div>
+                </details>
+              </div>
+
+              <!-- Step 2: Select Firmware -->
+              <div class="stepper-step inactive" id="step-select">
+                <div class="stepper-header">
+                  <span class="stepper-badge">2</span>
+                  <span class="stepper-title">Select Firmware Version</span>
+                </div>
+                <div class="form-group firmware-select-group">
+                  <label for="firmware-select">Select Firmware Version</label>
+                  <select id="firmware-select" disabled>
+                    <option value="firmware/aioc-v1.4.1.bin">
+                      AIOC Firmware v1.4.1 (Recommended)
+                    </option>
+                    <option value="firmware/aioc-v1.4.0.bin">AIOC Firmware v1.4.0</option>
+                    <option value="firmware/aioc-v1.3.0.bin">AIOC Firmware v1.3.0</option>
+                    <option value="firmware/aioc-v1.2.0.bin">AIOC Firmware v1.2.0</option>
+                    <option value="custom">Upload Local File...</option>
+                  </select>
+                </div>
+
+                <div class="upload-zone disabled" id="drop-zone" hidden>
+                  <span class="upload-icon" aria-hidden="true">⤓</span>
+                  <div id="file-info">Drag & drop your firmware file or click to browse</div>
+                  <input
+                    type="file"
+                    id="dfu-file-input"
+                    aria-labelledby="file-info"
+                    accept=".bin"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <!-- Step 3: Write Firmware -->
+              <div class="stepper-step inactive" id="step-write">
+                <div class="stepper-header">
+                  <span class="stepper-badge">3</span>
+                  <span class="stepper-title">Write Firmware to AIOC</span>
+                </div>
+
+                <div class="form-row dfu-actions-row">
+                  <div class="form-group btn-primary-col">
+                    <button id="btn-flash" class="btn btn-accent" disabled>Write Firmware</button>
+                  </div>
+                  <div class="form-group btn-secondary-col">
+                    <button id="btn-upload" class="btn btn-secondary" disabled>
+                      Backup Firmware
+                    </button>
+                    <button id="btn-leave-dfu" class="btn btn-danger" disabled>
+                      Exit Update Mode
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DFU Progress Section (Moved below buttons) -->
+                <div id="dfu-progress-container" style="display: none">
+                  <div
+                    id="dfu-progress-status"
+                    role="status"
+                    aria-live="polite"
+                    style="
+                      font-size: 0.95rem;
+                      font-weight: 700;
+                      text-transform: uppercase;
+                      margin-bottom: 0.75rem;
+                      letter-spacing: 0.05em;
+                      color: var(--text-secondary);
+                    "
+                  ></div>
+                  <progress
+                    id="dfu-progress"
+                    aria-describedby="dfu-progress-status"
+                    value="0"
+                  ></progress>
+                </div>
+              </div>
+
+              <!-- DFU parameters (Keep collapsed details at the bottom of the card) -->
+              <div
+                class="form-section"
+                style="border-bottom: none; padding-bottom: 0; margin-bottom: 0"
+              >
+                <details id="dfu-settings-details">
+                  <summary>Advanced DFU Settings</summary>
+                  <div class="form-row" style="margin-top: 1rem">
+                    <div class="form-group">
+                      <label for="dfu-xfer-size">Block size (bytes)</label>
+                      <input type="number" id="dfu-xfer-size" value="1024" disabled />
+                    </div>
+                    <div class="form-group">
+                      <label for="dfu-start-addr">DfuSe Start Address (hex)</label>
+                      <input
+                        type="text"
+                        id="dfu-start-addr"
+                        value="0x08000000"
+                        pattern="0x[A-Fa-f0-9]+"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="dfu-upload-size">Upload Backup Size (bytes)</label>
+                      <input type="number" id="dfu-upload-size" value="131072" min="1" disabled />
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Site Footer -->
+      <footer class="site-footer">
+        <p>&copy; 2025-2026 Nigel Armstrong. All rights reserved.</p>
+        <details class="footer-license-details">
+          <summary>Open Source Licenses & Credits</summary>
+          <p>
+            This application utilizes the open-source
+            <a href="https://github.com/devanlai/webdfu" target="_blank" rel="noopener noreferrer"
+              >webdfu</a
+            >
+            library (ISC License) and
+            <a
+              href="https://github.com/eligrey/FileSaver.js"
+              target="_blank"
+              rel="noopener noreferrer"
+              >FileSaver.js</a
+            >
+            (MIT License).
+          </p>
+        </details>
+      </footer>
+    </div>
+  </body>
 </html>

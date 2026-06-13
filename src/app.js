@@ -3,65 +3,65 @@
 
 // Constants matching AIOC hardware
 const Register = {
-    MAGIC: 0x00,
-    USBID: 0x08,
-    AIOC_IOMUX0: 0x24,
-    AIOC_IOMUX1: 0x25,
-    CM108_IOMUX0: 0x44,
-    CM108_IOMUX1: 0x45,
-    CM108_IOMUX2: 0x46,
-    CM108_IOMUX3: 0x47,
-    SERIAL_CTRL: 0x60,
-    SERIAL_IOMUX0: 0x64,
-    SERIAL_IOMUX1: 0x65,
-    SERIAL_IOMUX2: 0x66,
-    SERIAL_IOMUX3: 0x67,
-    AUDIO_RX: 0x72,
-    AUDIO_TX: 0x78,
-    VPTT_LVLCTRL: 0x82,
-    VPTT_TIMCTRL: 0x84,
-    VCOS_LVLCTRL: 0x92,
-    VCOS_TIMCTRL: 0x94,
-    FOXHUNT_CTRL: 0xA0,
-    FOXHUNT_MSG0: 0xA2,
-    FOXHUNT_MSG1: 0xA3,
-    FOXHUNT_MSG2: 0xA4,
-    FOXHUNT_MSG3: 0xA5
+  MAGIC: 0x00,
+  USBID: 0x08,
+  AIOC_IOMUX0: 0x24,
+  AIOC_IOMUX1: 0x25,
+  CM108_IOMUX0: 0x44,
+  CM108_IOMUX1: 0x45,
+  CM108_IOMUX2: 0x46,
+  CM108_IOMUX3: 0x47,
+  SERIAL_CTRL: 0x60,
+  SERIAL_IOMUX0: 0x64,
+  SERIAL_IOMUX1: 0x65,
+  SERIAL_IOMUX2: 0x66,
+  SERIAL_IOMUX3: 0x67,
+  AUDIO_RX: 0x72,
+  AUDIO_TX: 0x78,
+  VPTT_LVLCTRL: 0x82,
+  VPTT_TIMCTRL: 0x84,
+  VCOS_LVLCTRL: 0x92,
+  VCOS_TIMCTRL: 0x94,
+  FOXHUNT_CTRL: 0xa0,
+  FOXHUNT_MSG0: 0xa2,
+  FOXHUNT_MSG1: 0xa3,
+  FOXHUNT_MSG2: 0xa4,
+  FOXHUNT_MSG3: 0xa5,
 };
 
 const Command = {
-    NONE: 0x00,
-    WRITESTROBE: 0x01,
-    DEFAULTS: 0x10,
-    REBOOT: 0x20,
-    RECALL: 0x40,
-    STORE: 0x80
+  NONE: 0x00,
+  WRITESTROBE: 0x01,
+  DEFAULTS: 0x10,
+  REBOOT: 0x20,
+  RECALL: 0x40,
+  STORE: 0x80,
 };
 
 const PTTSource = {
-    NONE: 0x00000000,
-    CM108GPIO1: 0x00000001,
-    CM108GPIO2: 0x00000002,
-    CM108GPIO3: 0x00000004,
-    CM108GPIO4: 0x00000008,
-    SERIALDTR: 0x00000100,
-    SERIALRTS: 0x00000200,
-    SERIALDTRNRTS: 0x00000400,
-    SERIALNDTRRTS: 0x00000800,
-    VPTT: 0x00001000
+  NONE: 0x00000000,
+  CM108GPIO1: 0x00000001,
+  CM108GPIO2: 0x00000002,
+  CM108GPIO3: 0x00000004,
+  CM108GPIO4: 0x00000008,
+  SERIALDTR: 0x00000100,
+  SERIALRTS: 0x00000200,
+  SERIALDTRNRTS: 0x00000400,
+  SERIALNDTRRTS: 0x00000800,
+  VPTT: 0x00001000,
 };
 
 const RXGain = {
-    RXGAIN1X: 0x00000000,
-    RXGAIN2X: 0x00000001,
-    RXGAIN4X: 0x00000002,
-    RXGAIN8X: 0x00000003,
-    RXGAIN16X: 0x00000004
+  RXGAIN1X: 0x00000000,
+  RXGAIN2X: 0x00000001,
+  RXGAIN4X: 0x00000002,
+  RXGAIN8X: 0x00000003,
+  RXGAIN16X: 0x00000004,
 };
 
 const TXBoost = {
-    TXBOOSTOFF: 0x00000000,
-    TXBOOSTON: 0x00000100
+  TXBOOSTOFF: 0x00000000,
+  TXBOOSTON: 0x00000100,
 };
 
 // Global App State
@@ -74,518 +74,532 @@ let dfuManifestationTolerant = true;
 let dfuTransferSize = 1024;
 let expectingDisconnect = false;
 let deviceDisconnectedDuringFlash = false;
-let currentModule = "dfu"; // Tracks the active layout tab ("hid" or "dfu")
+let currentModule = 'dfu'; // Tracks the active layout tab ("hid" or "dfu")
 
 // Settings state status variables
 let appliedSettings = null;
-let matchStatus = { state: null, msg: "" };
-let currentFlashPhase = "";
+let matchStatus = { state: null, msg: '' };
+let currentFlashPhase = '';
 let progressHideTimeout = null;
 
 // Analytics Event Tracking Helpers
 function trackPostHog(eventName, params = {}) {
-    if (typeof posthog !== "undefined" && typeof posthog.capture === "function") {
-        posthog.capture(eventName, params);
-    }
+  if (typeof posthog !== 'undefined' && typeof posthog.capture === 'function') {
+    posthog.capture(eventName, params);
+  }
 }
 
 function trackException(err, extraParams = {}) {
-    if (typeof posthog !== "undefined" && typeof posthog.captureException === "function") {
-        const errorObj = err instanceof Error ? err : new Error(String(err));
-        posthog.captureException(errorObj, extraParams);
-    }
+  if (typeof posthog !== 'undefined' && typeof posthog.captureException === 'function') {
+    const errorObj = err instanceof Error ? err : new Error(String(err));
+    posthog.captureException(errorObj, extraParams);
+  }
 }
 
 function trackGA(eventName, params = {}) {
-    if (typeof gtag === "function") {
-        gtag('event', eventName, params);
-    }
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, params);
+  }
 }
 
 function normalizeHex(str) {
-    if (!str) return "";
-    str = str.trim().toLowerCase();
-    if (str.startsWith("0x")) return str;
-    return "0x" + str;
+  if (!str) return '';
+  str = str.trim().toLowerCase();
+  if (str.startsWith('0x')) return str;
+  return '0x' + str;
 }
 
 function applyUrlParameters() {
-    const params = new URLSearchParams(window.location.search);
-    
-    // 1. Preset
-    const preset = params.get("preset");
-    if (preset) {
-        const presetBtn = document.querySelector(`#preset-${preset}`);
-        if (presetBtn) {
-            const wasDisabled = presetBtn.disabled;
-            presetBtn.disabled = false;
-            presetBtn.click();
-            presetBtn.disabled = wasDisabled;
+  const params = new URLSearchParams(window.location.search);
+
+  // 1. Preset
+  const preset = params.get('preset');
+  if (preset) {
+    const presetBtn = document.querySelector(`#preset-${preset}`);
+    if (presetBtn) {
+      const wasDisabled = presetBtn.disabled;
+      presetBtn.disabled = false;
+      presetBtn.click();
+      presetBtn.disabled = wasDisabled;
+    }
+  }
+
+  // 2. Firmware select
+  const fw = params.get('fw');
+  if (fw) {
+    const fwSelect = document.querySelector('#firmware-select');
+    if (fwSelect) {
+      for (let option of fwSelect.options) {
+        if (option.value === fw || option.value.includes(fw) || option.text.includes(fw)) {
+          fwSelect.value = option.value;
+          fwSelect.dispatchEvent(new Event('change'));
+          break;
         }
+      }
     }
-    
-    // 2. Firmware select
-    const fw = params.get("fw");
-    if (fw) {
-        const fwSelect = document.querySelector("#firmware-select");
-        if (fwSelect) {
-            for (let option of fwSelect.options) {
-                if (option.value === fw || option.value.includes(fw) || option.text.includes(fw)) {
-                    fwSelect.value = option.value;
-                    fwSelect.dispatchEvent(new Event("change"));
-                    break;
-                }
-            }
-        }
+  }
+
+  // 3. Individual overrides
+  const ptt1Str = params.get('ptt1');
+  if (ptt1Str) {
+    const ptt1Val = parseInt(ptt1Str, ptt1Str.toLowerCase().startsWith('0x') ? 16 : 10);
+    if (!isNaN(ptt1Val)) {
+      updatePTTCheckboxes('ptt1', ptt1Val);
     }
-    
-    // 3. Individual overrides
-    const ptt1Str = params.get("ptt1");
-    if (ptt1Str) {
-        const ptt1Val = parseInt(ptt1Str, ptt1Str.toLowerCase().startsWith("0x") ? 16 : 10);
-        if (!isNaN(ptt1Val)) {
-            updatePTTCheckboxes("ptt1", ptt1Val);
-        }
+  }
+
+  const ptt2Str = params.get('ptt2');
+  if (ptt2Str) {
+    const ptt2Val = parseInt(ptt2Str, ptt2Str.toLowerCase().startsWith('0x') ? 16 : 10);
+    if (!isNaN(ptt2Val)) {
+      updatePTTCheckboxes('ptt2', ptt2Val);
     }
-    
-    const ptt2Str = params.get("ptt2");
-    if (ptt2Str) {
-        const ptt2Val = parseInt(ptt2Str, ptt2Str.toLowerCase().startsWith("0x") ? 16 : 10);
-        if (!isNaN(ptt2Val)) {
-            updatePTTCheckboxes("ptt2", ptt2Val);
-        }
+  }
+
+  const rxGain = params.get('rxGain');
+  if (rxGain !== null) {
+    const rxGainVal = parseInt(rxGain, 10);
+    if (!isNaN(rxGainVal)) {
+      const el = document.querySelector('#audio-rx-gain');
+      if (el) el.value = rxGainVal;
     }
-    
-    const rxGain = params.get("rxGain");
-    if (rxGain !== null) {
-        const rxGainVal = parseInt(rxGain, 10);
-        if (!isNaN(rxGainVal)) {
-            const el = document.querySelector("#audio-rx-gain");
-            if (el) el.value = rxGainVal;
-        }
-    }
-    
-    const txBoost = params.get("txBoost");
-    if (txBoost !== null) {
-        const el = document.querySelector("#audio-tx-boost");
-        if (el) el.checked = (txBoost === "true" || txBoost === "1");
-    }
-    
-    const vcosLvl = params.get("vcosLvl");
-    if (vcosLvl !== null) {
-        const el = document.querySelector("#vcos-level");
-        if (el) el.value = vcosLvl;
-    }
-    
-    const vcosTim = params.get("vcosTim");
-    if (vcosTim !== null) {
-        const el = document.querySelector("#vcos-timeout");
-        if (el) el.value = vcosTim;
-    }
-    
-    const vpttLvl = params.get("vpttLvl");
-    if (vpttLvl !== null) {
-        const el = document.querySelector("#vptt-level");
-        if (el) el.value = vpttLvl;
-    }
-    
-    const vpttTim = params.get("vpttTim");
-    if (vpttTim !== null) {
-        const el = document.querySelector("#vptt-timeout");
-        if (el) el.value = vpttTim;
-    }
-    
-    const foxVol = params.get("foxVol");
-    if (foxVol !== null) {
-        const el = document.querySelector("#fox-volume");
-        if (el) el.value = foxVol;
-    }
-    
-    const foxWpm = params.get("foxWpm");
-    if (foxWpm !== null) {
-        const el = document.querySelector("#fox-wpm");
-        if (el) el.value = foxWpm;
-    }
-    
-    const foxInt = params.get("foxInt");
-    if (foxInt !== null) {
-        const el = document.querySelector("#fox-interval");
-        if (el) el.value = foxInt;
-    }
-    
-    const foxMsg = params.get("foxMsg");
-    if (foxMsg !== null) {
-        const el = document.querySelector("#fox-message");
-        if (el) el.value = foxMsg;
-    }
-    
-    const vid = params.get("vid");
-    if (vid !== null) {
-        const el = document.querySelector("#usb-vid");
-        if (el) el.value = vid;
-    }
-    
-    const pid = params.get("pid");
-    if (pid !== null) {
-        const el = document.querySelector("#usb-pid");
-        if (el) el.value = pid;
-    }
+  }
+
+  const txBoost = params.get('txBoost');
+  if (txBoost !== null) {
+    const el = document.querySelector('#audio-tx-boost');
+    if (el) el.checked = txBoost === 'true' || txBoost === '1';
+  }
+
+  const vcosLvl = params.get('vcosLvl');
+  if (vcosLvl !== null) {
+    const el = document.querySelector('#vcos-level');
+    if (el) el.value = vcosLvl;
+  }
+
+  const vcosTim = params.get('vcosTim');
+  if (vcosTim !== null) {
+    const el = document.querySelector('#vcos-timeout');
+    if (el) el.value = vcosTim;
+  }
+
+  const vpttLvl = params.get('vpttLvl');
+  if (vpttLvl !== null) {
+    const el = document.querySelector('#vptt-level');
+    if (el) el.value = vpttLvl;
+  }
+
+  const vpttTim = params.get('vpttTim');
+  if (vpttTim !== null) {
+    const el = document.querySelector('#vptt-timeout');
+    if (el) el.value = vpttTim;
+  }
+
+  const foxVol = params.get('foxVol');
+  if (foxVol !== null) {
+    const el = document.querySelector('#fox-volume');
+    if (el) el.value = foxVol;
+  }
+
+  const foxWpm = params.get('foxWpm');
+  if (foxWpm !== null) {
+    const el = document.querySelector('#fox-wpm');
+    if (el) el.value = foxWpm;
+  }
+
+  const foxInt = params.get('foxInt');
+  if (foxInt !== null) {
+    const el = document.querySelector('#fox-interval');
+    if (el) el.value = foxInt;
+  }
+
+  const foxMsg = params.get('foxMsg');
+  if (foxMsg !== null) {
+    const el = document.querySelector('#fox-message');
+    if (el) el.value = foxMsg;
+  }
+
+  const vid = params.get('vid');
+  if (vid !== null) {
+    const el = document.querySelector('#usb-vid');
+    if (el) el.value = vid;
+  }
+
+  const pid = params.get('pid');
+  if (pid !== null) {
+    const el = document.querySelector('#usb-pid');
+    if (el) el.value = pid;
+  }
 }
 
 function generateShareableLink() {
-    const url = new URL(window.location.origin + window.location.pathname);
-    
-    // 1. Active Tab
-    const activeTab = currentModule === "hid" ? "config" : "flash";
-    url.hash = activeTab;
-    
-    // 2. Firmware
-    const fwSelect = document.querySelector("#firmware-select");
-    if (fwSelect && fwSelect.value && fwSelect.value !== "firmware/aioc-v1.4.1.bin") {
-        url.searchParams.set("fw", fwSelect.value);
-    }
-    
-    // 3. Preset
-    const activePresetBtn = document.querySelector(".btn-preset.active");
-    if (activePresetBtn) {
-        const presetId = activePresetBtn.id.replace("preset-", "");
-        url.searchParams.set("preset", presetId);
-        // Since settings match this preset exactly, we don't need individual overrides!
-        return url.toString();
-    }
-    
-    // 4. Custom Configuration (Individual overrides that differ from factory defaults)
-    const currentSettings = collectUISettings();
-    const defaults = {
-        ptt1: 0x404,
-        ptt2: 0x8,
-        audioRxGain: 0,
-        audioTxBoost: false,
-        vcosLevel: 256,
-        vcosTimeout: 3200,
-        vpttLevel: 16,
-        vpttTimeout: 320,
-        foxVolume: 32768,
-        foxWpm: 20,
-        foxInterval: 0,
-        foxMessage: "",
-        usbVid: "0x1209",
-        usbPid: "0x7388"
-    };
-    
-    if (currentSettings.ptt1 !== defaults.ptt1) {
-        url.searchParams.set("ptt1", "0x" + currentSettings.ptt1.toString(16));
-    }
-    if (currentSettings.ptt2 !== defaults.ptt2) {
-        url.searchParams.set("ptt2", "0x" + currentSettings.ptt2.toString(16));
-    }
-    if (currentSettings.audioRxGain !== defaults.audioRxGain) {
-        url.searchParams.set("rxGain", currentSettings.audioRxGain);
-    }
-    if (currentSettings.audioTxBoost !== defaults.audioTxBoost) {
-        url.searchParams.set("txBoost", currentSettings.audioTxBoost ? "1" : "0");
-    }
-    if (currentSettings.vcosLevel !== defaults.vcosLevel) {
-        url.searchParams.set("vcosLvl", currentSettings.vcosLevel);
-    }
-    if (currentSettings.vcosTimeout !== defaults.vcosTimeout) {
-        url.searchParams.set("vcosTim", currentSettings.vcosTimeout);
-    }
-    if (currentSettings.vpttLevel !== defaults.vpttLevel) {
-        url.searchParams.set("vpttLvl", currentSettings.vpttLevel);
-    }
-    if (currentSettings.vpttTimeout !== defaults.vpttTimeout) {
-        url.searchParams.set("vpttTim", currentSettings.vpttTimeout);
-    }
-    if (currentSettings.foxVolume !== defaults.foxVolume) {
-        url.searchParams.set("foxVol", currentSettings.foxVolume);
-    }
-    if (currentSettings.foxWpm !== defaults.foxWpm) {
-        url.searchParams.set("foxWpm", currentSettings.foxWpm);
-    }
-    if (currentSettings.foxInterval !== defaults.foxInterval) {
-        url.searchParams.set("foxInt", currentSettings.foxInterval);
-    }
-    if (currentSettings.foxMessage !== defaults.foxMessage) {
-        url.searchParams.set("foxMsg", currentSettings.foxMessage);
-    }
-    if (normalizeHex(currentSettings.usbVid) !== normalizeHex(defaults.usbVid)) {
-        url.searchParams.set("vid", currentSettings.usbVid);
-    }
-    if (normalizeHex(currentSettings.usbPid) !== normalizeHex(defaults.usbPid)) {
-        url.searchParams.set("pid", currentSettings.usbPid);
-    }
-    
+  const url = new URL(window.location.origin + window.location.pathname);
+
+  // 1. Active Tab
+  const activeTab = currentModule === 'hid' ? 'config' : 'flash';
+  url.hash = activeTab;
+
+  // 2. Firmware
+  const fwSelect = document.querySelector('#firmware-select');
+  if (fwSelect && fwSelect.value && fwSelect.value !== 'firmware/aioc-v1.4.1.bin') {
+    url.searchParams.set('fw', fwSelect.value);
+  }
+
+  // 3. Preset
+  const activePresetBtn = document.querySelector('.btn-preset.active');
+  if (activePresetBtn) {
+    const presetId = activePresetBtn.id.replace('preset-', '');
+    url.searchParams.set('preset', presetId);
+    // Since settings match this preset exactly, we don't need individual overrides!
     return url.toString();
+  }
+
+  // 4. Custom Configuration (Individual overrides that differ from factory defaults)
+  const currentSettings = collectUISettings();
+  const defaults = {
+    ptt1: 0x404,
+    ptt2: 0x8,
+    audioRxGain: 0,
+    audioTxBoost: false,
+    vcosLevel: 256,
+    vcosTimeout: 3200,
+    vpttLevel: 16,
+    vpttTimeout: 320,
+    foxVolume: 32768,
+    foxWpm: 20,
+    foxInterval: 0,
+    foxMessage: '',
+    usbVid: '0x1209',
+    usbPid: '0x7388',
+  };
+
+  if (currentSettings.ptt1 !== defaults.ptt1) {
+    url.searchParams.set('ptt1', '0x' + currentSettings.ptt1.toString(16));
+  }
+  if (currentSettings.ptt2 !== defaults.ptt2) {
+    url.searchParams.set('ptt2', '0x' + currentSettings.ptt2.toString(16));
+  }
+  if (currentSettings.audioRxGain !== defaults.audioRxGain) {
+    url.searchParams.set('rxGain', currentSettings.audioRxGain);
+  }
+  if (currentSettings.audioTxBoost !== defaults.audioTxBoost) {
+    url.searchParams.set('txBoost', currentSettings.audioTxBoost ? '1' : '0');
+  }
+  if (currentSettings.vcosLevel !== defaults.vcosLevel) {
+    url.searchParams.set('vcosLvl', currentSettings.vcosLevel);
+  }
+  if (currentSettings.vcosTimeout !== defaults.vcosTimeout) {
+    url.searchParams.set('vcosTim', currentSettings.vcosTimeout);
+  }
+  if (currentSettings.vpttLevel !== defaults.vpttLevel) {
+    url.searchParams.set('vpttLvl', currentSettings.vpttLevel);
+  }
+  if (currentSettings.vpttTimeout !== defaults.vpttTimeout) {
+    url.searchParams.set('vpttTim', currentSettings.vpttTimeout);
+  }
+  if (currentSettings.foxVolume !== defaults.foxVolume) {
+    url.searchParams.set('foxVol', currentSettings.foxVolume);
+  }
+  if (currentSettings.foxWpm !== defaults.foxWpm) {
+    url.searchParams.set('foxWpm', currentSettings.foxWpm);
+  }
+  if (currentSettings.foxInterval !== defaults.foxInterval) {
+    url.searchParams.set('foxInt', currentSettings.foxInterval);
+  }
+  if (currentSettings.foxMessage !== defaults.foxMessage) {
+    url.searchParams.set('foxMsg', currentSettings.foxMessage);
+  }
+  if (normalizeHex(currentSettings.usbVid) !== normalizeHex(defaults.usbVid)) {
+    url.searchParams.set('vid', currentSettings.usbVid);
+  }
+  if (normalizeHex(currentSettings.usbPid) !== normalizeHex(defaults.usbPid)) {
+    url.searchParams.set('pid', currentSettings.usbPid);
+  }
+
+  return url.toString();
 }
 
 function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  // Fallback method for older browsers or non-secure HTTP contexts
+  return new Promise((resolve, reject) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        resolve();
+      } else {
+        reject(new Error('execCommand copy was unsuccessful'));
+      }
+    } catch (err) {
+      reject(err);
     }
-    
-    // Fallback method for older browsers or non-secure HTTP contexts
-    return new Promise((resolve, reject) => {
-        try {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            const successful = document.execCommand("copy");
-            document.body.removeChild(textArea);
-            
-            if (successful) {
-                resolve();
-            } else {
-                reject(new Error("execCommand copy was unsuccessful"));
-            }
-        } catch (err) {
-            reject(err);
-        }
-    });
+  });
 }
 
 function collectUISettings() {
-    return {
-        ptt1: collectPTTValue("ptt1"),
-        ptt2: collectPTTValue("ptt2"),
-        audioRxGain: parseInt(document.querySelector("#audio-rx-gain")?.value || 0),
-        audioTxBoost: !!document.querySelector("#audio-tx-boost")?.checked,
-        vcosLevel: parseInt(document.querySelector("#vcos-level")?.value || 0),
-        vcosTimeout: parseInt(document.querySelector("#vcos-timeout")?.value || 0),
-        vpttLevel: parseInt(document.querySelector("#vptt-level")?.value || 0),
-        vpttTimeout: parseInt(document.querySelector("#vptt-timeout")?.value || 0),
-        foxVolume: parseInt(document.querySelector("#fox-volume")?.value || 0),
-        foxWpm: parseInt(document.querySelector("#fox-wpm")?.value || 0),
-        foxInterval: parseInt(document.querySelector("#fox-interval")?.value || 0),
-        foxMessage: document.querySelector("#fox-message")?.value || "",
-        usbVid: document.querySelector("#usb-vid")?.value || "",
-        usbPid: document.querySelector("#usb-pid")?.value || ""
-    };
+  return {
+    ptt1: collectPTTValue('ptt1'),
+    ptt2: collectPTTValue('ptt2'),
+    audioRxGain: parseInt(document.querySelector('#audio-rx-gain')?.value || 0),
+    audioTxBoost: !!document.querySelector('#audio-tx-boost')?.checked,
+    vcosLevel: parseInt(document.querySelector('#vcos-level')?.value || 0),
+    vcosTimeout: parseInt(document.querySelector('#vcos-timeout')?.value || 0),
+    vpttLevel: parseInt(document.querySelector('#vptt-level')?.value || 0),
+    vpttTimeout: parseInt(document.querySelector('#vptt-timeout')?.value || 0),
+    foxVolume: parseInt(document.querySelector('#fox-volume')?.value || 0),
+    foxWpm: parseInt(document.querySelector('#fox-wpm')?.value || 0),
+    foxInterval: parseInt(document.querySelector('#fox-interval')?.value || 0),
+    foxMessage: document.querySelector('#fox-message')?.value || '',
+    usbVid: document.querySelector('#usb-vid')?.value || '',
+    usbPid: document.querySelector('#usb-pid')?.value || '',
+  };
 }
 
 function areSettingsEqual(s1, s2) {
-    if (!s1 || !s2) return false;
-    return (
-        s1.ptt1 === s2.ptt1 &&
-        s1.ptt2 === s2.ptt2 &&
-        s1.audioRxGain === s2.audioRxGain &&
-        s1.audioTxBoost === s2.audioTxBoost &&
-        s1.vcosLevel === s2.vcosLevel &&
-        s1.vcosTimeout === s2.vcosTimeout &&
-        s1.vpttLevel === s2.vpttLevel &&
-        s1.vpttTimeout === s2.vpttTimeout &&
-        s1.foxVolume === s2.foxVolume &&
-        s1.foxWpm === s2.foxWpm &&
-        s1.foxInterval === s2.foxInterval &&
-        s1.foxMessage === s2.foxMessage &&
-        normalizeHex(s1.usbVid) === normalizeHex(s2.usbVid) &&
-        normalizeHex(s1.usbPid) === normalizeHex(s2.usbPid)
-    );
+  if (!s1 || !s2) return false;
+  return (
+    s1.ptt1 === s2.ptt1 &&
+    s1.ptt2 === s2.ptt2 &&
+    s1.audioRxGain === s2.audioRxGain &&
+    s1.audioTxBoost === s2.audioTxBoost &&
+    s1.vcosLevel === s2.vcosLevel &&
+    s1.vcosTimeout === s2.vcosTimeout &&
+    s1.vpttLevel === s2.vpttLevel &&
+    s1.vpttTimeout === s2.vpttTimeout &&
+    s1.foxVolume === s2.foxVolume &&
+    s1.foxWpm === s2.foxWpm &&
+    s1.foxInterval === s2.foxInterval &&
+    s1.foxMessage === s2.foxMessage &&
+    normalizeHex(s1.usbVid) === normalizeHex(s2.usbVid) &&
+    normalizeHex(s1.usbPid) === normalizeHex(s2.usbPid)
+  );
 }
 
 function updateSettingsStatus(isPresetLoaded = false) {
-    if (!hidDevice) {
-        showSettingsStatus(null);
-        return;
-    }
-    
-    const current = collectUISettings();
-    if (areSettingsEqual(current, appliedSettings)) {
-        showSettingsStatus(matchStatus.state, matchStatus.msg);
+  if (!hidDevice) {
+    showSettingsStatus(null);
+    return;
+  }
+
+  const current = collectUISettings();
+  if (areSettingsEqual(current, appliedSettings)) {
+    showSettingsStatus(matchStatus.state, matchStatus.msg);
+  } else {
+    if (isPresetLoaded) {
+      showSettingsStatus(
+        'warning',
+        '<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.'
+      );
     } else {
-        if (isPresetLoaded) {
-            showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> Preset loaded. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below to send these settings to the AIOC.");
-        } else {
-            showSettingsStatus("warning", "<strong>⚠️ Unsaved changes:</strong> You have edited settings on this page that are not yet sent to the AIOC. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below.");
-        }
+      showSettingsStatus(
+        'warning',
+        '<strong>⚠️ Unsaved changes:</strong> You have edited settings on this page that are not yet sent to the AIOC. Click <em>Apply Temporarily</em> or <em>Save Permanently</em> below.'
+      );
     }
-    checkMatchingPreset();
+  }
+  checkMatchingPreset();
 }
 
 function showSettingsStatus(state, msg) {
-    const banner = document.querySelector("#settings-status-banner");
-    if (!banner) return;
-    if (!state) {
-        banner.hidden = true;
-        return;
-    }
-    banner.hidden = false;
-    banner.className = `alert-box ${state}`;
-    banner.innerHTML = msg;
+  const banner = document.querySelector('#settings-status-banner');
+  if (!banner) return;
+  if (!state) {
+    banner.hidden = true;
+    return;
+  }
+  banner.hidden = false;
+  banner.className = `alert-box ${state}`;
+  banner.innerHTML = msg;
 }
 
 // Helper sizing function (moved to file-level scope)
 function niceSize(n) {
-    if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
-    if (n >= 1024) return (n / 1024).toFixed(1) + " KB";
-    return n + " B";
+  if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  if (n >= 1024) return (n / 1024).toFixed(1) + ' KB';
+  return n + ' B';
 }
 
 // Log helper
 function log(type, msg, module = null) {
-    const targetModule = module || currentModule;
-    const time = new Date().toLocaleTimeString();
-    
-    // Detect download/erase/backup phase from logs
-    if (msg.includes("Erasing DFU device memory") || msg.includes("Erasing DFU device")) {
-        currentFlashPhase = "erase";
-    } else if (msg.includes("Copying data") || msg.includes("Writing firmware")) {
-        currentFlashPhase = "write";
-    } else if (msg.includes("Reading")) {
-        currentFlashPhase = "backup";
-    }
-    
-    // Strip HTML tags for developer console logs
-    const plainTextMsg = msg.replace(/<[^>]*>/g, "");
-    const consoleMsg = `[${time}] [${targetModule.toUpperCase()}] ${plainTextMsg}`;
-    
-    if (type === "error") {
-        console.error(consoleMsg);
-    } else if (type === "warning") {
-        console.warn(consoleMsg);
-    } else if (type === "debug") {
-        console.debug(consoleMsg);
-    } else {
-        console.log(consoleMsg);
-    }
+  const targetModule = module || currentModule;
+  const time = new Date().toLocaleTimeString();
 
-    // Skip showing debug logs in on-page alerts
-    if (type === "debug") return;
+  // Detect download/erase/backup phase from logs
+  if (msg.includes('Erasing DFU device memory') || msg.includes('Erasing DFU device')) {
+    currentFlashPhase = 'erase';
+  } else if (msg.includes('Copying data') || msg.includes('Writing firmware')) {
+    currentFlashPhase = 'write';
+  } else if (msg.includes('Reading')) {
+    currentFlashPhase = 'backup';
+  }
 
-    // Update on-page alert box
-    const alertEl = document.querySelector(`#${targetModule}-alert`);
-    if (alertEl) {
-        alertEl.className = `alert-box ${type}`;
-        alertEl.innerHTML = msg;
-        alertEl.hidden = false;
-    }
+  // Strip HTML tags for developer console logs
+  const plainTextMsg = msg.replace(/<[^>]*>/g, '');
+  const consoleMsg = `[${time}] [${targetModule.toUpperCase()}] ${plainTextMsg}`;
+
+  if (type === 'error') {
+    console.error(consoleMsg);
+  } else if (type === 'warning') {
+    console.warn(consoleMsg);
+  } else if (type === 'debug') {
+    console.debug(consoleMsg);
+  } else {
+    console.log(consoleMsg);
+  }
+
+  // Skip showing debug logs in on-page alerts
+  if (type === 'debug') return;
+
+  // Update on-page alert box
+  const alertEl = document.querySelector(`#${targetModule}-alert`);
+  if (alertEl) {
+    alertEl.className = `alert-box ${type}`;
+    alertEl.innerHTML = msg;
+    alertEl.hidden = false;
+  }
 }
 
-function logInfo(msg, module = null) { log("info", msg, module); }
-function logWarning(msg, module = null) { log("warning", msg, module); }
-function logError(msg, module = null) { log("error", msg, module); }
+function logInfo(msg, module = null) {
+  log('info', msg, module);
+}
+function logWarning(msg, module = null) {
+  log('warning', msg, module);
+}
+function logError(msg, module = null) {
+  log('error', msg, module);
+}
 function logDebug(msg) {
-    console.debug(`[DEBUG] ${msg}`);
+  console.debug(`[DEBUG] ${msg}`);
 }
-function logSuccess(msg, module = null) { log("success", msg, module); }
+function logSuccess(msg, module = null) {
+  log('success', msg, module);
+}
 
 function hideAlert(module) {
-    const alertEl = document.querySelector(`#${module}-alert`);
-    if (alertEl) {
-        alertEl.hidden = true;
-    }
+  const alertEl = document.querySelector(`#${module}-alert`);
+  if (alertEl) {
+    alertEl.hidden = true;
+  }
 }
 
 function hideProgressContainerDelay(ms = 5000) {
-    if (progressHideTimeout) {
-        clearTimeout(progressHideTimeout);
+  if (progressHideTimeout) {
+    clearTimeout(progressHideTimeout);
+  }
+  progressHideTimeout = setTimeout(() => {
+    const container = document.querySelector('#dfu-progress-container');
+    if (container) {
+      container.style.display = 'none';
     }
-    progressHideTimeout = setTimeout(() => {
-        const container = document.querySelector("#dfu-progress-container");
-        if (container) {
-            container.style.display = "none";
-        }
-        const progressEl = document.querySelector("#dfu-progress");
-        if (progressEl) {
-            progressEl.value = 0;
-        }
-        progressHideTimeout = null;
-    }, ms);
+    const progressEl = document.querySelector('#dfu-progress');
+    if (progressEl) {
+      progressEl.value = 0;
+    }
+    progressHideTimeout = null;
+  }, ms);
 }
 
 // UI Progress logger interface for DFU
 function logProgress(done, total) {
-    if (progressHideTimeout) {
-        clearTimeout(progressHideTimeout);
-        progressHideTimeout = null;
-    }
-    const container = document.querySelector("#dfu-progress-container");
-    if (container) {
-        container.style.display = "block";
-    }
+  if (progressHideTimeout) {
+    clearTimeout(progressHideTimeout);
+    progressHideTimeout = null;
+  }
+  const container = document.querySelector('#dfu-progress-container');
+  if (container) {
+    container.style.display = 'block';
+  }
 
-    const progressEl = document.querySelector("#dfu-progress");
-    if (!progressEl) return;
-    
-    const statusEl = document.querySelector("#dfu-progress-status");
+  const progressEl = document.querySelector('#dfu-progress');
+  if (!progressEl) return;
+
+  const statusEl = document.querySelector('#dfu-progress-status');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+  }
+
+  if (typeof total === 'undefined') {
+    progressEl.removeAttribute('value');
+    logDebug(`Progress: ${done} bytes`);
+
     if (statusEl) {
-        statusEl.style.display = "block";
+      statusEl.innerHTML = `Operation in progress... (Processed <strong>${niceSize(done)}</strong>)`;
     }
-    
-    if (typeof total === "undefined") {
-        progressEl.removeAttribute("value");
-        logDebug(`Progress: ${done} bytes`);
-        
-        if (statusEl) {
-            statusEl.innerHTML = `Operation in progress... (Processed <strong>${niceSize(done)}</strong>)`;
-        }
-        return;
-    }
+    return;
+  }
 
-    progressEl.max = 100;
-    let pct = 0;
-    
-    if (currentFlashPhase === "erase") {
-        // Erase phase: scale from 0% to 20%
-        pct = Math.round((done / total) * 20);
-        progressEl.value = pct;
-        
-        if (statusEl) {
-            const erasePct = Math.round((done / total) * 100);
-            statusEl.innerHTML = `Erasing device memory... <strong>${erasePct}%</strong>`;
-        }
-    } else {
-        // Write/Backup phase: scale from 20% to 100% (or 0-100% if backup)
-        const isBackup = currentFlashPhase === "backup";
-        const base = isBackup ? 0 : 20;
-        const scale = isBackup ? 100 : 80;
-        
-        const subPct = Math.round((done / total) * scale);
-        pct = base + subPct;
-        progressEl.value = pct;
-        
-        if (statusEl) {
-            const phasePct = Math.round((done / total) * 100);
-            let actionText = isBackup ? "Reading from AIOC..." : "Writing to AIOC...";
-            statusEl.innerHTML = `${actionText} <strong>${phasePct}%</strong> (${niceSize(done)} of ${niceSize(total)})`;
-        }
+  progressEl.max = 100;
+  let pct = 0;
+
+  if (currentFlashPhase === 'erase') {
+    // Erase phase: scale from 0% to 20%
+    pct = Math.round((done / total) * 20);
+    progressEl.value = pct;
+
+    if (statusEl) {
+      const erasePct = Math.round((done / total) * 100);
+      statusEl.innerHTML = `Erasing device memory... <strong>${erasePct}%</strong>`;
     }
-    logDebug(`Progress: ${pct}%`);
+  } else {
+    // Write/Backup phase: scale from 20% to 100% (or 0-100% if backup)
+    const isBackup = currentFlashPhase === 'backup';
+    const base = isBackup ? 0 : 20;
+    const scale = isBackup ? 100 : 80;
+
+    const subPct = Math.round((done / total) * scale);
+    pct = base + subPct;
+    progressEl.value = pct;
+
+    if (statusEl) {
+      const phasePct = Math.round((done / total) * 100);
+      let actionText = isBackup ? 'Reading from AIOC...' : 'Writing to AIOC...';
+      statusEl.innerHTML = `${actionText} <strong>${phasePct}%</strong> (${niceSize(done)} of ${niceSize(total)})`;
+    }
+  }
+  logDebug(`Progress: ${pct}%`);
 }
 
 // Helper: formats hex numbers nicely
 function hex16(n) {
-    return "0x" + n.toString(16).padStart(4, "0").toUpperCase();
+  return '0x' + n.toString(16).padStart(4, '0').toUpperCase();
 }
 function hex32(n) {
-    return "0x" + n.toString(16).padStart(8, "0").toUpperCase();
+  return '0x' + n.toString(16).padStart(8, '0').toUpperCase();
 }
 
 // Helper: Wraps a promise with a timeout
 function withTimeout(promise, ms, timeoutError) {
-    return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-            reject(new Error(timeoutError));
-        }, ms);
-        
-        promise.then(
-            (res) => {
-                clearTimeout(timer);
-                resolve(res);
-            },
-            (err) => {
-                clearTimeout(timer);
-                reject(err);
-            }
-        );
-    });
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(timeoutError));
+    }, ms);
+
+    promise.then(
+      (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
 }
 
 /* ==========================================================================
@@ -593,71 +607,74 @@ function withTimeout(promise, ms, timeoutError) {
    ========================================================================== */
 
 async function sendHIDFeature(device, cmdCode, address, value) {
-    // 6 bytes payload for Report ID 0:
-    // Byte 0: Command (1 byte)
-    // Byte 1: Register Address (1 byte)
-    // Bytes 2-5: Value (Uint32, 4 bytes, little-endian)
-    const payload = new Uint8Array(6);
-    const view = new DataView(payload.buffer);
-    payload[0] = cmdCode;
-    payload[1] = address;
-    view.setUint32(2, value, true); // little-endian
-    
-    await device.sendFeatureReport(0x00, payload);
+  // 6 bytes payload for Report ID 0:
+  // Byte 0: Command (1 byte)
+  // Byte 1: Register Address (1 byte)
+  // Bytes 2-5: Value (Uint32, 4 bytes, little-endian)
+  const payload = new Uint8Array(6);
+  const view = new DataView(payload.buffer);
+  payload[0] = cmdCode;
+  payload[1] = address;
+  view.setUint32(2, value, true); // little-endian
+
+  await device.sendFeatureReport(0x00, payload);
 }
 
 async function readRegister(device, address) {
-    await sendHIDFeature(device, Command.NONE, address, 0x00000000);
-    const response = await device.receiveFeatureReport(0x00);
-    
-    // WebHID may omit the report ID byte for Report ID 0 depending on the platform/OS:
-    // - 6-byte response: [cmd, addr, v0, v1, v2, v3] -> value starts at offset 2
-    // - 7-byte response: [reportId, cmd, addr, v0, v1, v2, v3] -> value starts at offset 3
-    if (response.byteLength < 6) {
-        throw new Error(`Short feature report received: ${response.byteLength} bytes`);
-    }
-    const offset = response.byteLength >= 7 ? 3 : 2;
-    return response.getUint32(offset, true);
+  await sendHIDFeature(device, Command.NONE, address, 0x00000000);
+  const response = await device.receiveFeatureReport(0x00);
+
+  // WebHID may omit the report ID byte for Report ID 0 depending on the platform/OS:
+  // - 6-byte response: [cmd, addr, v0, v1, v2, v3] -> value starts at offset 2
+  // - 7-byte response: [reportId, cmd, addr, v0, v1, v2, v3] -> value starts at offset 3
+  if (response.byteLength < 6) {
+    throw new Error(`Short feature report received: ${response.byteLength} bytes`);
+  }
+  const offset = response.byteLength >= 7 ? 3 : 2;
+  return response.getUint32(offset, true);
 }
 
 async function writeRegister(device, address, value) {
-    await sendHIDFeature(device, Command.WRITESTROBE, address, value);
+  await sendHIDFeature(device, Command.WRITESTROBE, address, value);
 }
 
 async function connectHID() {
-    disconnectDFU(); // Prevent concurrent USB access
-    const btn = document.querySelector("#btn-connect-hid");
-    if (btn) btn.disabled = true;
-    try {
-        logInfo("Requesting AIOC HID device...");
-        trackPostHog("connect_device_attempt", { mode: "hid" });
-        trackGA("connect_hid_attempt");
-        const devices = await navigator.hid.requestDevice({
-            filters: [{ vendorId: 0x1209, productId: 0x7388 }]
-        });
-        
-        if (devices.length === 0) {
-            logWarning("No device selected.");
-            trackException(new Error("No device selected during HID connection request"), { module: "hid", action: "connect_hid" });
-            if (btn) btn.disabled = false;
-            return;
-        }
-        
-        hidDevice = devices[0];
-        await hidDevice.open();
-        logSuccess(`Connected to HID: ${hidDevice.productName}`);
-        trackPostHog("connect_device_success", {
-            mode: "hid",
-            device_name: hidDevice.productName
-        });
-        
-        // Validate if this interface supports feature reports (i.e. is the AIOC configuration interface)
-        const hasFeatureReports = hidDevice.collections && hidDevice.collections.some(
-            c => (c.featureReports && c.featureReports.length > 0)
-        );
-        
-        if (!hasFeatureReports) {
-            const warningHtml = `
+  disconnectDFU(); // Prevent concurrent USB access
+  const btn = document.querySelector('#btn-connect-hid');
+  if (btn) btn.disabled = true;
+  try {
+    logInfo('Requesting AIOC HID device...');
+    trackPostHog('connect_device_attempt', { mode: 'hid' });
+    trackGA('connect_hid_attempt');
+    const devices = await navigator.hid.requestDevice({
+      filters: [{ vendorId: 0x1209, productId: 0x7388 }],
+    });
+
+    if (devices.length === 0) {
+      logWarning('No device selected.');
+      trackException(new Error('No device selected during HID connection request'), {
+        module: 'hid',
+        action: 'connect_hid',
+      });
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    hidDevice = devices[0];
+    await hidDevice.open();
+    logSuccess(`Connected to HID: ${hidDevice.productName}`);
+    trackPostHog('connect_device_success', {
+      mode: 'hid',
+      device_name: hidDevice.productName,
+    });
+
+    // Validate if this interface supports feature reports (i.e. is the AIOC configuration interface)
+    const hasFeatureReports =
+      hidDevice.collections &&
+      hidDevice.collections.some((c) => c.featureReports && c.featureReports.length > 0);
+
+    if (!hasFeatureReports) {
+      const warningHtml = `
                 <strong>Connection failed: Selected interface does not support configuration.</strong>
                 <p style="margin-top: 0.5rem;">To resolve this:</p>
                 <ul>
@@ -665,444 +682,484 @@ async function connectHID() {
                     <li>If "AIOC HID" is not visible or you are on firmware v1.2.0 or older, please upgrade your AIOC firmware to v1.3.0+ using the <strong>Update Firmware</strong> tab.</li>
                 </ul>
             `;
-            log("error", warningHtml, "hid");
-            trackException(new Error("Selected HID interface does not support configuration"), { module: "hid", action: "connect_hid" });
-            await hidDevice.close();
-            hidDevice = null;
-            if (btn) btn.disabled = false;
-            return;
-        }
-        
-        // Check magic register
-        const magicVal = await readRegister(hidDevice, Register.MAGIC);
-        const magicStr = String.fromCharCode(
-            magicVal & 0xFF,
-            (magicVal >> 8) & 0xFF,
-            (magicVal >> 16) & 0xFF,
-            (magicVal >> 24) & 0xFF
-        );
-        
-        logInfo(`Device Magic: "${magicStr}" (${hex32(magicVal)})`);
-        if (magicStr !== "AIOC") {
-            logWarning("Device magic does not match 'AIOC'. Settings might not behave correctly.");
-            trackPostHog("device_magic_mismatch", { magic: magicStr });
-        }
-        
-        document.querySelector("#hid-status").textContent = "Connected";
-        document.querySelector("#hid-status").className = "status-pill status-connected";
-        if (btn) {
-            btn.textContent = "Disconnect";
-            btn.disabled = false;
-        }
-        enableHIDControls(true);
-        
-        // Read everything
-        await readAllSettings();
-
-        // Overlay URL parameters if present
-        if (window.location.search) {
-            applyUrlParameters();
-            logInfo("Applied URL configurations on top of connected device settings.");
-            updateSettingsStatus(true);
-        }
-    } catch (err) {
-        logError(`HID connection failed: ${err.message}`);
-        trackException(err, { module: "hid", action: "connect_hid" });
-        if (btn) {
-            btn.textContent = "Connect AIOC Settings";
-            btn.disabled = false;
-        }
+      log('error', warningHtml, 'hid');
+      trackException(new Error('Selected HID interface does not support configuration'), {
+        module: 'hid',
+        action: 'connect_hid',
+      });
+      await hidDevice.close();
+      hidDevice = null;
+      if (btn) btn.disabled = false;
+      return;
     }
+
+    // Check magic register
+    const magicVal = await readRegister(hidDevice, Register.MAGIC);
+    const magicStr = String.fromCharCode(
+      magicVal & 0xff,
+      (magicVal >> 8) & 0xff,
+      (magicVal >> 16) & 0xff,
+      (magicVal >> 24) & 0xff
+    );
+
+    logInfo(`Device Magic: "${magicStr}" (${hex32(magicVal)})`);
+    if (magicStr !== 'AIOC') {
+      logWarning("Device magic does not match 'AIOC'. Settings might not behave correctly.");
+      trackPostHog('device_magic_mismatch', { magic: magicStr });
+    }
+
+    document.querySelector('#hid-status').textContent = 'Connected';
+    document.querySelector('#hid-status').className = 'status-pill status-connected';
+    if (btn) {
+      btn.textContent = 'Disconnect';
+      btn.disabled = false;
+    }
+    enableHIDControls(true);
+
+    // Read everything
+    await readAllSettings();
+
+    // Overlay URL parameters if present
+    if (window.location.search) {
+      applyUrlParameters();
+      logInfo('Applied URL configurations on top of connected device settings.');
+      updateSettingsStatus(true);
+    }
+  } catch (err) {
+    logError(`HID connection failed: ${err.message}`);
+    trackException(err, { module: 'hid', action: 'connect_hid' });
+    if (btn) {
+      btn.textContent = 'Connect AIOC Settings';
+      btn.disabled = false;
+    }
+  }
 }
 
 function disconnectHID() {
-    if (hidDevice) {
-        const btn = document.querySelector("#btn-connect-hid");
-        if (btn) btn.disabled = true;
-        hidDevice.close().then(() => {
-            logInfo("HID interface closed.");
-            trackPostHog("disconnect_device", { mode: "hid" });
-            hidDevice = null;
-            originalDeviceVid = null;
-            originalDevicePid = null;
-            appliedSettings = null;
-            matchStatus = { state: null, msg: "" };
-            document.querySelector("#hid-status").textContent = "Disconnected";
-            document.querySelector("#hid-status").className = "status-pill status-disconnected";
-            if (btn) {
-                btn.textContent = "Connect AIOC Settings";
-                btn.disabled = false;
-            }
-            enableHIDControls(false);
-            clearHIDFields();
-            showSettingsStatus(null);
-        }).catch(err => {
-            logError(`Error closing HID device: ${err.message}`);
-            trackException(err, { module: "hid", action: "disconnect_hid" });
-            if (btn) btn.disabled = false;
-        });
-    }
+  if (hidDevice) {
+    const btn = document.querySelector('#btn-connect-hid');
+    if (btn) btn.disabled = true;
+    hidDevice
+      .close()
+      .then(() => {
+        logInfo('HID interface closed.');
+        trackPostHog('disconnect_device', { mode: 'hid' });
+        hidDevice = null;
+        originalDeviceVid = null;
+        originalDevicePid = null;
+        appliedSettings = null;
+        matchStatus = { state: null, msg: '' };
+        document.querySelector('#hid-status').textContent = 'Disconnected';
+        document.querySelector('#hid-status').className = 'status-pill status-disconnected';
+        if (btn) {
+          btn.textContent = 'Connect AIOC Settings';
+          btn.disabled = false;
+        }
+        enableHIDControls(false);
+        clearHIDFields();
+        showSettingsStatus(null);
+      })
+      .catch((err) => {
+        logError(`Error closing HID device: ${err.message}`);
+        trackException(err, { module: 'hid', action: 'disconnect_hid' });
+        if (btn) btn.disabled = false;
+      });
+  }
 }
 
 function enableHIDControls(enable) {
-    const fields = document.querySelectorAll("#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid)");
-    fields.forEach(el => el.disabled = !enable);
+  const fields = document.querySelectorAll(
+    '#hid-panel input, #hid-panel select, #hid-panel button:not(#btn-connect-hid)'
+  );
+  fields.forEach((el) => (el.disabled = !enable));
 }
 
 function clearHIDFields() {
-    document.querySelectorAll("#hid-panel input[type='checkbox']").forEach(el => el.checked = false);
-    document.querySelectorAll("#hid-panel input[type='number'], #hid-panel input[type='text']").forEach(el => el.value = "");
-    document.querySelectorAll("#hid-panel select").forEach(el => el.selectedIndex = 0);
+  document
+    .querySelectorAll("#hid-panel input[type='checkbox']")
+    .forEach((el) => (el.checked = false));
+  document
+    .querySelectorAll("#hid-panel input[type='number'], #hid-panel input[type='text']")
+    .forEach((el) => (el.value = ''));
+  document.querySelectorAll('#hid-panel select').forEach((el) => (el.selectedIndex = 0));
 }
 
 async function readAllSettings() {
-    if (!hidDevice) return;
-    try {
-        logInfo("Reading settings from AIOC registers...");
-        trackPostHog("read_settings_attempt");
-        
-        // Clear active presets class on read
-        document.querySelectorAll(".btn-preset").forEach(btn => btn.classList.remove("active"));
-        
-        // PTT1 (IOMUX0) & PTT2 (IOMUX1)
-        const ptt1Val = await readRegister(hidDevice, Register.AIOC_IOMUX0);
-        const ptt2Val = await readRegister(hidDevice, Register.AIOC_IOMUX1);
-        updatePTTCheckboxes("ptt1", ptt1Val);
-        updatePTTCheckboxes("ptt2", ptt2Val);
-        logInfo(`PTT1 Sources: ${hex32(ptt1Val)} | PTT2 Sources: ${hex32(ptt2Val)}`);
-        
-        // Audio RX (0x72) & TX (0x78)
-        const audioRx = await readRegister(hidDevice, Register.AUDIO_RX);
-        const audioTx = await readRegister(hidDevice, Register.AUDIO_TX);
-        document.querySelector("#audio-rx-gain").value = audioRx & 0x07; // gain index (0-4)
-        document.querySelector("#audio-tx-boost").checked = (audioTx & 0x0100) !== 0;
-        logInfo(`RX Gain: ${audioRx & 0x07} | TX Boost: ${(audioTx & 0x0100) !== 0 ? "ON" : "OFF"}`);
-        
-        // Squelch (VCOS) Level (0x92) & Timeout (0x94)
-        const vcosLvl = await readRegister(hidDevice, Register.VCOS_LVLCTRL);
-        const vcosTim = await readRegister(hidDevice, Register.VCOS_TIMCTRL);
-        document.querySelector("#vcos-level").value = vcosLvl;
-        document.querySelector("#vcos-timeout").value = vcosTim;
-        logInfo(`VCOS Level: ${vcosLvl} | VCOS Timeout: ${vcosTim} ms`);
-        
-        // VPTT Level (0x82) & Timeout (0x84)
-        const vpttLvl = await readRegister(hidDevice, Register.VPTT_LVLCTRL);
-        const vpttTim = await readRegister(hidDevice, Register.VPTT_TIMCTRL);
-        document.querySelector("#vptt-level").value = vpttLvl;
-        document.querySelector("#vptt-timeout").value = vpttTim;
-        logInfo(`VPTT Level: ${vpttLvl} | VPTT Timeout: ${vpttTim} ms`);
-        
-        // Foxhunt Configuration (0xA0)
-        const foxCtrl = await readRegister(hidDevice, Register.FOXHUNT_CTRL);
-        const volume = (foxCtrl >> 16) & 0xFFFF;
-        const wpm = (foxCtrl >> 8) & 0xFF;
-        const interval = foxCtrl & 0xFF;
-        document.querySelector("#fox-volume").value = volume;
-        document.querySelector("#fox-wpm").value = wpm;
-        document.querySelector("#fox-interval").value = interval;
-        logInfo(`Foxhunt Config: Vol=${volume}, Speed=${wpm} WPM, Interval=${interval}s`);
-        
-        // Foxhunt Morse Message (0xA2 - 0xA5)
-        const msgWord0 = await readRegister(hidDevice, Register.FOXHUNT_MSG0);
-        const msgWord1 = await readRegister(hidDevice, Register.FOXHUNT_MSG1);
-        const msgWord2 = await readRegister(hidDevice, Register.FOXHUNT_MSG2);
-        const msgWord3 = await readRegister(hidDevice, Register.FOXHUNT_MSG3);
-        
-        const textDecoder = new TextDecoder("ascii");
-        const msgBytes = new Uint8Array(16);
-        const view = new DataView(msgBytes.buffer);
-        view.setUint32(0, msgWord0, true);
-        view.setUint32(4, msgWord1, true);
-        view.setUint32(8, msgWord2, true);
-        view.setUint32(12, msgWord3, true);
-        
-        // Strip trailing nulls for display
-        let endIdx = msgBytes.indexOf(0);
-        if (endIdx === -1) endIdx = 16;
-        const msgText = textDecoder.decode(msgBytes.slice(0, endIdx));
-        document.querySelector("#fox-message").value = msgText;
-        logInfo(`Foxhunt Message: "${msgText}"`);
-        
-        // USB ID Override (0x08)
-        const usbidVal = await readRegister(hidDevice, Register.USBID);
-        const vid = usbidVal & 0xFFFF;
-        const pid = (usbidVal >> 16) & 0xFFFF;
-        document.querySelector("#usb-vid").value = hex16(vid);
-        document.querySelector("#usb-pid").value = hex16(pid);
-        logInfo(`USB VID/PID: ${hex16(vid)}:${hex16(pid)}`);
-        
-        // Save initial values
-        originalDeviceVid = vid;
-        originalDevicePid = pid;
-        
-        logSuccess("Registers loaded successfully.");
-        appliedSettings = collectUISettings();
-        matchStatus = { state: null, msg: "" };
-        updateSettingsStatus();
-        trackPostHog("read_settings_success");
-    } catch (err) {
-        logError(`Failed reading registers: ${err.message}`);
-        trackException(err, { module: "hid", action: "read_settings" });
-    }
+  if (!hidDevice) return;
+  try {
+    logInfo('Reading settings from AIOC registers...');
+    trackPostHog('read_settings_attempt');
+
+    // Clear active presets class on read
+    document.querySelectorAll('.btn-preset').forEach((btn) => btn.classList.remove('active'));
+
+    // PTT1 (IOMUX0) & PTT2 (IOMUX1)
+    const ptt1Val = await readRegister(hidDevice, Register.AIOC_IOMUX0);
+    const ptt2Val = await readRegister(hidDevice, Register.AIOC_IOMUX1);
+    updatePTTCheckboxes('ptt1', ptt1Val);
+    updatePTTCheckboxes('ptt2', ptt2Val);
+    logInfo(`PTT1 Sources: ${hex32(ptt1Val)} | PTT2 Sources: ${hex32(ptt2Val)}`);
+
+    // Audio RX (0x72) & TX (0x78)
+    const audioRx = await readRegister(hidDevice, Register.AUDIO_RX);
+    const audioTx = await readRegister(hidDevice, Register.AUDIO_TX);
+    document.querySelector('#audio-rx-gain').value = audioRx & 0x07; // gain index (0-4)
+    document.querySelector('#audio-tx-boost').checked = (audioTx & 0x0100) !== 0;
+    logInfo(`RX Gain: ${audioRx & 0x07} | TX Boost: ${(audioTx & 0x0100) !== 0 ? 'ON' : 'OFF'}`);
+
+    // Squelch (VCOS) Level (0x92) & Timeout (0x94)
+    const vcosLvl = await readRegister(hidDevice, Register.VCOS_LVLCTRL);
+    const vcosTim = await readRegister(hidDevice, Register.VCOS_TIMCTRL);
+    document.querySelector('#vcos-level').value = vcosLvl;
+    document.querySelector('#vcos-timeout').value = vcosTim;
+    logInfo(`VCOS Level: ${vcosLvl} | VCOS Timeout: ${vcosTim} ms`);
+
+    // VPTT Level (0x82) & Timeout (0x84)
+    const vpttLvl = await readRegister(hidDevice, Register.VPTT_LVLCTRL);
+    const vpttTim = await readRegister(hidDevice, Register.VPTT_TIMCTRL);
+    document.querySelector('#vptt-level').value = vpttLvl;
+    document.querySelector('#vptt-timeout').value = vpttTim;
+    logInfo(`VPTT Level: ${vpttLvl} | VPTT Timeout: ${vpttTim} ms`);
+
+    // Foxhunt Configuration (0xA0)
+    const foxCtrl = await readRegister(hidDevice, Register.FOXHUNT_CTRL);
+    const volume = (foxCtrl >> 16) & 0xffff;
+    const wpm = (foxCtrl >> 8) & 0xff;
+    const interval = foxCtrl & 0xff;
+    document.querySelector('#fox-volume').value = volume;
+    document.querySelector('#fox-wpm').value = wpm;
+    document.querySelector('#fox-interval').value = interval;
+    logInfo(`Foxhunt Config: Vol=${volume}, Speed=${wpm} WPM, Interval=${interval}s`);
+
+    // Foxhunt Morse Message (0xA2 - 0xA5)
+    const msgWord0 = await readRegister(hidDevice, Register.FOXHUNT_MSG0);
+    const msgWord1 = await readRegister(hidDevice, Register.FOXHUNT_MSG1);
+    const msgWord2 = await readRegister(hidDevice, Register.FOXHUNT_MSG2);
+    const msgWord3 = await readRegister(hidDevice, Register.FOXHUNT_MSG3);
+
+    const textDecoder = new TextDecoder('ascii');
+    const msgBytes = new Uint8Array(16);
+    const view = new DataView(msgBytes.buffer);
+    view.setUint32(0, msgWord0, true);
+    view.setUint32(4, msgWord1, true);
+    view.setUint32(8, msgWord2, true);
+    view.setUint32(12, msgWord3, true);
+
+    // Strip trailing nulls for display
+    let endIdx = msgBytes.indexOf(0);
+    if (endIdx === -1) endIdx = 16;
+    const msgText = textDecoder.decode(msgBytes.slice(0, endIdx));
+    document.querySelector('#fox-message').value = msgText;
+    logInfo(`Foxhunt Message: "${msgText}"`);
+
+    // USB ID Override (0x08)
+    const usbidVal = await readRegister(hidDevice, Register.USBID);
+    const vid = usbidVal & 0xffff;
+    const pid = (usbidVal >> 16) & 0xffff;
+    document.querySelector('#usb-vid').value = hex16(vid);
+    document.querySelector('#usb-pid').value = hex16(pid);
+    logInfo(`USB VID/PID: ${hex16(vid)}:${hex16(pid)}`);
+
+    // Save initial values
+    originalDeviceVid = vid;
+    originalDevicePid = pid;
+
+    logSuccess('Registers loaded successfully.');
+    appliedSettings = collectUISettings();
+    matchStatus = { state: null, msg: '' };
+    updateSettingsStatus();
+    trackPostHog('read_settings_success');
+  } catch (err) {
+    logError(`Failed reading registers: ${err.message}`);
+    trackException(err, { module: 'hid', action: 'read_settings' });
+  }
 }
 
 function checkMatchingPreset() {
-    // Clear all active presets first
-    document.querySelectorAll(".btn-preset").forEach(btn => btn.classList.remove("active"));
-    
-    const ptt1Val = collectPTTValue("ptt1");
-    const ptt2Val = collectPTTValue("ptt2");
-    const rxGain = parseInt(document.querySelector("#audio-rx-gain").value);
-    const txBoost = document.querySelector("#audio-tx-boost").checked;
-    const vcosLvl = parseInt(document.querySelector("#vcos-level").value) || 0;
-    const vcosTim = parseInt(document.querySelector("#vcos-timeout").value) || 0;
-    const vpttLvl = parseInt(document.querySelector("#vptt-level").value) || 0;
-    const vpttTim = parseInt(document.querySelector("#vptt-timeout").value) || 0;
-    const vidVal = document.querySelector("#usb-vid").value.trim().toLowerCase();
-    const pidVal = document.querySelector("#usb-pid").value.trim().toLowerCase();
+  // Clear all active presets first
+  document.querySelectorAll('.btn-preset').forEach((btn) => btn.classList.remove('active'));
 
-    // Standardize hex strings (e.g. 0x1209 vs 1209)
-    const normalizeHex = (str) => {
-        if (!str) return "";
-        if (str.startsWith("0x")) return str;
-        return "0x" + str;
-    };
-    const vid = normalizeHex(vidVal);
-    const pid = normalizeHex(pidVal);
+  const ptt1Val = collectPTTValue('ptt1');
+  const ptt2Val = collectPTTValue('ptt2');
+  const rxGain = parseInt(document.querySelector('#audio-rx-gain').value);
+  const txBoost = document.querySelector('#audio-tx-boost').checked;
+  const vcosLvl = parseInt(document.querySelector('#vcos-level').value) || 0;
+  const vcosTim = parseInt(document.querySelector('#vcos-timeout').value) || 0;
+  const vpttLvl = parseInt(document.querySelector('#vptt-level').value) || 0;
+  const vpttTim = parseInt(document.querySelector('#vptt-timeout').value) || 0;
+  const vidVal = document.querySelector('#usb-vid').value.trim().toLowerCase();
+  const pidVal = document.querySelector('#usb-pid').value.trim().toLowerCase();
 
-    // 1. Default Config preset
-    const isDefault = (
-        ptt1Val === (PTTSource.CM108GPIO3 | PTTSource.SERIALDTRNRTS) &&
-        ptt2Val === PTTSource.CM108GPIO4 &&
-        rxGain === 0 && !txBoost &&
-        vcosLvl === 256 && vcosTim === 3200 &&
-        vpttLvl === 16 && vpttTim === 320 &&
-        vid === "0x1209" && pid === "0x7388"
-    );
-    if (isDefault) {
-        document.querySelector("#preset-defaults")?.classList.add("active");
-        return;
-    }
+  // Standardize hex strings (e.g. 0x1209 vs 1209)
+  const normalizeHex = (str) => {
+    if (!str) return '';
+    if (str.startsWith('0x')) return str;
+    return '0x' + str;
+  };
+  const vid = normalizeHex(vidVal);
+  const pid = normalizeHex(pidVal);
 
-    // 2. CHIRP Programming preset
-    const isChirp = (
-        ptt1Val === (PTTSource.SERIALRTS | PTTSource.SERIALDTR) &&
-        ptt2Val === 0 &&
-        rxGain === 0 && !txBoost &&
-        vcosLvl === 256 && vcosTim === 3200 &&
-        vpttLvl === 16 && vpttTim === 320 &&
-        vid === "0x1209" && pid === "0x7388"
-    );
-    if (isChirp) {
-        document.querySelector("#preset-chirp")?.classList.add("active");
-        return;
-    }
+  // 1. Default Config preset
+  const isDefault =
+    ptt1Val === (PTTSource.CM108GPIO3 | PTTSource.SERIALDTRNRTS) &&
+    ptt2Val === PTTSource.CM108GPIO4 &&
+    rxGain === 0 &&
+    !txBoost &&
+    vcosLvl === 256 &&
+    vcosTim === 3200 &&
+    vpttLvl === 16 &&
+    vpttTim === 320 &&
+    vid === '0x1209' &&
+    pid === '0x7388';
+  if (isDefault) {
+    document.querySelector('#preset-defaults')?.classList.add('active');
+    return;
+  }
 
-    // 3. Digital Modes preset
-    const isSoundcard = (
-        ptt1Val === PTTSource.CM108GPIO1 &&
-        ptt2Val === 0 &&
-        rxGain === 0 && !txBoost &&
-        vcosLvl === 256 && vcosTim === 3200 &&
-        vpttLvl === 16 && vpttTim === 320 &&
-        vid === "0x1209" && pid === "0x7388"
-    );
-    if (isSoundcard) {
-        document.querySelector("#preset-soundcard")?.classList.add("active");
-        return;
-    }
+  // 2. CHIRP Programming preset
+  const isChirp =
+    ptt1Val === (PTTSource.SERIALRTS | PTTSource.SERIALDTR) &&
+    ptt2Val === 0 &&
+    rxGain === 0 &&
+    !txBoost &&
+    vcosLvl === 256 &&
+    vcosTim === 3200 &&
+    vpttLvl === 16 &&
+    vpttTim === 320 &&
+    vid === '0x1209' &&
+    pid === '0x7388';
+  if (isChirp) {
+    document.querySelector('#preset-chirp')?.classList.add('active');
+    return;
+  }
 
-    // 4. AllStarLink preset
-    const isASL = (
-        ptt1Val === PTTSource.CM108GPIO1 &&
-        ptt2Val === 0 &&
-        rxGain === 0 && !txBoost &&
-        vcosLvl === 256 && vcosTim === 1500 &&
-        vpttLvl === 16 && vpttTim === 320 &&
-        vid === "0x0d8c" && pid === "0x000c"
-    );
-    if (isASL) {
-        document.querySelector("#preset-asl")?.classList.add("active");
-        return;
-    }
+  // 3. Digital Modes preset
+  const isSoundcard =
+    ptt1Val === PTTSource.CM108GPIO1 &&
+    ptt2Val === 0 &&
+    rxGain === 0 &&
+    !txBoost &&
+    vcosLvl === 256 &&
+    vcosTim === 3200 &&
+    vpttLvl === 16 &&
+    vpttTim === 320 &&
+    vid === '0x1209' &&
+    pid === '0x7388';
+  if (isSoundcard) {
+    document.querySelector('#preset-soundcard')?.classList.add('active');
+    return;
+  }
+
+  // 4. AllStarLink preset
+  const isASL =
+    ptt1Val === PTTSource.CM108GPIO1 &&
+    ptt2Val === 0 &&
+    rxGain === 0 &&
+    !txBoost &&
+    vcosLvl === 256 &&
+    vcosTim === 1500 &&
+    vpttLvl === 16 &&
+    vpttTim === 320 &&
+    vid === '0x0d8c' &&
+    pid === '0x000c';
+  if (isASL) {
+    document.querySelector('#preset-asl')?.classList.add('active');
+    return;
+  }
 }
 
 function updatePTTCheckboxes(prefix, value) {
-    document.querySelectorAll(`input[id^="${prefix}-"]`).forEach(el => {
-        const flagName = el.id.split("-")[1].toUpperCase();
-        if (PTTSource[flagName] !== undefined) {
-            el.checked = (value & PTTSource[flagName]) !== 0;
-        }
-    });
+  document.querySelectorAll(`input[id^="${prefix}-"]`).forEach((el) => {
+    const flagName = el.id.split('-')[1].toUpperCase();
+    if (PTTSource[flagName] !== undefined) {
+      el.checked = (value & PTTSource[flagName]) !== 0;
+    }
+  });
 }
 
 function collectPTTValue(prefix) {
-    let value = 0x00000000;
-    document.querySelectorAll(`input[id^="${prefix}-"]`).forEach(el => {
-        if (el.checked) {
-            const flagName = el.id.split("-")[1].toUpperCase();
-            if (PTTSource[flagName] !== undefined) {
-                value |= PTTSource[flagName];
-            }
-        }
-    });
-    return value;
+  let value = 0x00000000;
+  document.querySelectorAll(`input[id^="${prefix}-"]`).forEach((el) => {
+    if (el.checked) {
+      const flagName = el.id.split('-')[1].toUpperCase();
+      if (PTTSource[flagName] !== undefined) {
+        value |= PTTSource[flagName];
+      }
+    }
+  });
+  return value;
 }
 
 async function writeAllSettings(store = false) {
-    if (!hidDevice) {
-        logError("Device not connected.");
+  if (!hidDevice) {
+    logError('Device not connected.');
+    return;
+  }
+  trackPostHog('write_settings_attempt', { persistent: store });
+
+  // Check if USB ID has been modified from original value read from device
+  const vidStr = document.querySelector('#usb-vid').value.trim();
+  const pidStr = document.querySelector('#usb-pid').value.trim();
+  const vid = parseInt(
+    vidStr.startsWith('0x') || vidStr.startsWith('0X') ? vidStr : '0x' + vidStr,
+    16
+  );
+  const pid = parseInt(
+    pidStr.startsWith('0x') || pidStr.startsWith('0X') ? pidStr : '0x' + pidStr,
+    16
+  );
+
+  if (originalDeviceVid !== null && originalDevicePid !== null && !isNaN(vid) && !isNaN(pid)) {
+    if (vid !== originalDeviceVid || pid !== originalDevicePid) {
+      const confirmed = confirm(
+        `⚠️ WARNING: You are changing the USB Vendor ID (VID) / Product ID (PID) from the values currently read on the device.\n\n` +
+          `Current: ${hex16(originalDeviceVid)}:${hex16(originalDevicePid)}\n` +
+          `New: ${hex16(vid)}:${hex16(pid)}\n\n` +
+          `This will change how your operating system and browser recognize the device when it reboots. If this is incorrect, the AIOC may become unrecognized.\n\n` +
+          `Are you sure you want to proceed with this change?`
+      );
+      if (!confirmed) {
+        logWarning('USB ID override change cancelled by user. Settings not applied.');
         return;
+      }
     }
-    trackPostHog("write_settings_attempt", { persistent: store });
-    
-    // Check if USB ID has been modified from original value read from device
-    const vidStr = document.querySelector("#usb-vid").value.trim();
-    const pidStr = document.querySelector("#usb-pid").value.trim();
-    const vid = parseInt(vidStr.startsWith("0x") || vidStr.startsWith("0X") ? vidStr : "0x" + vidStr, 16);
-    const pid = parseInt(pidStr.startsWith("0x") || pidStr.startsWith("0X") ? pidStr : "0x" + pidStr, 16);
-    
-    if (originalDeviceVid !== null && originalDevicePid !== null && !isNaN(vid) && !isNaN(pid)) {
-        if (vid !== originalDeviceVid || pid !== originalDevicePid) {
-            const confirmed = confirm(
-                `⚠️ WARNING: You are changing the USB Vendor ID (VID) / Product ID (PID) from the values currently read on the device.\n\n` +
-                `Current: ${hex16(originalDeviceVid)}:${hex16(originalDevicePid)}\n` +
-                `New: ${hex16(vid)}:${hex16(pid)}\n\n` +
-                `This will change how your operating system and browser recognize the device when it reboots. If this is incorrect, the AIOC may become unrecognized.\n\n` +
-                `Are you sure you want to proceed with this change?`
-            );
-            if (!confirmed) {
-                logWarning("USB ID override change cancelled by user. Settings not applied.");
-                return;
-            }
-        }
+  }
+
+  try {
+    logInfo('Writing settings to registers...');
+
+    // PTT settings
+    const ptt1Val = collectPTTValue('ptt1');
+    const ptt2Val = collectPTTValue('ptt2');
+    await writeRegister(hidDevice, Register.AIOC_IOMUX0, ptt1Val);
+    await writeRegister(hidDevice, Register.AIOC_IOMUX1, ptt2Val);
+
+    // Audio
+    const rxGainIdx = parseInt(document.querySelector('#audio-rx-gain').value);
+    const txBoostOn = document.querySelector('#audio-tx-boost').checked;
+    await writeRegister(hidDevice, Register.AUDIO_RX, rxGainIdx);
+    await writeRegister(
+      hidDevice,
+      Register.AUDIO_TX,
+      txBoostOn ? TXBoost.TXBOOSTON : TXBoost.TXBOOSTOFF
+    );
+
+    // Squelch / VCOS
+    const vcosLvl = parseInt(document.querySelector('#vcos-level').value) || 0;
+    const vcosTim = parseInt(document.querySelector('#vcos-timeout').value) || 0;
+    await writeRegister(hidDevice, Register.VCOS_LVLCTRL, vcosLvl);
+    await writeRegister(hidDevice, Register.VCOS_TIMCTRL, vcosTim);
+
+    // VPTT
+    const vpttLvl = parseInt(document.querySelector('#vptt-level').value) || 0;
+    const vpttTim = parseInt(document.querySelector('#vptt-timeout').value) || 0;
+    await writeRegister(hidDevice, Register.VPTT_LVLCTRL, vpttLvl);
+    await writeRegister(hidDevice, Register.VPTT_TIMCTRL, vpttTim);
+
+    // Foxhunt config
+    const volume = parseInt(document.querySelector('#fox-volume').value) || 0;
+    const wpm = parseInt(document.querySelector('#fox-wpm').value) || 0;
+    const interval = parseInt(document.querySelector('#fox-interval').value) || 0;
+    const foxCtrlVal = (volume << 16) | (wpm << 8) | interval;
+    await writeRegister(hidDevice, Register.FOXHUNT_CTRL, foxCtrlVal);
+
+    // Foxhunt Morse Message
+    const msgText = document.querySelector('#fox-message').value || '';
+    const encoder = new TextEncoder();
+    const asciiBytes = encoder.encode(msgText);
+    const paddedBytes = new Uint8Array(16);
+    paddedBytes.set(asciiBytes.slice(0, 16));
+
+    const view = new DataView(paddedBytes.buffer);
+    const w0 = view.getUint32(0, true);
+    const w1 = view.getUint32(4, true);
+    const w2 = view.getUint32(8, true);
+    const w3 = view.getUint32(12, true);
+
+    await writeRegister(hidDevice, Register.FOXHUNT_MSG0, w0);
+    await writeRegister(hidDevice, Register.FOXHUNT_MSG1, w1);
+    await writeRegister(hidDevice, Register.FOXHUNT_MSG2, w2);
+    await writeRegister(hidDevice, Register.FOXHUNT_MSG3, w3);
+
+    // USB ID Override
+    const vidStr = document.querySelector('#usb-vid').value.trim();
+    const pidStr = document.querySelector('#usb-pid').value.trim();
+    const vid = parseInt(
+      vidStr.startsWith('0x') || vidStr.startsWith('0X') ? vidStr : '0x' + vidStr,
+      16
+    );
+    const pid = parseInt(
+      pidStr.startsWith('0x') || pidStr.startsWith('0X') ? pidStr : '0x' + pidStr,
+      16
+    );
+    if (!isNaN(vid) && !isNaN(pid)) {
+      const usbidVal = ((pid & 0xffff) << 16) | (vid & 0xffff);
+      await writeRegister(hidDevice, Register.USBID, usbidVal);
     }
-    
-    try {
-        logInfo("Writing settings to registers...");
-        
-        // PTT settings
-        const ptt1Val = collectPTTValue("ptt1");
-        const ptt2Val = collectPTTValue("ptt2");
-        await writeRegister(hidDevice, Register.AIOC_IOMUX0, ptt1Val);
-        await writeRegister(hidDevice, Register.AIOC_IOMUX1, ptt2Val);
-        
-        // Audio
-        const rxGainIdx = parseInt(document.querySelector("#audio-rx-gain").value);
-        const txBoostOn = document.querySelector("#audio-tx-boost").checked;
-        await writeRegister(hidDevice, Register.AUDIO_RX, rxGainIdx);
-        await writeRegister(hidDevice, Register.AUDIO_TX, txBoostOn ? TXBoost.TXBOOSTON : TXBoost.TXBOOSTOFF);
-        
-        // Squelch / VCOS
-        const vcosLvl = parseInt(document.querySelector("#vcos-level").value) || 0;
-        const vcosTim = parseInt(document.querySelector("#vcos-timeout").value) || 0;
-        await writeRegister(hidDevice, Register.VCOS_LVLCTRL, vcosLvl);
-        await writeRegister(hidDevice, Register.VCOS_TIMCTRL, vcosTim);
-        
-        // VPTT
-        const vpttLvl = parseInt(document.querySelector("#vptt-level").value) || 0;
-        const vpttTim = parseInt(document.querySelector("#vptt-timeout").value) || 0;
-        await writeRegister(hidDevice, Register.VPTT_LVLCTRL, vpttLvl);
-        await writeRegister(hidDevice, Register.VPTT_TIMCTRL, vpttTim);
-        
-        // Foxhunt config
-        const volume = parseInt(document.querySelector("#fox-volume").value) || 0;
-        const wpm = parseInt(document.querySelector("#fox-wpm").value) || 0;
-        const interval = parseInt(document.querySelector("#fox-interval").value) || 0;
-        const foxCtrlVal = (volume << 16) | (wpm << 8) | interval;
-        await writeRegister(hidDevice, Register.FOXHUNT_CTRL, foxCtrlVal);
-        
-        // Foxhunt Morse Message
-        const msgText = document.querySelector("#fox-message").value || "";
-        const encoder = new TextEncoder();
-        const asciiBytes = encoder.encode(msgText);
-        const paddedBytes = new Uint8Array(16);
-        paddedBytes.set(asciiBytes.slice(0, 16));
-        
-        const view = new DataView(paddedBytes.buffer);
-        const w0 = view.getUint32(0, true);
-        const w1 = view.getUint32(4, true);
-        const w2 = view.getUint32(8, true);
-        const w3 = view.getUint32(12, true);
-        
-        await writeRegister(hidDevice, Register.FOXHUNT_MSG0, w0);
-        await writeRegister(hidDevice, Register.FOXHUNT_MSG1, w1);
-        await writeRegister(hidDevice, Register.FOXHUNT_MSG2, w2);
-        await writeRegister(hidDevice, Register.FOXHUNT_MSG3, w3);
-        
-        // USB ID Override
-        const vidStr = document.querySelector("#usb-vid").value.trim();
-        const pidStr = document.querySelector("#usb-pid").value.trim();
-        const vid = parseInt(vidStr.startsWith("0x") || vidStr.startsWith("0X") ? vidStr : "0x" + vidStr, 16);
-        const pid = parseInt(pidStr.startsWith("0x") || pidStr.startsWith("0X") ? pidStr : "0x" + pidStr, 16);
-        if (!isNaN(vid) && !isNaN(pid)) {
-            const usbidVal = ((pid & 0xFFFF) << 16) | (vid & 0xFFFF);
-            await writeRegister(hidDevice, Register.USBID, usbidVal);
-        }
-        
-        logSuccess("Settings written to device RAM successfully.");
-        
-        if (store) {
-            logInfo("Saving settings to persistent Flash memory...");
-            await sendHIDFeature(hidDevice, Command.STORE, 0, 0);
-            logSuccess("Settings permanently saved.");
-            
-            appliedSettings = collectUISettings();
-            matchStatus = {
-                state: "success",
-                msg: "<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting."
-            };
-            updateSettingsStatus();
-            trackPostHog("write_settings_success", { persistent: true, ...appliedSettings });
-            trackGA("save_settings_permanent", appliedSettings);
-        } else {
-            appliedSettings = collectUISettings();
-            matchStatus = {
-                state: "info",
-                msg: "<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently."
-            };
-            updateSettingsStatus();
-            trackPostHog("write_settings_success", { persistent: false, ...appliedSettings });
-        }
-    } catch (err) {
-        logError(`Failed writing settings: ${err.message}`);
-        trackException(err, { module: "hid", action: "write_settings", persistent: store });
+
+    logSuccess('Settings written to device RAM successfully.');
+
+    if (store) {
+      logInfo('Saving settings to persistent Flash memory...');
+      await sendHIDFeature(hidDevice, Command.STORE, 0, 0);
+      logSuccess('Settings permanently saved.');
+
+      appliedSettings = collectUISettings();
+      matchStatus = {
+        state: 'success',
+        msg: '<strong>✅ Permanently Saved:</strong> Settings are written to persistent flash memory and will survive unplugging/rebooting.',
+      };
+      updateSettingsStatus();
+      trackPostHog('write_settings_success', { persistent: true, ...appliedSettings });
+      trackGA('save_settings_permanent', appliedSettings);
+    } else {
+      appliedSettings = collectUISettings();
+      matchStatus = {
+        state: 'info',
+        msg: '<strong>ℹ️ Temporarily Applied:</strong> Changes are active but will reset if the AIOC is unplugged. Click <em>Save Permanently to AIOC</em> to write them permanently.',
+      };
+      updateSettingsStatus();
+      trackPostHog('write_settings_success', { persistent: false, ...appliedSettings });
     }
+  } catch (err) {
+    logError(`Failed writing settings: ${err.message}`);
+    trackException(err, { module: 'hid', action: 'write_settings', persistent: store });
+  }
 }
 
 async function loadDefaults() {
-    if (!hidDevice) return;
-    try {
-        logInfo("Resetting AIOC registers to factory defaults...");
-        trackPostHog("load_defaults_attempt");
-        await sendHIDFeature(hidDevice, Command.DEFAULTS, 0, 0);
-        logSuccess("Factory defaults loaded. Reading registers...");
-        await readAllSettings();
-        matchStatus = {
-            state: "info",
-            msg: "<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently."
-        };
-        updateSettingsStatus();
-        trackPostHog("load_defaults_success");
-    } catch (err) {
-        logError(`Failed to load defaults: ${err.message}`);
-        trackException(err, { module: "hid", action: "load_defaults" });
-    }
+  if (!hidDevice) return;
+  try {
+    logInfo('Resetting AIOC registers to factory defaults...');
+    trackPostHog('load_defaults_attempt');
+    await sendHIDFeature(hidDevice, Command.DEFAULTS, 0, 0);
+    logSuccess('Factory defaults loaded. Reading registers...');
+    await readAllSettings();
+    matchStatus = {
+      state: 'info',
+      msg: '<strong>ℹ️ Defaults Loaded:</strong> Factory defaults applied to form. Click <em>Save Permanently to AIOC</em> to write them permanently.',
+    };
+    updateSettingsStatus();
+    trackPostHog('load_defaults_success');
+  } catch (err) {
+    logError(`Failed to load defaults: ${err.message}`);
+    trackException(err, { module: 'hid', action: 'load_defaults' });
+  }
 }
 
 async function rebootDevice() {
-    if (!hidDevice) return;
-    try {
-        logInfo("Rebooting device...");
-        trackPostHog("reboot_device_attempt");
-        await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
-        logSuccess("Reboot command sent.");
-        disconnectHID();
-        trackPostHog("reboot_device_success");
-    } catch (err) {
-        logError(`Failed to reboot: ${err.message}`);
-        trackException(err, { module: "hid", action: "reboot" });
-    }
+  if (!hidDevice) return;
+  try {
+    logInfo('Rebooting device...');
+    trackPostHog('reboot_device_attempt');
+    await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
+    logSuccess('Reboot command sent.');
+    disconnectHID();
+    trackPostHog('reboot_device_success');
+  } catch (err) {
+    logError(`Failed to reboot: ${err.message}`);
+    trackException(err, { module: 'hid', action: 'reboot' });
+  }
 }
 
 /* ==========================================================================
@@ -1110,151 +1167,161 @@ async function rebootDevice() {
    ========================================================================== */
 
 async function getDFUDescriptorProperties(device) {
-    let configIndex = 0;
-    if (device.settings && device.settings.configuration) {
-        let configValue = device.settings.configuration.configurationValue;
-        let index = device.device_.configurations.findIndex(c => c.configurationValue === configValue);
-        if (index !== -1) {
-            configIndex = index;
-        }
+  let configIndex = 0;
+  if (device.settings && device.settings.configuration) {
+    let configValue = device.settings.configuration.configurationValue;
+    let index = device.device_.configurations.findIndex(
+      (c) => c.configurationValue === configValue
+    );
+    if (index !== -1) {
+      configIndex = index;
     }
-    try {
-        const data = await device.readConfigurationDescriptor(configIndex);
-        let configDesc = dfu.parseConfigurationDescriptor(data);
-        let funcDesc = null;
-        for (let desc of configDesc.descriptors) {
-            if (desc.bDescriptorType == 0x21 && desc.hasOwnProperty("bcdDFUVersion")) {
-                funcDesc = desc;
-                break;
-            }
-        }
-        if (funcDesc) {
-            return {
-                WillDetach:            ((funcDesc.bmAttributes & 0x08) != 0),
-                ManifestationTolerant: ((funcDesc.bmAttributes & 0x04) != 0),
-                CanUpload:             ((funcDesc.bmAttributes & 0x02) != 0),
-                CanDnload:             ((funcDesc.bmAttributes & 0x01) != 0),
-                TransferSize:          funcDesc.wTransferSize,
-                DetachTimeOut:         funcDesc.wDetachTimeOut,
-                DFUVersion:            funcDesc.bcdDFUVersion
-            };
-        }
-    } catch (err) {
-        logWarning(`Could not read DFU functional descriptor: ${err.message}`);
+  }
+  try {
+    const data = await device.readConfigurationDescriptor(configIndex);
+    let configDesc = dfu.parseConfigurationDescriptor(data);
+    let funcDesc = null;
+    for (let desc of configDesc.descriptors) {
+      if (desc.bDescriptorType == 0x21 && desc.hasOwnProperty('bcdDFUVersion')) {
+        funcDesc = desc;
+        break;
+      }
     }
-    return {};
+    if (funcDesc) {
+      return {
+        WillDetach: (funcDesc.bmAttributes & 0x08) != 0,
+        ManifestationTolerant: (funcDesc.bmAttributes & 0x04) != 0,
+        CanUpload: (funcDesc.bmAttributes & 0x02) != 0,
+        CanDnload: (funcDesc.bmAttributes & 0x01) != 0,
+        TransferSize: funcDesc.wTransferSize,
+        DetachTimeOut: funcDesc.wDetachTimeOut,
+        DFUVersion: funcDesc.bcdDFUVersion,
+      };
+    }
+  } catch (err) {
+    logWarning(`Could not read DFU functional descriptor: ${err.message}`);
+  }
+  return {};
 }
 
 async function loadServerFirmware(url) {
-    try {
-        logInfo(`Fetching firmware from server: ${url}...`);
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Server returned status ${response.status}: ${response.statusText}`);
-        }
-        firmwareFile = await response.arrayBuffer();
-        logSuccess(`Firmware loaded: ${url.split('/').pop()} (${firmwareFile.byteLength} bytes)`);
-        document.querySelector("#step-write")?.classList.remove("inactive");
-    } catch (err) {
-        logError(`Failed to load firmware from server: ${err.message}`);
-        firmwareFile = null;
-        document.querySelector("#step-write")?.classList.add("inactive");
+  try {
+    logInfo(`Fetching firmware from server: ${url}...`);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Server returned status ${response.status}: ${response.statusText}`);
     }
+    firmwareFile = await response.arrayBuffer();
+    logSuccess(`Firmware loaded: ${url.split('/').pop()} (${firmwareFile.byteLength} bytes)`);
+    document.querySelector('#step-write')?.classList.remove('inactive');
+  } catch (err) {
+    logError(`Failed to load firmware from server: ${err.message}`);
+    firmwareFile = null;
+    document.querySelector('#step-write')?.classList.add('inactive');
+  }
 }
 
 async function trySoftwareRebootToDFU() {
-    try {
-        logInfo("Checking if AIOC is connected in normal configuration mode...");
-        
-        // Check if we already have an active HID connection
-        if (hidDevice && hidDevice.opened) {
-            logInfo("Active configuration connection found. Sending reboot command...");
-            await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
-            logSuccess("Reboot command sent. Waiting for DFU bootloader...");
-            disconnectHID();
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            return true;
-        }
-        
-        const hid_devices = await navigator.hid.getDevices();
-        const aioc_hid = hid_devices.find(d => d.vendorId === 0x1209 && d.productId === 0x7388);
-        
-        if (aioc_hid) {
-            logInfo("Found paired AIOC in configuration mode. Attempting automatic reboot to DFU bootloader...");
-            if (!aioc_hid.opened) {
-                await aioc_hid.open();
-            }
-            await sendHIDFeature(aioc_hid, Command.REBOOT, 0, 0);
-            logSuccess("Reboot command sent to AIOC. Waiting for DFU bootloader to enumerate...");
-            await aioc_hid.close();
-            
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            return true;
-        }
-    } catch (err) {
-        logWarning(`Software reboot attempt failed: ${err.message}`);
+  try {
+    logInfo('Checking if AIOC is connected in normal configuration mode...');
+
+    // Check if we already have an active HID connection
+    if (hidDevice && hidDevice.opened) {
+      logInfo('Active configuration connection found. Sending reboot command...');
+      await sendHIDFeature(hidDevice, Command.REBOOT, 0, 0);
+      logSuccess('Reboot command sent. Waiting for DFU bootloader...');
+      disconnectHID();
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      return true;
     }
-    return false;
+
+    const hid_devices = await navigator.hid.getDevices();
+    const aioc_hid = hid_devices.find((d) => d.vendorId === 0x1209 && d.productId === 0x7388);
+
+    if (aioc_hid) {
+      logInfo(
+        'Found paired AIOC in configuration mode. Attempting automatic reboot to DFU bootloader...'
+      );
+      if (!aioc_hid.opened) {
+        await aioc_hid.open();
+      }
+      await sendHIDFeature(aioc_hid, Command.REBOOT, 0, 0);
+      logSuccess('Reboot command sent to AIOC. Waiting for DFU bootloader to enumerate...');
+      await aioc_hid.close();
+
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      return true;
+    }
+  } catch (err) {
+    logWarning(`Software reboot attempt failed: ${err.message}`);
+  }
+  return false;
 }
 
 async function connectDFU() {
-    disconnectHID(); // Prevent concurrent USB access conflicts
-    const btn = document.querySelector("#btn-connect-dfu");
-    if (btn) btn.disabled = true;
-    try {
-        logInfo("Scanning for USB DFU interfaces...");
-        trackPostHog("connect_device_attempt", { mode: "dfu" });
-        trackGA("connect_dfu_attempt");
-        let dfu_devices = await dfu.findAllDfuInterfaces();
-        
-        // Filter to match DFU bootloader (0483:df11) AND normal-mode AIOC DFU runtime interface (1209:7388)
-        dfu_devices = dfu_devices.filter(d => 
-            (d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11) ||
+  disconnectHID(); // Prevent concurrent USB access conflicts
+  const btn = document.querySelector('#btn-connect-dfu');
+  if (btn) btn.disabled = true;
+  try {
+    logInfo('Scanning for USB DFU interfaces...');
+    trackPostHog('connect_device_attempt', { mode: 'dfu' });
+    trackGA('connect_dfu_attempt');
+    let dfu_devices = await dfu.findAllDfuInterfaces();
+
+    // Filter to match DFU bootloader (0483:df11) AND normal-mode AIOC DFU runtime interface (1209:7388)
+    dfu_devices = dfu_devices.filter(
+      (d) =>
+        (d.device_.vendorId === 0x0483 && d.device_.productId === 0xdf11) ||
+        (d.device_.vendorId === 0x1209 && d.device_.productId === 0x7388)
+    );
+
+    if (dfu_devices.length === 0) {
+      const rebooted = await trySoftwareRebootToDFU();
+      if (rebooted) {
+        logInfo('Scanning again for DFU bootloader...');
+        dfu_devices = await dfu.findAllDfuInterfaces();
+        dfu_devices = dfu_devices.filter(
+          (d) =>
+            (d.device_.vendorId === 0x0483 && d.device_.productId === 0xdf11) ||
             (d.device_.vendorId === 0x1209 && d.device_.productId === 0x7388)
         );
-        
-        if (dfu_devices.length === 0) {
-            const rebooted = await trySoftwareRebootToDFU();
-            if (rebooted) {
-                logInfo("Scanning again for DFU bootloader...");
-                dfu_devices = await dfu.findAllDfuInterfaces();
-                dfu_devices = dfu_devices.filter(d => 
-                    (d.device_.vendorId === 0x0483 && d.device_.productId === 0xDF11) ||
-                    (d.device_.vendorId === 0x1209 && d.device_.productId === 0x7388)
-                );
-            }
-        }
-        
-        let selected_device = null;
-        if (dfu_devices.length === 0) {
-            logInfo("No active DFU device found. Requesting USB DFU device from user...");
-            const rawUsbDevice = await navigator.usb.requestDevice({
-                filters: [
-                    { vendorId: 0x0483, productId: 0xDF11 },
-                    { vendorId: 0x1209, productId: 0x7388 }
-                ]
-            });
-            const interfaces = dfu.findDeviceDfuInterfaces(rawUsbDevice);
-            if (interfaces.length === 0) {
-                throw new Error("Selected device does not support USB DFU.");
-            }
-            // Use first interface
-            selected_device = new dfu.Device(rawUsbDevice, interfaces[0]);
-        } else if (dfu_devices.length === 1) {
-            selected_device = dfu_devices[0];
-        } else {
-            logWarning("Multiple DFU interfaces found. Connecting to first one...");
-            selected_device = dfu_devices[0];
-        }
-        
-        logInfo("Opening DFU device...", "dfu");
-        try {
-            await withTimeout(selected_device.open(), 2500, "Timeout opening USB device. This usually means Windows is missing the WinUSB driver for the DFU interface.");
-        } catch (error) {
-            if (error.message.includes("Timeout opening USB device")) {
-                let warningHtml = "";
-                if (selected_device.device_.vendorId === 0x1209) {
-                    warningHtml = `
+      }
+    }
+
+    let selected_device = null;
+    if (dfu_devices.length === 0) {
+      logInfo('No active DFU device found. Requesting USB DFU device from user...');
+      const rawUsbDevice = await navigator.usb.requestDevice({
+        filters: [
+          { vendorId: 0x0483, productId: 0xdf11 },
+          { vendorId: 0x1209, productId: 0x7388 },
+        ],
+      });
+      const interfaces = dfu.findDeviceDfuInterfaces(rawUsbDevice);
+      if (interfaces.length === 0) {
+        throw new Error('Selected device does not support USB DFU.');
+      }
+      // Use first interface
+      selected_device = new dfu.Device(rawUsbDevice, interfaces[0]);
+    } else if (dfu_devices.length === 1) {
+      selected_device = dfu_devices[0];
+    } else {
+      logWarning('Multiple DFU interfaces found. Connecting to first one...');
+      selected_device = dfu_devices[0];
+    }
+
+    logInfo('Opening DFU device...', 'dfu');
+    try {
+      await withTimeout(
+        selected_device.open(),
+        2500,
+        'Timeout opening USB device. This usually means Windows is missing the WinUSB driver for the DFU interface.'
+      );
+    } catch (error) {
+      if (error.message.includes('Timeout opening USB device')) {
+        let warningHtml = '';
+        if (selected_device.device_.vendorId === 0x1209) {
+          warningHtml = `
                         <strong>Windows Driver Issue Detected</strong>
                         <p>Your AIOC is in normal mode, but the browser is blocked trying to access its firmware update interface (Interface 6).</p>
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
@@ -1266,8 +1333,8 @@ async function connectDFU() {
                             ℹ️ <strong>If your device becomes unresponsive or stuck:</strong> Simply unplug the USB cable and plug it back in to reboot back to normal operation.
                         </div>
                     `;
-                } else {
-                    warningHtml = `
+        } else {
+          warningHtml = `
                         <strong>Windows Driver Issue Detected</strong>
                         <p>Your AIOC is in firmware update mode, but Windows does not have the WinUSB driver installed for it.</p>
                         <p style="margin-top: 0.5rem;"><strong>To fix this:</strong></p>
@@ -1278,788 +1345,817 @@ async function connectDFU() {
                             ℹ️ <strong>To exit update mode at any time:</strong> Simply unplug the USB cable and plug it back in to reboot back to normal operation.
                         </div>
                     `;
-                }
-                log("error", warningHtml, "dfu");
-            } else {
-                logError(`DFU Connection failed: ${error.message}`, "dfu");
-            }
-            throw error;
         }
-        
-        // Read DFU functional descriptor details
-        const desc = await getDFUDescriptorProperties(selected_device);
-        
-        let memorySummary = "";
-        if (desc && Object.keys(desc).length > 0) {
-            selected_device.properties = desc;
-            dfuTransferSize = desc.TransferSize;
-            dfuManifestationTolerant = desc.ManifestationTolerant;
-            document.querySelector("#dfu-xfer-size").value = dfuTransferSize;
-            
-            logInfo(`DFU properties: Detach=${desc.WillDetach}, ManifestTolerant=${desc.ManifestationTolerant}, Upload=${desc.CanUpload}, Dnload=${desc.CanDnload}, XferSize=${desc.TransferSize}, DFUVer=${hex16(desc.DFUVersion)}`);
-            
-            // Convert to DfuSe.Device if DfuSe protocol is detected
-            if (desc.DFUVersion === 0x011a || selected_device.settings.alternate.interfaceProtocol === 0x02) {
-                logInfo("DfuSe protocol detected. Parsing memory sectors...");
-                dfuDevice = new dfuse.Device(selected_device.device_, selected_device.settings);
-                dfuDevice.properties = desc;
-                
-                if (dfuDevice.memoryInfo) {
-                    let totalSize = 0;
-                    for (let segment of dfuDevice.memoryInfo.segments) {
-                        totalSize += segment.end - segment.start;
-                    }
-                    memorySummary = `Memory: ${dfuDevice.memoryInfo.name} (${Math.round(totalSize/1024)} KiB)`;
-                    let firstWritable = dfuDevice.getFirstWritableSegment();
-                    if (firstWritable) {
-                        dfuDevice.startAddress = firstWritable.start;
-                        document.querySelector("#dfu-start-addr").value = "0x" + firstWritable.start.toString(16);
-                        logInfo(`Default DfuSe write segment: ${hex32(firstWritable.start)}`);
-                    }
-                }
-            } else {
-                dfuDevice = selected_device;
-            }
-        } else {
-            dfuDevice = selected_device;
-        }
-        
-        // Check if device is in Runtime mode (0x01) or DFU mode (0x02)
-        const isRuntimeMode = selected_device.settings.alternate.interfaceProtocol === 0x01;
-        
-        // Hook up log methods
-        dfuDevice.logDebug = logDebug;
-        dfuDevice.logInfo = logInfo;
-        dfuDevice.logWarning = logWarning;
-        dfuDevice.logError = logError;
-        dfuDevice.logProgress = logProgress;
-        
-        if (isRuntimeMode) {
-            logWarning("Device is connected in normal mode. Automatically restarting AIOC into firmware update mode...");
-            await dfuDevice.detach();
-            logSuccess("Detach command sent successfully. Rebooting...");
-            
-            // Close interface
-            await dfuDevice.close();
-            logInfo("DFU runtime interface closed.");
-            
-            // Wait for disconnect
-            try {
-                await dfuDevice.waitDisconnected(5000);
-                logSuccess("Device disconnected.");
-            } catch (err) {
-                logWarning("Timeout waiting for disconnect.");
-            }
-            
-            dfuDevice = null;
-            
-            // Wait 2.5 seconds for reboot and USB enumeration
-            logInfo("Waiting for DFU bootloader to enumerate...");
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            
-            // Re-trigger connection!
-            if (btn) btn.disabled = false;
-            await connectDFU();
-            return;
-        }
-        
-        document.querySelector("#dfu-status").textContent = "Connected";
-        document.querySelector("#dfu-status").className = "status-pill status-connected";
-        if (btn) {
-            btn.textContent = "Disconnect";
-            btn.disabled = false;
-        }
-        
-        const deviceInfoEl = document.querySelector("#dfu-device-info");
-        deviceInfoEl.textContent = 
-            `Device: ${dfuDevice.device_.productName || "Unknown"}\n` +
-            `Manufacturer: ${dfuDevice.device_.manufacturerName || "Unknown"}\n` +
-            `Serial: ${dfuDevice.device_.serialNumber || "Unknown"}\n` +
-            `Mode: DFU (Flashing Mode)\n` +
-            (memorySummary ? `${memorySummary}\n` : "");
-        deviceInfoEl.style.display = "block";
-        
-        const connectGuideEl = document.querySelector("#dfu-connect-guide");
-        if (connectGuideEl) {
-            connectGuideEl.style.display = "none";
-        }
-            
-                enableDFUControls(true);
-        document.querySelector("#step-select")?.classList.remove("inactive");
-        const firmwareSelect = document.querySelector("#firmware-select");
-        if (firmwareSelect && firmwareSelect.value !== "custom") {
-            await loadServerFirmware(firmwareSelect.value);
-        }
-        logSuccess("DFU Interface opened successfully.");
-        trackPostHog("connect_device_success", {
-            mode: "dfu",
-            device_name: dfuDevice.device_.productName || "Unknown",
-            manufacturer: dfuDevice.device_.manufacturerName || "Unknown",
-            serial: dfuDevice.device_.serialNumber || "Unknown"
-        });
-    } catch (err) {
-        if (!err.message.includes("Timeout opening USB device")) {
-            logError(`DFU Connection failed: ${err.message}`);
-        }
-        trackException(err, { module: "dfu", action: "connect_dfu" });
-        disconnectDFU();
-        if (btn) {
-            btn.textContent = "Connect AIOC for Update";
-            btn.disabled = false;
-        }
+        log('error', warningHtml, 'dfu');
+      } else {
+        logError(`DFU Connection failed: ${error.message}`, 'dfu');
+      }
+      throw error;
     }
+
+    // Read DFU functional descriptor details
+    const desc = await getDFUDescriptorProperties(selected_device);
+
+    let memorySummary = '';
+    if (desc && Object.keys(desc).length > 0) {
+      selected_device.properties = desc;
+      dfuTransferSize = desc.TransferSize;
+      dfuManifestationTolerant = desc.ManifestationTolerant;
+      document.querySelector('#dfu-xfer-size').value = dfuTransferSize;
+
+      logInfo(
+        `DFU properties: Detach=${desc.WillDetach}, ManifestTolerant=${desc.ManifestationTolerant}, Upload=${desc.CanUpload}, Dnload=${desc.CanDnload}, XferSize=${desc.TransferSize}, DFUVer=${hex16(desc.DFUVersion)}`
+      );
+
+      // Convert to DfuSe.Device if DfuSe protocol is detected
+      if (
+        desc.DFUVersion === 0x011a ||
+        selected_device.settings.alternate.interfaceProtocol === 0x02
+      ) {
+        logInfo('DfuSe protocol detected. Parsing memory sectors...');
+        dfuDevice = new dfuse.Device(selected_device.device_, selected_device.settings);
+        dfuDevice.properties = desc;
+
+        if (dfuDevice.memoryInfo) {
+          let totalSize = 0;
+          for (let segment of dfuDevice.memoryInfo.segments) {
+            totalSize += segment.end - segment.start;
+          }
+          memorySummary = `Memory: ${dfuDevice.memoryInfo.name} (${Math.round(totalSize / 1024)} KiB)`;
+          let firstWritable = dfuDevice.getFirstWritableSegment();
+          if (firstWritable) {
+            dfuDevice.startAddress = firstWritable.start;
+            document.querySelector('#dfu-start-addr').value =
+              '0x' + firstWritable.start.toString(16);
+            logInfo(`Default DfuSe write segment: ${hex32(firstWritable.start)}`);
+          }
+        }
+      } else {
+        dfuDevice = selected_device;
+      }
+    } else {
+      dfuDevice = selected_device;
+    }
+
+    // Check if device is in Runtime mode (0x01) or DFU mode (0x02)
+    const isRuntimeMode = selected_device.settings.alternate.interfaceProtocol === 0x01;
+
+    // Hook up log methods
+    dfuDevice.logDebug = logDebug;
+    dfuDevice.logInfo = logInfo;
+    dfuDevice.logWarning = logWarning;
+    dfuDevice.logError = logError;
+    dfuDevice.logProgress = logProgress;
+
+    if (isRuntimeMode) {
+      logWarning(
+        'Device is connected in normal mode. Automatically restarting AIOC into firmware update mode...'
+      );
+      await dfuDevice.detach();
+      logSuccess('Detach command sent successfully. Rebooting...');
+
+      // Close interface
+      await dfuDevice.close();
+      logInfo('DFU runtime interface closed.');
+
+      // Wait for disconnect
+      try {
+        await dfuDevice.waitDisconnected(5000);
+        logSuccess('Device disconnected.');
+      } catch (err) {
+        logWarning('Timeout waiting for disconnect.');
+      }
+
+      dfuDevice = null;
+
+      // Wait 2.5 seconds for reboot and USB enumeration
+      logInfo('Waiting for DFU bootloader to enumerate...');
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      // Re-trigger connection!
+      if (btn) btn.disabled = false;
+      await connectDFU();
+      return;
+    }
+
+    document.querySelector('#dfu-status').textContent = 'Connected';
+    document.querySelector('#dfu-status').className = 'status-pill status-connected';
+    if (btn) {
+      btn.textContent = 'Disconnect';
+      btn.disabled = false;
+    }
+
+    const deviceInfoEl = document.querySelector('#dfu-device-info');
+    deviceInfoEl.textContent =
+      `Device: ${dfuDevice.device_.productName || 'Unknown'}\n` +
+      `Manufacturer: ${dfuDevice.device_.manufacturerName || 'Unknown'}\n` +
+      `Serial: ${dfuDevice.device_.serialNumber || 'Unknown'}\n` +
+      `Mode: DFU (Flashing Mode)\n` +
+      (memorySummary ? `${memorySummary}\n` : '');
+    deviceInfoEl.style.display = 'block';
+
+    const connectGuideEl = document.querySelector('#dfu-connect-guide');
+    if (connectGuideEl) {
+      connectGuideEl.style.display = 'none';
+    }
+
+    enableDFUControls(true);
+    document.querySelector('#step-select')?.classList.remove('inactive');
+    const firmwareSelect = document.querySelector('#firmware-select');
+    if (firmwareSelect && firmwareSelect.value !== 'custom') {
+      await loadServerFirmware(firmwareSelect.value);
+    }
+    logSuccess('DFU Interface opened successfully.');
+    trackPostHog('connect_device_success', {
+      mode: 'dfu',
+      device_name: dfuDevice.device_.productName || 'Unknown',
+      manufacturer: dfuDevice.device_.manufacturerName || 'Unknown',
+      serial: dfuDevice.device_.serialNumber || 'Unknown',
+    });
+  } catch (err) {
+    if (!err.message.includes('Timeout opening USB device')) {
+      logError(`DFU Connection failed: ${err.message}`);
+    }
+    trackException(err, { module: 'dfu', action: 'connect_dfu' });
+    disconnectDFU();
+    if (btn) {
+      btn.textContent = 'Connect AIOC for Update';
+      btn.disabled = false;
+    }
+  }
 }
 
 function disconnectDFU() {
-    const btn = document.querySelector("#btn-connect-dfu");
-    if (btn) btn.disabled = true;
-    
-    const cleanupUI = () => {
-        document.querySelector("#dfu-status").textContent = "Disconnected";
-        document.querySelector("#dfu-status").className = "status-pill status-disconnected";
-        if (btn) {
-            btn.textContent = "Connect AIOC for Update";
-            btn.disabled = false;
-        }
-        const deviceInfoEl = document.querySelector("#dfu-device-info");
-        if (deviceInfoEl) {
-            deviceInfoEl.textContent = "";
-            deviceInfoEl.style.display = "none";
-        }
-        const connectGuideEl = document.querySelector("#dfu-connect-guide");
-        if (connectGuideEl) {
-            connectGuideEl.style.display = "block";
-        }
-        enableDFUControls(false);
-        document.querySelector("#step-select")?.classList.add("inactive");
-        document.querySelector("#step-write")?.classList.add("inactive");
-        expectingDisconnect = false;
-        deviceDisconnectedDuringFlash = false;
-        hideProgressContainerDelay(5000);
-    };
+  const btn = document.querySelector('#btn-connect-dfu');
+  if (btn) btn.disabled = true;
 
-    if (dfuDevice) {
-        dfuDevice.close().then(() => {
-            logInfo("DFU interface closed.");
-            trackPostHog("disconnect_device", { mode: "dfu" });
-            dfuDevice = null;
-            cleanupUI();
-        }).catch(err => {
-            logError(`Error closing DFU: ${err.message}`);
-            trackException(err, { module: "dfu", action: "disconnect_dfu" });
-            dfuDevice = null;
-            cleanupUI();
-        });
-    } else {
+  const cleanupUI = () => {
+    document.querySelector('#dfu-status').textContent = 'Disconnected';
+    document.querySelector('#dfu-status').className = 'status-pill status-disconnected';
+    if (btn) {
+      btn.textContent = 'Connect AIOC for Update';
+      btn.disabled = false;
+    }
+    const deviceInfoEl = document.querySelector('#dfu-device-info');
+    if (deviceInfoEl) {
+      deviceInfoEl.textContent = '';
+      deviceInfoEl.style.display = 'none';
+    }
+    const connectGuideEl = document.querySelector('#dfu-connect-guide');
+    if (connectGuideEl) {
+      connectGuideEl.style.display = 'block';
+    }
+    enableDFUControls(false);
+    document.querySelector('#step-select')?.classList.add('inactive');
+    document.querySelector('#step-write')?.classList.add('inactive');
+    expectingDisconnect = false;
+    deviceDisconnectedDuringFlash = false;
+    hideProgressContainerDelay(5000);
+  };
+
+  if (dfuDevice) {
+    dfuDevice
+      .close()
+      .then(() => {
+        logInfo('DFU interface closed.');
+        trackPostHog('disconnect_device', { mode: 'dfu' });
         dfuDevice = null;
         cleanupUI();
-    }
+      })
+      .catch((err) => {
+        logError(`Error closing DFU: ${err.message}`);
+        trackException(err, { module: 'dfu', action: 'disconnect_dfu' });
+        dfuDevice = null;
+        cleanupUI();
+      });
+  } else {
+    dfuDevice = null;
+    cleanupUI();
+  }
 }
 
 function enableDFUControls(enable) {
-    const controls = document.querySelectorAll("#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu)");
-    controls.forEach(el => el.disabled = !enable);
-    
-    // Also manage the drop zone visibility and input disabled state based on selection
-    const firmwareSelect = document.querySelector("#firmware-select");
-    const dropZone = document.querySelector("#drop-zone");
-    const fileInput = document.querySelector("#dfu-file-input");
-    if (enable && firmwareSelect && firmwareSelect.value === "custom") {
-        dropZone.hidden = false;
-        if (fileInput) fileInput.disabled = false;
-        dropZone.classList.remove("disabled");
-    } else {
-        dropZone.hidden = true;
-        if (fileInput) fileInput.disabled = true;
-        dropZone.classList.add("disabled");
-    }
+  const controls = document.querySelectorAll(
+    '#dfu-panel input, #dfu-panel select, #dfu-panel button:not(#btn-connect-dfu)'
+  );
+  controls.forEach((el) => (el.disabled = !enable));
+
+  // Also manage the drop zone visibility and input disabled state based on selection
+  const firmwareSelect = document.querySelector('#firmware-select');
+  const dropZone = document.querySelector('#drop-zone');
+  const fileInput = document.querySelector('#dfu-file-input');
+  if (enable && firmwareSelect && firmwareSelect.value === 'custom') {
+    dropZone.hidden = false;
+    if (fileInput) fileInput.disabled = false;
+    dropZone.classList.remove('disabled');
+  } else {
+    dropZone.hidden = true;
+    if (fileInput) fileInput.disabled = true;
+    dropZone.classList.add('disabled');
+  }
 }
 
 async function startDownload() {
-    if (!dfuDevice) {
-        logError("DFU Device not connected.");
-        return;
+  if (!dfuDevice) {
+    logError('DFU Device not connected.');
+    return;
+  }
+  if (!firmwareFile) {
+    logError('No firmware file selected.');
+    return;
+  }
+
+  const connectBtn = document.querySelector('#btn-connect-dfu');
+  if (connectBtn) connectBtn.disabled = true;
+  enableDFUControls(false);
+
+  const firmwareSelect = document.querySelector('#firmware-select');
+  const firmwareName = firmwareSelect.value === 'custom' ? 'custom_file' : firmwareSelect.value;
+
+  try {
+    logInfo('Preparing device status...');
+    trackPostHog('flash_firmware_attempt', { firmware_version: firmwareName });
+    let status = await dfuDevice.getStatus();
+    if (status.state === dfu.dfuERROR) {
+      await dfuDevice.clearStatus();
     }
-    if (!firmwareFile) {
-        logError("No firmware file selected.");
-        return;
+
+    logInfo('Writing firmware to device...');
+    if (progressHideTimeout) {
+      clearTimeout(progressHideTimeout);
+      progressHideTimeout = null;
     }
-    
-    const connectBtn = document.querySelector("#btn-connect-dfu");
-    if (connectBtn) connectBtn.disabled = true;
-    enableDFUControls(false);
-    
-    const firmwareSelect = document.querySelector("#firmware-select");
-    const firmwareName = firmwareSelect.value === "custom" ? "custom_file" : firmwareSelect.value;
-    
+    const container = document.querySelector('#dfu-progress-container');
+    if (container) container.style.display = 'block';
+    const statusEl = document.querySelector('#dfu-progress-status');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = 'Initializing write...';
+    }
+    const progressEl = document.querySelector('#dfu-progress');
+    if (progressEl) progressEl.value = 0;
+
+    const startTime = performance.now();
+    expectingDisconnect = true;
+    deviceDisconnectedDuringFlash = false;
+    await dfuDevice.do_download(dfuTransferSize, firmwareFile, dfuManifestationTolerant);
+    const duration = ((performance.now() - startTime) / 1000).toFixed(1);
+
+    logSuccess(`Flashing completed successfully in ${duration} seconds.`);
+    trackPostHog('flash_firmware_success', {
+      firmware_version: firmwareName,
+      duration_seconds: parseFloat(duration),
+    });
+    trackGA('flash_firmware_success', {
+      firmware_version: firmwareName,
+      duration_seconds: parseFloat(duration),
+    });
+
+    // Wait for disconnect or reset
+    logInfo('Waiting for device reset...');
     try {
-        logInfo("Preparing device status...");
-        trackPostHog("flash_firmware_attempt", { firmware_version: firmwareName });
-        let status = await dfuDevice.getStatus();
-        if (status.state === dfu.dfuERROR) {
-            await dfuDevice.clearStatus();
-        }
-        
-        logInfo("Writing firmware to device...");
-        if (progressHideTimeout) {
-            clearTimeout(progressHideTimeout);
-            progressHideTimeout = null;
-        }
-        const container = document.querySelector("#dfu-progress-container");
-        if (container) container.style.display = "block";
-        const statusEl = document.querySelector("#dfu-progress-status");
-        if (statusEl) {
-            statusEl.style.display = "block";
-            statusEl.innerHTML = "Initializing write...";
-        }
-        const progressEl = document.querySelector("#dfu-progress");
-        if (progressEl) progressEl.value = 0;
-        
-        const startTime = performance.now();
-        expectingDisconnect = true;
-        deviceDisconnectedDuringFlash = false;
-        await dfuDevice.do_download(dfuTransferSize, firmwareFile, dfuManifestationTolerant);
-        const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-        
-        logSuccess(`Flashing completed successfully in ${duration} seconds.`);
-        trackPostHog("flash_firmware_success", {
-            firmware_version: firmwareName,
-            duration_seconds: parseFloat(duration)
-        });
-        trackGA("flash_firmware_success", {
-            firmware_version: firmwareName,
-            duration_seconds: parseFloat(duration)
-        });
-        
-        // Wait for disconnect or reset
-        logInfo("Waiting for device reset...");
-        try {
-            if (deviceDisconnectedDuringFlash) {
-                logSuccess("Device disconnected and rebooted.");
-                disconnectDFU();
-            } else if (dfuDevice) {
-                await dfuDevice.waitDisconnected(5000);
-                logSuccess("Device disconnected and rebooted.");
-                disconnectDFU();
-            } else {
-                logSuccess("Device disconnected and rebooted.");
-                disconnectDFU();
-            }
-        } catch (err) {
-            logWarning("Timeout waiting for device disconnect. Connection will be closed.");
-            disconnectDFU();
-        }
+      if (deviceDisconnectedDuringFlash) {
+        logSuccess('Device disconnected and rebooted.');
+        disconnectDFU();
+      } else if (dfuDevice) {
+        await dfuDevice.waitDisconnected(5000);
+        logSuccess('Device disconnected and rebooted.');
+        disconnectDFU();
+      } else {
+        logSuccess('Device disconnected and rebooted.');
+        disconnectDFU();
+      }
     } catch (err) {
-        logError(`Error during download: ${err}`);
-        trackException(err, { module: "dfu", action: "flash", firmware_version: firmwareName });
-    } finally {
-        expectingDisconnect = false;
-        if (connectBtn) connectBtn.disabled = false;
-        enableDFUControls(true);
-        hideProgressContainerDelay(5000);
+      logWarning('Timeout waiting for device disconnect. Connection will be closed.');
+      disconnectDFU();
     }
+  } catch (err) {
+    logError(`Error during download: ${err}`);
+    trackException(err, { module: 'dfu', action: 'flash', firmware_version: firmwareName });
+  } finally {
+    expectingDisconnect = false;
+    if (connectBtn) connectBtn.disabled = false;
+    enableDFUControls(true);
+    hideProgressContainerDelay(5000);
+  }
 }
 
 async function startUpload() {
-    if (!dfuDevice) {
-        logError("DFU Device not connected.");
-        return;
+  if (!dfuDevice) {
+    logError('DFU Device not connected.');
+    return;
+  }
+
+  const connectBtn = document.querySelector('#btn-connect-dfu');
+  if (connectBtn) connectBtn.disabled = true;
+  enableDFUControls(false);
+
+  try {
+    const sizeField = document.querySelector('#dfu-upload-size');
+    const maxSize = parseInt(sizeField.value) || 1024 * 128; // Default 128KiB
+
+    logInfo(`Reading ${maxSize} bytes from device...`);
+    trackPostHog('backup_firmware_attempt', { max_size: maxSize });
+    if (progressHideTimeout) {
+      clearTimeout(progressHideTimeout);
+      progressHideTimeout = null;
     }
-    
-    const connectBtn = document.querySelector("#btn-connect-dfu");
-    if (connectBtn) connectBtn.disabled = true;
-    enableDFUControls(false);
-    
-    try {
-        const sizeField = document.querySelector("#dfu-upload-size");
-        const maxSize = parseInt(sizeField.value) || 1024 * 128; // Default 128KiB
-        
-        logInfo(`Reading ${maxSize} bytes from device...`);
-        trackPostHog("backup_firmware_attempt", { max_size: maxSize });
-        if (progressHideTimeout) {
-            clearTimeout(progressHideTimeout);
-            progressHideTimeout = null;
-        }
-        const container = document.querySelector("#dfu-progress-container");
-        if (container) container.style.display = "block";
-        const statusEl = document.querySelector("#dfu-progress-status");
-        if (statusEl) {
-            statusEl.style.display = "block";
-            statusEl.innerHTML = "Initializing upload...";
-        }
-        const progressEl = document.querySelector("#dfu-progress");
-        if (progressEl) progressEl.value = 0;
-        
-        let status = await dfuDevice.getStatus();
-        if (status.state === dfu.dfuERROR) {
-            await dfuDevice.clearStatus();
-        }
-        
-        const startTime = performance.now();
-        const blob = await dfuDevice.do_upload(dfuTransferSize, maxSize);
-        const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-        
-        logSuccess(`Upload completed in ${duration} seconds.`);
-        saveAs(blob, "aioc_firmware_backup.bin");
-        trackPostHog("backup_firmware_success", {
-            duration_seconds: parseFloat(duration),
-            file_size: blob.size
-        });
-    } catch (err) {
-        logError(`Error during upload: ${err}`);
-        trackException(err, { module: "dfu", action: "backup" });
-    } finally {
-        if (connectBtn) connectBtn.disabled = false;
-        enableDFUControls(true);
-        hideProgressContainerDelay(5000);
+    const container = document.querySelector('#dfu-progress-container');
+    if (container) container.style.display = 'block';
+    const statusEl = document.querySelector('#dfu-progress-status');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = 'Initializing upload...';
     }
+    const progressEl = document.querySelector('#dfu-progress');
+    if (progressEl) progressEl.value = 0;
+
+    let status = await dfuDevice.getStatus();
+    if (status.state === dfu.dfuERROR) {
+      await dfuDevice.clearStatus();
+    }
+
+    const startTime = performance.now();
+    const blob = await dfuDevice.do_upload(dfuTransferSize, maxSize);
+    const duration = ((performance.now() - startTime) / 1000).toFixed(1);
+
+    logSuccess(`Upload completed in ${duration} seconds.`);
+    saveAs(blob, 'aioc_firmware_backup.bin');
+    trackPostHog('backup_firmware_success', {
+      duration_seconds: parseFloat(duration),
+      file_size: blob.size,
+    });
+  } catch (err) {
+    logError(`Error during upload: ${err}`);
+    trackException(err, { module: 'dfu', action: 'backup' });
+  } finally {
+    if (connectBtn) connectBtn.disabled = false;
+    enableDFUControls(true);
+    hideProgressContainerDelay(5000);
+  }
 }
 
 async function leaveDFUMode() {
-    if (!dfuDevice) {
-        logError("DFU Device not connected.");
-        return;
+  if (!dfuDevice) {
+    logError('DFU Device not connected.');
+    return;
+  }
+
+  const connectBtn = document.querySelector('#btn-connect-dfu');
+  if (connectBtn) connectBtn.disabled = true;
+  enableDFUControls(false);
+
+  try {
+    logInfo('Attempting to exit DFU mode and reboot the device...');
+    trackPostHog('leave_dfu_attempt');
+
+    let startAddress = dfuDevice.startAddress;
+    if (isNaN(startAddress)) {
+      if (
+        dfuDevice.memoryInfo &&
+        dfuDevice.memoryInfo.segments &&
+        dfuDevice.memoryInfo.segments.length > 0
+      ) {
+        let firstWritable = dfuDevice.getFirstWritableSegment();
+        startAddress = firstWritable ? firstWritable.start : dfuDevice.memoryInfo.segments[0].start;
+      } else {
+        startAddress = 0x08000000;
+      }
     }
-    
-    const connectBtn = document.querySelector("#btn-connect-dfu");
-    if (connectBtn) connectBtn.disabled = true;
-    enableDFUControls(false);
-    
+
+    let status = await dfuDevice.getStatus();
+    if (status.state === dfu.dfuERROR) {
+      await dfuDevice.clearStatus();
+    }
+
+    expectingDisconnect = true;
+    deviceDisconnectedDuringFlash = false;
+
+    if (dfuDevice instanceof dfuse.Device) {
+      logInfo(`Sending Go command (SET_ADDRESS 0x${startAddress.toString(16)})...`);
+      await dfuDevice.dfuseCommand(dfuse.SET_ADDRESS, startAddress, 4);
+      logInfo('Sending 0-length block to trigger manifestation...');
+      await dfuDevice.download(new ArrayBuffer(), 0);
+
+      try {
+        await dfuDevice.poll_until((state) => state == dfu.dfuMANIFEST);
+      } catch (error) {
+        logDebug('Manifestation polling finished/error: ' + error);
+      }
+    } else {
+      logInfo('Sending empty download block to trigger manifestation...');
+      await dfuDevice.download(new ArrayBuffer(), 0);
+
+      try {
+        await dfuDevice.poll_until(
+          (state) => state == dfu.dfuMANIFEST || state == dfu.dfuMANIFEST_WAIT_RESET
+        );
+      } catch (error) {
+        logDebug('Manifestation polling finished/error: ' + error);
+      }
+    }
+
+    logInfo('Triggering USB reset...');
     try {
-        logInfo("Attempting to exit DFU mode and reboot the device...");
-        trackPostHog("leave_dfu_attempt");
-        
-        let startAddress = dfuDevice.startAddress;
-        if (isNaN(startAddress)) {
-            if (dfuDevice.memoryInfo && dfuDevice.memoryInfo.segments && dfuDevice.memoryInfo.segments.length > 0) {
-                let firstWritable = dfuDevice.getFirstWritableSegment();
-                startAddress = firstWritable ? firstWritable.start : dfuDevice.memoryInfo.segments[0].start;
-            } else {
-                startAddress = 0x08000000;
-            }
-        }
-        
-        let status = await dfuDevice.getStatus();
-        if (status.state === dfu.dfuERROR) {
-            await dfuDevice.clearStatus();
-        }
-        
-        expectingDisconnect = true;
-        deviceDisconnectedDuringFlash = false;
-        
-        if (dfuDevice instanceof dfuse.Device) {
-            logInfo(`Sending Go command (SET_ADDRESS 0x${startAddress.toString(16)})...`);
-            await dfuDevice.dfuseCommand(dfuse.SET_ADDRESS, startAddress, 4);
-            logInfo("Sending 0-length block to trigger manifestation...");
-            await dfuDevice.download(new ArrayBuffer(), 0);
-            
-            try {
-                await dfuDevice.poll_until(state => (state == dfu.dfuMANIFEST));
-            } catch (error) {
-                logDebug("Manifestation polling finished/error: " + error);
-            }
-        } else {
-            logInfo("Sending empty download block to trigger manifestation...");
-            await dfuDevice.download(new ArrayBuffer(), 0);
-            
-            try {
-                await dfuDevice.poll_until(state => (state == dfu.dfuMANIFEST || state == dfu.dfuMANIFEST_WAIT_RESET));
-            } catch (error) {
-                logDebug("Manifestation polling finished/error: " + error);
-            }
-        }
-        
-        logInfo("Triggering USB reset...");
-        try {
-            await dfuDevice.device_.reset();
-        } catch (error) {
-            logDebug("Ignored reset error during exit: " + error);
-        }
-        
-        logSuccess("Exit command sent successfully. Device should reboot into normal mode.");
-        trackPostHog("leave_dfu_success");
-        
-        // Wait for disconnect
-        try {
-            if (deviceDisconnectedDuringFlash) {
-                logSuccess("Device disconnected.");
-                disconnectDFU();
-            } else {
-                await dfuDevice.waitDisconnected(2500);
-                logSuccess("Device disconnected.");
-                disconnectDFU();
-            }
-        } catch (err) {
-            logWarning("Timeout waiting for device disconnect. Connection will be closed.");
-            disconnectDFU();
-        }
-    } catch (err) {
-        logError(`Failed to exit DFU mode: ${err.message}`);
-        trackException(err, { module: "dfu", action: "leave_dfu" });
-        expectingDisconnect = false;
-        if (connectBtn) connectBtn.disabled = false;
-        enableDFUControls(true);
+      await dfuDevice.device_.reset();
+    } catch (error) {
+      logDebug('Ignored reset error during exit: ' + error);
     }
+
+    logSuccess('Exit command sent successfully. Device should reboot into normal mode.');
+    trackPostHog('leave_dfu_success');
+
+    // Wait for disconnect
+    try {
+      if (deviceDisconnectedDuringFlash) {
+        logSuccess('Device disconnected.');
+        disconnectDFU();
+      } else {
+        await dfuDevice.waitDisconnected(2500);
+        logSuccess('Device disconnected.');
+        disconnectDFU();
+      }
+    } catch (err) {
+      logWarning('Timeout waiting for device disconnect. Connection will be closed.');
+      disconnectDFU();
+    }
+  } catch (err) {
+    logError(`Failed to exit DFU mode: ${err.message}`);
+    trackException(err, { module: 'dfu', action: 'leave_dfu' });
+    expectingDisconnect = false;
+    if (connectBtn) connectBtn.disabled = false;
+    enableDFUControls(true);
+  }
 }
 
 /* ==========================================================================
    Main Event Listeners & Bootstrapping
    ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // 1. Browser capability checks
-    const webusbSupported = (typeof navigator.usb !== "undefined");
-    const webhidSupported = (typeof navigator.hid !== "undefined");
-    
-    trackPostHog("app_load", {
-        webusb_supported: webusbSupported,
-        webhid_supported: webhidSupported
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Browser capability checks
+  const webusbSupported = typeof navigator.usb !== 'undefined';
+  const webhidSupported = typeof navigator.hid !== 'undefined';
+
+  trackPostHog('app_load', {
+    webusb_supported: webusbSupported,
+    webhid_supported: webhidSupported,
+  });
+
+  if (!webusbSupported) {
+    const dfuWarning = document.querySelector('#dfu-browser-warning');
+    if (dfuWarning) {
+      dfuWarning.hidden = false;
+    }
+    logError('WebUSB not supported in this browser. Flashing features will be unavailable.');
+    const btnConnectDfu = document.querySelector('#btn-connect-dfu');
+    if (btnConnectDfu) {
+      btnConnectDfu.disabled = true;
+    }
+  } else {
+    console.log('[DFU] WebUSB interface loaded. Flasher is compatible.');
+  }
+
+  if (!webhidSupported) {
+    const hidWarning = document.querySelector('#hid-browser-warning');
+    if (hidWarning) {
+      hidWarning.hidden = false;
+    }
+    logError('WebHID not supported in this browser. Configuration features will be unavailable.');
+    const btnConnectHid = document.querySelector('#btn-connect-hid');
+    if (btnConnectHid) {
+      btnConnectHid.disabled = true;
+    }
+  } else {
+    console.log('[DFU] WebHID interface loaded. Configurator is compatible.');
+  }
+
+  // 2. Tab switching logic
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      panels.forEach((p) => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelector(`#${tab.dataset.tab}`).classList.add('active');
+      currentModule = tab.dataset.tab === 'hid-panel' ? 'hid' : 'dfu';
+      logDebug(`Switched to tab: ${tab.dataset.tab}`);
+
+      // Update URL hash without adding multiple duplicate items to history stack
+      const newHash = tab.dataset.tab === 'hid-panel' ? '#config' : '#flash';
+      if (window.location.hash !== newHash) {
+        history.replaceState(null, null, newHash);
+      }
     });
-    
-    if (!webusbSupported) {
-        const dfuWarning = document.querySelector("#dfu-browser-warning");
-        if (dfuWarning) {
-            dfuWarning.hidden = false;
-        }
-        logError("WebUSB not supported in this browser. Flashing features will be unavailable.");
-        const btnConnectDfu = document.querySelector("#btn-connect-dfu");
-        if (btnConnectDfu) {
-            btnConnectDfu.disabled = true;
-        }
+  });
+
+  // Handle hash routing
+  function handleHashRouting() {
+    const hash = window.location.hash;
+    if (hash === '#config' || hash === '#hid-panel') {
+      const tabConfig = document.querySelector('#tab-config');
+      if (tabConfig && !tabConfig.classList.contains('active')) {
+        tabConfig.click();
+      }
+    } else if (hash === '#flash' || hash === '#dfu-panel') {
+      const tabFlash = document.querySelector('#tab-flash');
+      if (tabFlash && !tabFlash.classList.contains('active')) {
+        tabFlash.click();
+      }
+    }
+  }
+
+  // Listen for hash change (for back/forward browser navigation)
+  window.addEventListener('hashchange', handleHashRouting);
+
+  // Initial check on load
+  handleHashRouting();
+
+  // Apply URL parameters if present
+  if (window.location.search) {
+    applyUrlParameters();
+  }
+
+  // 3. WebHID configuration buttons
+  document.querySelector('#btn-connect-hid').addEventListener('click', () => {
+    if (hidDevice) {
+      disconnectHID();
+      hideAlert('hid');
     } else {
-        console.log("[DFU] WebUSB interface loaded. Flasher is compatible.");
+      connectHID();
     }
+  });
 
-    if (!webhidSupported) {
-        const hidWarning = document.querySelector("#hid-browser-warning");
-        if (hidWarning) {
-            hidWarning.hidden = false;
-        }
-        logError("WebHID not supported in this browser. Configuration features will be unavailable.");
-        const btnConnectHid = document.querySelector("#btn-connect-hid");
-        if (btnConnectHid) {
-            btnConnectHid.disabled = true;
-        }
+  document.querySelector('#btn-read-settings').addEventListener('click', readAllSettings);
+  document
+    .querySelector('#btn-write-settings')
+    .addEventListener('click', () => writeAllSettings(false));
+  document
+    .querySelector('#btn-save-settings')
+    .addEventListener('click', () => writeAllSettings(true));
+  document.querySelector('#btn-load-defaults').addEventListener('click', loadDefaults);
+  document.querySelector('#btn-reboot-hid').addEventListener('click', rebootDevice);
+
+  document.querySelector('#btn-share-link').addEventListener('click', () => {
+    const url = generateShareableLink();
+    copyToClipboard(url)
+      .then(() => {
+        // Visual feedback
+        const btn = document.querySelector('#btn-share-link');
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied to Clipboard! ✓';
+        btn.classList.add('btn-accent');
+        btn.classList.remove('btn-primary');
+
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('btn-accent');
+          btn.classList.add('btn-primary');
+        }, 2000);
+
+        logSuccess('Shareable configuration link copied to clipboard.');
+        trackPostHog('copy_shareable_link');
+      })
+      .catch((err) => {
+        logError(`Failed to copy link: ${err.message}`);
+        trackException(err, { module: 'hid', action: 'copy_shareable_link' });
+      });
+  });
+
+  // Device Presets & Configuration View Helpers
+  function setActivePreset(buttonId) {
+    document.querySelectorAll('.btn-preset').forEach((btn) => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    if (buttonId) {
+      const el = document.querySelector(buttonId);
+      if (el) {
+        el.classList.add('active');
+        el.setAttribute('aria-pressed', 'true');
+      }
+    }
+  }
+
+  function setConfigDetailsOpen(open) {
+    document.querySelectorAll('#hid-panel details').forEach((el) => {
+      el.open = open;
+    });
+  }
+
+  function clearActivePresets() {
+    document.querySelectorAll('.btn-preset').forEach((btn) => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+  }
+
+  function applyBaseDefaults() {
+    // Clear all checkboxes
+    document
+      .querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']")
+      .forEach((el) => (el.checked = false));
+    // Reset inputs to clean system defaults
+    document.querySelector('#audio-rx-gain').value = '0';
+    document.querySelector('#audio-tx-boost').checked = false;
+    document.querySelector('#vcos-level').value = '256';
+    document.querySelector('#vcos-timeout').value = '3200';
+    document.querySelector('#vptt-level').value = '16';
+    document.querySelector('#vptt-timeout').value = '320';
+    document.querySelector('#fox-volume').value = '32768';
+    document.querySelector('#fox-wpm').value = '20';
+    document.querySelector('#fox-interval').value = '0';
+    document.querySelector('#fox-message').value = '';
+    document.querySelector('#usb-vid').value = '0x1209';
+    document.querySelector('#usb-pid').value = '0x7388';
+  }
+
+  // Register presets event listeners
+  document.querySelector('#preset-defaults').addEventListener('click', () => {
+    applyBaseDefaults();
+    document.querySelector('#ptt1-cm108gpio3').checked = true;
+    document.querySelector('#ptt1-serialdtrnrts').checked = true;
+    document.querySelector('#ptt2-cm108gpio4').checked = true;
+
+    setConfigDetailsOpen(false);
+    setActivePreset('#preset-defaults');
+    logInfo('Applied preset: Default HID Configuration');
+
+    updateSettingsStatus(true);
+  });
+
+  document.querySelector('#preset-chirp').addEventListener('click', () => {
+    applyBaseDefaults();
+    // CHIRP typically uses Serial RTS/DTR
+    document.querySelector('#ptt1-serialrts').checked = true;
+    document.querySelector('#ptt1-serialdtr').checked = true;
+
+    setConfigDetailsOpen(false);
+    setActivePreset('#preset-chirp');
+    logInfo('Applied preset: CHIRP Programming (RTS & DTR)');
+
+    updateSettingsStatus(true);
+  });
+
+  document.querySelector('#preset-soundcard').addEventListener('click', () => {
+    applyBaseDefaults();
+    // Soundcard modes typically trigger via CM108 GPIO 1
+    document.querySelector('#ptt1-cm108gpio1').checked = true;
+
+    setConfigDetailsOpen(false);
+    setActivePreset('#preset-soundcard');
+    logInfo('Applied preset: Soundcard Digital Modes (CM108 GPIO 1)');
+
+    updateSettingsStatus(true);
+  });
+
+  document.querySelector('#preset-asl').addEventListener('click', () => {
+    applyBaseDefaults();
+    // AllStarLink (CM108 Emulation) preset
+    document.querySelector('#ptt1-cm108gpio1').checked = true;
+    document.querySelector('#vcos-timeout').value = '1500';
+    document.querySelector('#usb-vid').value = '0x0D8C';
+    document.querySelector('#usb-pid').value = '0x000C';
+
+    setConfigDetailsOpen(false);
+    setActivePreset('#preset-asl');
+    logInfo('Applied preset: AllStarLink (CM108 Emulation)');
+
+    updateSettingsStatus(true);
+  });
+
+  document.querySelector('#preset-custom').addEventListener('click', () => {
+    setConfigDetailsOpen(true);
+    setActivePreset('#preset-custom');
+    logInfo('Custom Mode: Expanded all configuration sections.');
+  });
+
+  // Clear active presets on any manual config changes
+  document.querySelectorAll('#hid-panel input, #hid-panel select').forEach((input) => {
+    const markDirty = () => {
+      clearActivePresets();
+      updateSettingsStatus();
+    };
+    input.addEventListener('input', markDirty);
+    input.addEventListener('change', markDirty);
+  });
+
+  // Morse code message input sanitization and auto-uppercase
+  const foxMsgInput = document.querySelector('#fox-message');
+  if (foxMsgInput) {
+    foxMsgInput.addEventListener('input', (e) => {
+      let val = e.target.value.toUpperCase();
+      // Retain letters, digits, spaces, slashes, periods, and dashes
+      val = val.replace(/[^A-Z0-9\s/.-]/g, '');
+      if (e.target.value !== val) {
+        e.target.value = val;
+      }
+    });
+  }
+
+  // 4. WebUSB DFU Flashing buttons
+  document.querySelector('#btn-connect-dfu').addEventListener('click', () => {
+    if (dfuDevice) {
+      disconnectDFU();
+      hideAlert('dfu');
     } else {
-        console.log("[DFU] WebHID interface loaded. Configurator is compatible.");
+      connectDFU();
     }
-    
-    // 2. Tab switching logic
-    const tabs = document.querySelectorAll(".tab-btn");
-    const panels = document.querySelectorAll(".panel");
-    
-    tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            tabs.forEach(t => {
-                t.classList.remove("active");
-                t.setAttribute("aria-selected", "false");
-            });
-            panels.forEach(p => p.classList.remove("active"));
-            
-            tab.classList.add("active");
-            tab.setAttribute("aria-selected", "true");
-            document.querySelector(`#${tab.dataset.tab}`).classList.add("active");
-            currentModule = tab.dataset.tab === "hid-panel" ? "hid" : "dfu";
-            logDebug(`Switched to tab: ${tab.dataset.tab}`);
+  });
 
-            // Update URL hash without adding multiple duplicate items to history stack
-            const newHash = tab.dataset.tab === "hid-panel" ? "#config" : "#flash";
-            if (window.location.hash !== newHash) {
-                history.replaceState(null, null, newHash);
-            }
-        });
-    });
-
-    // Handle hash routing
-    function handleHashRouting() {
-        const hash = window.location.hash;
-        if (hash === "#config" || hash === "#hid-panel") {
-            const tabConfig = document.querySelector("#tab-config");
-            if (tabConfig && !tabConfig.classList.contains("active")) {
-                tabConfig.click();
-            }
-        } else if (hash === "#flash" || hash === "#dfu-panel") {
-            const tabFlash = document.querySelector("#tab-flash");
-            if (tabFlash && !tabFlash.classList.contains("active")) {
-                tabFlash.click();
-            }
-        }
+  // Handle DFU parameter changes
+  document.querySelector('#dfu-xfer-size').addEventListener('change', (e) => {
+    dfuTransferSize = parseInt(e.target.value) || 1024;
+  });
+  document.querySelector('#dfu-start-addr').addEventListener('change', (e) => {
+    if (dfuDevice && !isNaN(parseInt(e.target.value, 16))) {
+      dfuDevice.startAddress = parseInt(e.target.value, 16);
     }
+  });
 
-    // Listen for hash change (for back/forward browser navigation)
-    window.addEventListener("hashchange", handleHashRouting);
+  // Handle File Drop / Select
+  const fileInput = document.querySelector('#dfu-file-input');
+  fileInput.addEventListener('change', (e) => {
+    firmwareFile = null;
+    document.querySelector('#step-write')?.classList.add('inactive');
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      document.querySelector('#file-info').textContent =
+        `Selected: ${file.name} (${niceSize(file.size)})`;
 
-    // Initial check on load
-    handleHashRouting();
+      trackPostHog('upload_custom_firmware', {
+        file_name: file.name,
+        file_size: file.size,
+      });
 
-    // Apply URL parameters if present
-    if (window.location.search) {
-        applyUrlParameters();
+      const reader = new FileReader();
+      reader.onload = () => {
+        firmwareFile = reader.result;
+        logInfo(`Firmware file loaded: ${file.name} (${file.size} bytes)`);
+        document.querySelector('#step-write')?.classList.remove('inactive');
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      document.querySelector('#file-info').textContent =
+        'Drag & drop your firmware file or click to browse';
     }
-    
-    // 3. WebHID configuration buttons
-    document.querySelector("#btn-connect-hid").addEventListener("click", () => {
-        if (hidDevice) {
-            disconnectHID();
-            hideAlert("hid");
+  });
+
+  document.querySelector('#btn-flash').addEventListener('click', startDownload);
+  document.querySelector('#btn-upload').addEventListener('click', startUpload);
+  document.querySelector('#btn-leave-dfu').addEventListener('click', leaveDFUMode);
+
+  // Handle Firmware selection changes
+  const firmwareSelect = document.querySelector('#firmware-select');
+  const dropZone = document.querySelector('#drop-zone');
+
+  firmwareSelect.addEventListener('change', async () => {
+    firmwareFile = null;
+    document.querySelector('#step-write')?.classList.add('inactive');
+
+    trackPostHog('select_firmware_version', { firmware_version: firmwareSelect.value });
+
+    if (firmwareSelect.value === 'custom') {
+      dropZone.hidden = false;
+      if (fileInput) fileInput.disabled = false;
+      dropZone.classList.remove('disabled');
+      document.querySelector('#file-info').textContent =
+        'Drag & drop your firmware file or click to browse';
+    } else {
+      dropZone.hidden = true;
+      if (fileInput) fileInput.disabled = true;
+      dropZone.classList.add('disabled');
+      if (dfuDevice) {
+        await loadServerFirmware(firmwareSelect.value);
+      }
+    }
+  });
+
+  // 5. Console clearing (Removed since event log console panel was removed)
+
+  // WebUSB disconnect event
+  navigator.usb?.addEventListener('disconnect', (event) => {
+    if (dfuDevice) {
+      const isMatch =
+        dfuDevice.device_ === event.device ||
+        (dfuDevice.device_.vendorId === event.device.vendorId &&
+          dfuDevice.device_.productId === event.device.productId &&
+          dfuDevice.device_.serialNumber === event.device.serialNumber);
+      if (isMatch) {
+        if (expectingDisconnect) {
+          deviceDisconnectedDuringFlash = true;
         } else {
-            connectHID();
+          logWarning('DFU device disconnected unexpectedly.');
+          disconnectDFU();
         }
-    });
-    
-    document.querySelector("#btn-read-settings").addEventListener("click", readAllSettings);
-    document.querySelector("#btn-write-settings").addEventListener("click", () => writeAllSettings(false));
-    document.querySelector("#btn-save-settings").addEventListener("click", () => writeAllSettings(true));
-    document.querySelector("#btn-load-defaults").addEventListener("click", loadDefaults);
-    document.querySelector("#btn-reboot-hid").addEventListener("click", rebootDevice);
-    
-    document.querySelector("#btn-share-link").addEventListener("click", () => {
-        const url = generateShareableLink();
-        copyToClipboard(url).then(() => {
-            // Visual feedback
-            const btn = document.querySelector("#btn-share-link");
-            const originalText = btn.textContent;
-            btn.textContent = "Copied to Clipboard! ✓";
-            btn.classList.add("btn-accent");
-            btn.classList.remove("btn-primary");
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.classList.remove("btn-accent");
-                btn.classList.add("btn-primary");
-            }, 2000);
-            
-            logSuccess("Shareable configuration link copied to clipboard.");
-            trackPostHog("copy_shareable_link");
-        }).catch(err => {
-            logError(`Failed to copy link: ${err.message}`);
-            trackException(err, { module: "hid", action: "copy_shareable_link" });
-        });
-    });
-    
-    // Device Presets & Configuration View Helpers
-    function setActivePreset(buttonId) {
-        document.querySelectorAll(".btn-preset").forEach(btn => {
-            btn.classList.remove("active");
-            btn.setAttribute("aria-pressed", "false");
-        });
-        if (buttonId) {
-            const el = document.querySelector(buttonId);
-            if (el) {
-                el.classList.add("active");
-                el.setAttribute("aria-pressed", "true");
-            }
-        }
+      }
     }
-
-    function setConfigDetailsOpen(open) {
-        document.querySelectorAll("#hid-panel details").forEach(el => {
-            el.open = open;
-        });
-    }
-
-    function clearActivePresets() {
-        document.querySelectorAll(".btn-preset").forEach(btn => {
-            btn.classList.remove("active");
-            btn.setAttribute("aria-pressed", "false");
-        });
-    }
-
-    function applyBaseDefaults() {
-        // Clear all checkboxes
-        document.querySelectorAll("input[id^='ptt1-'], input[id^='ptt2-']").forEach(el => el.checked = false);
-        // Reset inputs to clean system defaults
-        document.querySelector("#audio-rx-gain").value = "0";
-        document.querySelector("#audio-tx-boost").checked = false;
-        document.querySelector("#vcos-level").value = "256";
-        document.querySelector("#vcos-timeout").value = "3200";
-        document.querySelector("#vptt-level").value = "16";
-        document.querySelector("#vptt-timeout").value = "320";
-        document.querySelector("#fox-volume").value = "32768";
-        document.querySelector("#fox-wpm").value = "20";
-        document.querySelector("#fox-interval").value = "0";
-        document.querySelector("#fox-message").value = "";
-        document.querySelector("#usb-vid").value = "0x1209";
-        document.querySelector("#usb-pid").value = "0x7388";
-    }
-
-    // Register presets event listeners
-    document.querySelector("#preset-defaults").addEventListener("click", () => {
-        applyBaseDefaults();
-        document.querySelector("#ptt1-cm108gpio3").checked = true;
-        document.querySelector("#ptt1-serialdtrnrts").checked = true;
-        document.querySelector("#ptt2-cm108gpio4").checked = true;
-        
-        setConfigDetailsOpen(false);
-        setActivePreset("#preset-defaults");
-        logInfo("Applied preset: Default HID Configuration");
-        
-        updateSettingsStatus(true);
-    });
-
-    document.querySelector("#preset-chirp").addEventListener("click", () => {
-        applyBaseDefaults();
-        // CHIRP typically uses Serial RTS/DTR
-        document.querySelector("#ptt1-serialrts").checked = true;
-        document.querySelector("#ptt1-serialdtr").checked = true;
-        
-        setConfigDetailsOpen(false);
-        setActivePreset("#preset-chirp");
-        logInfo("Applied preset: CHIRP Programming (RTS & DTR)");
-        
-        updateSettingsStatus(true);
-    });
-    
-    document.querySelector("#preset-soundcard").addEventListener("click", () => {
-        applyBaseDefaults();
-        // Soundcard modes typically trigger via CM108 GPIO 1
-        document.querySelector("#ptt1-cm108gpio1").checked = true;
-        
-        setConfigDetailsOpen(false);
-        setActivePreset("#preset-soundcard");
-        logInfo("Applied preset: Soundcard Digital Modes (CM108 GPIO 1)");
-        
-        updateSettingsStatus(true);
-    });
-
-    document.querySelector("#preset-asl").addEventListener("click", () => {
-        applyBaseDefaults();
-        // AllStarLink (CM108 Emulation) preset
-        document.querySelector("#ptt1-cm108gpio1").checked = true;
-        document.querySelector("#vcos-timeout").value = "1500";
-        document.querySelector("#usb-vid").value = "0x0D8C";
-        document.querySelector("#usb-pid").value = "0x000C";
-        
-        setConfigDetailsOpen(false);
-        setActivePreset("#preset-asl");
-        logInfo("Applied preset: AllStarLink (CM108 Emulation)");
-        
-        updateSettingsStatus(true);
-    });
-
-    document.querySelector("#preset-custom").addEventListener("click", () => {
-        setConfigDetailsOpen(true);
-        setActivePreset("#preset-custom");
-        logInfo("Custom Mode: Expanded all configuration sections.");
-    });
-
-    // Clear active presets on any manual config changes
-    document.querySelectorAll("#hid-panel input, #hid-panel select").forEach(input => {
-        const markDirty = () => {
-            clearActivePresets();
-            updateSettingsStatus();
-        };
-        input.addEventListener("input", markDirty);
-        input.addEventListener("change", markDirty);
-    });
-
-    // Morse code message input sanitization and auto-uppercase
-    const foxMsgInput = document.querySelector("#fox-message");
-    if (foxMsgInput) {
-        foxMsgInput.addEventListener("input", (e) => {
-            let val = e.target.value.toUpperCase();
-            // Retain letters, digits, spaces, slashes, periods, and dashes
-            val = val.replace(/[^A-Z0-9\s/.-]/g, "");
-            if (e.target.value !== val) {
-                e.target.value = val;
-            }
-        });
-    }
-    
-    // 4. WebUSB DFU Flashing buttons
-    document.querySelector("#btn-connect-dfu").addEventListener("click", () => {
-        if (dfuDevice) {
-            disconnectDFU();
-            hideAlert("dfu");
-        } else {
-            connectDFU();
-        }
-    });
-    
-    
-    // Handle DFU parameter changes
-    document.querySelector("#dfu-xfer-size").addEventListener("change", (e) => {
-        dfuTransferSize = parseInt(e.target.value) || 1024;
-    });
-    document.querySelector("#dfu-start-addr").addEventListener("change", (e) => {
-        if (dfuDevice && !isNaN(parseInt(e.target.value, 16))) {
-            dfuDevice.startAddress = parseInt(e.target.value, 16);
-        }
-    });
-    
-    // Handle File Drop / Select
-    const fileInput = document.querySelector("#dfu-file-input");
-    fileInput.addEventListener("change", (e) => {
-        firmwareFile = null;
-        document.querySelector("#step-write")?.classList.add("inactive");
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            document.querySelector("#file-info").textContent = `Selected: ${file.name} (${niceSize(file.size)})`;
-            
-            trackPostHog("upload_custom_firmware", {
-                file_name: file.name,
-                file_size: file.size
-            });
-            
-            const reader = new FileReader();
-            reader.onload = () => {
-                firmwareFile = reader.result;
-                logInfo(`Firmware file loaded: ${file.name} (${file.size} bytes)`);
-                document.querySelector("#step-write")?.classList.remove("inactive");
-            };
-            reader.readAsArrayBuffer(file);
-        } else {
-            document.querySelector("#file-info").textContent = "Drag & drop your firmware file or click to browse";
-        }
-    });
-    
-    document.querySelector("#btn-flash").addEventListener("click", startDownload);
-    document.querySelector("#btn-upload").addEventListener("click", startUpload);
-    document.querySelector("#btn-leave-dfu").addEventListener("click", leaveDFUMode);
-    
-    // Handle Firmware selection changes
-    const firmwareSelect = document.querySelector("#firmware-select");
-    const dropZone = document.querySelector("#drop-zone");
-    
-    firmwareSelect.addEventListener("change", async () => {
-        firmwareFile = null;
-        document.querySelector("#step-write")?.classList.add("inactive");
-        
-        trackPostHog("select_firmware_version", { firmware_version: firmwareSelect.value });
-        
-        if (firmwareSelect.value === "custom") {
-            dropZone.hidden = false;
-            if (fileInput) fileInput.disabled = false;
-            dropZone.classList.remove("disabled");
-            document.querySelector("#file-info").textContent = "Drag & drop your firmware file or click to browse";
-        } else {
-            dropZone.hidden = true;
-            if (fileInput) fileInput.disabled = true;
-            dropZone.classList.add("disabled");
-            if (dfuDevice) {
-                await loadServerFirmware(firmwareSelect.value);
-            }
-        }
-    });
-
-    // 5. Console clearing (Removed since event log console panel was removed)
-    
-    // WebUSB disconnect event
-    navigator.usb?.addEventListener("disconnect", (event) => {
-        if (dfuDevice) {
-            const isMatch = dfuDevice.device_ === event.device || (
-                dfuDevice.device_.vendorId === event.device.vendorId &&
-                dfuDevice.device_.productId === event.device.productId &&
-                dfuDevice.device_.serialNumber === event.device.serialNumber
-            );
-            if (isMatch) {
-                if (expectingDisconnect) {
-                    deviceDisconnectedDuringFlash = true;
-                } else {
-                    logWarning("DFU device disconnected unexpectedly.");
-                    disconnectDFU();
-                }
-            }
-        }
-    });
+  });
 });
