@@ -6,10 +6,26 @@
     "build": "node build.js",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "start": "wrangler dev"
+    "start": "wrangler dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,css,html,json,jsonc}": "prettier --write",
+    "src/**/*.js": "eslint --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "esbuild": "^0.25.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "prettier": "^3.8.4",
     "wrangler": "^4.98.0"
   }
 }
