@@ -5,8 +5,6 @@
    sharp square corners (0px radius), and high-contrast blue/orange solid color blocks.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap');
-
 :root {
   /* na6d.com Color Palette */
   --bg-base: #fff8e7; /* Warm Cream/Beige */
