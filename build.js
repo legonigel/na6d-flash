@@ -33,7 +33,18 @@ async function runBuild() {
   }
 
   // 2. Copy static files
-  const staticFiles = ['index.html', 'favicon.png', 'logo.svg'];
+  const staticFiles = [
+    'index.html',
+    'favicon.png',
+    'logo.svg',
+    'favicon-96x96.png',
+    'favicon.svg',
+    'favicon.ico',
+    'apple-touch-icon.png',
+    'site.webmanifest',
+    'web-app-manifest-192x192.png',
+    'web-app-manifest-512x512.png',
+  ];
   staticFiles.forEach((file) => {
     const srcPath = path.join('src', file);
     if (fs.existsSync(srcPath)) {
