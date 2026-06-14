@@ -303,11 +303,12 @@ body {
 }
 
 .card-title {
+  margin-top: 0;
+  margin-bottom: 1.75rem;
   font-size: 1.35rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 1.75rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -945,6 +946,7 @@ summary:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-primary);
+  margin: 0;
 }
 
 /* Status Banner above Config Buttons */
