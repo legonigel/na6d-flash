@@ -1485,7 +1485,7 @@ async function connectDFU() {
   }
 }
 
-function disconnectDFU() {
+async function disconnectDFU(silent = false) {
   const btn = document.querySelector('#btn-connect-dfu');
   if (btn) btn.disabled = true;
 
@@ -1514,20 +1514,25 @@ function disconnectDFU() {
   };
 
   if (dfuDevice) {
-    dfuDevice
-      .close()
-      .then(() => {
+    try {
+      await dfuDevice.close();
+      if (!silent) {
         logInfo('DFU interface closed.');
-        trackPostHog('disconnect_device', { mode: 'dfu' });
-        dfuDevice = null;
-        cleanupUI();
-      })
-      .catch((err) => {
+      } else {
+        logDebug('DFU interface closed (silent).');
+      }
+      trackPostHog('disconnect_device', { mode: 'dfu' });
+    } catch (err) {
+      if (!silent) {
         logError(`Error closing DFU: ${err.message}`);
-        trackException(err, { module: 'dfu', action: 'disconnect_dfu' });
-        dfuDevice = null;
-        cleanupUI();
-      });
+      } else {
+        logDebug(`Error closing DFU: ${err.message} (silent)`);
+      }
+      trackException(err, { module: 'dfu', action: 'disconnect_dfu' });
+    } finally {
+      dfuDevice = null;
+      cleanupUI();
+    }
   } else {
     dfuDevice = null;
     cleanupUI();
@@ -1601,7 +1606,6 @@ async function startDownload() {
     await dfuDevice.do_download(dfuTransferSize, firmwareFile, dfuManifestationTolerant);
     const duration = ((performance.now() - startTime) / 1000).toFixed(1);
 
-    logSuccess(`Flashing completed successfully in ${duration} seconds.`);
     trackPostHog('flash_firmware_success', {
       firmware_version: firmwareName,
       duration_seconds: parseFloat(duration),
@@ -1615,20 +1619,20 @@ async function startDownload() {
     logInfo('Waiting for device reset...');
     try {
       if (deviceDisconnectedDuringFlash) {
-        logSuccess('Device disconnected and rebooted.');
-        disconnectDFU();
+        await disconnectDFU(true);
       } else if (dfuDevice) {
         await dfuDevice.waitDisconnected(5000);
-        logSuccess('Device disconnected and rebooted.');
-        disconnectDFU();
+        await disconnectDFU(true);
       } else {
-        logSuccess('Device disconnected and rebooted.');
-        disconnectDFU();
+        await disconnectDFU(true);
       }
     } catch (err) {
       logWarning('Timeout waiting for device disconnect. Connection will be closed.');
-      disconnectDFU();
+      await disconnectDFU(true);
     }
+
+    const successMsg = `<strong>Success!</strong> Your AIOC is ready for action. Need a 3D-printed case or an extension cable to finish your HT setup? Browse <a href="https://na6d.com/collections/accessories" target="_blank" rel="noopener noreferrer">NA6D Accessories</a>.`;
+    logSuccess(successMsg, 'dfu');
   } catch (err) {
     logError(`Error during download: ${err}`);
     trackException(err, { module: 'dfu', action: 'flash', firmware_version: firmwareName });
