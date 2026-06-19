@@ -124,7 +124,10 @@ async function runBuild() {
         execSync('npx @posthog/cli sourcemap inject --directory dist', { stdio: 'inherit' });
 
         console.log('Uploading source maps to PostHog...');
-        execSync('npx @posthog/cli sourcemap upload --directory dist', { stdio: 'inherit' });
+        execSync(
+          `npx @posthog/cli sourcemap upload --directory dist --release-name na6d-flash --release-version ${commitHash}`,
+          { stdio: 'inherit' }
+        );
       } catch (err) {
         console.error('PostHog source map integration failed:', err.message);
       }
