@@ -91,8 +91,25 @@ function trackPostHog(eventName, params = {}) {
 
 function trackException(err, extraParams = {}) {
   if (typeof posthog !== 'undefined' && typeof posthog.captureException === 'function') {
-    const errorObj = err instanceof Error ? err : new Error(String(err));
-    posthog.captureException(errorObj, extraParams);
+    let errorObj;
+    if (err instanceof Error) {
+      errorObj = err;
+    } else if (err && typeof err === 'object' && err.stack) {
+      errorObj = new Error(err.message || String(err));
+      errorObj.stack = err.stack;
+      if (err.name) {
+        errorObj.name = err.name;
+      }
+    } else {
+      errorObj = new Error(String(err));
+    }
+
+    const properties = {
+      ...extraParams,
+      error_stack: errorObj.stack || '',
+    };
+
+    posthog.captureException(errorObj, properties);
   }
 }
 
