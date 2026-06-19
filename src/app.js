@@ -90,6 +90,14 @@ function trackPostHog(eventName, params = {}) {
 }
 
 function trackException(err, extraParams = {}) {
+  const errMsg = err?.message || String(err);
+  if (
+    err?.name === 'NotFoundError' &&
+    (errMsg.includes('No device selected') || errMsg.includes('requestDevice'))
+  ) {
+    return;
+  }
+
   if (typeof posthog !== 'undefined' && typeof posthog.captureException === 'function') {
     let errorObj;
     if (err instanceof Error) {
@@ -669,10 +677,6 @@ async function connectHID() {
 
     if (devices.length === 0) {
       logWarning('No device selected.');
-      trackException(new Error('No device selected during HID connection request'), {
-        module: 'hid',
-        action: 'connect_hid',
-      });
       if (btn) btn.disabled = false;
       return;
     }
@@ -743,8 +747,15 @@ async function connectHID() {
       updateSettingsStatus(true);
     }
   } catch (err) {
-    logError(`HID connection failed: ${err.message}`);
-    trackException(err, { module: 'hid', action: 'connect_hid' });
+    const isUserCancel =
+      err.name === 'NotFoundError' &&
+      (err.message.includes('No device selected') || err.message.includes('requestDevice'));
+    if (isUserCancel) {
+      logWarning('No device selected.');
+    } else {
+      logError(`HID connection failed: ${err.message}`);
+      trackException(err, { module: 'hid', action: 'connect_hid' });
+    }
     if (btn) {
       btn.textContent = 'Connect AIOC Settings';
       btn.disabled = false;
@@ -1490,10 +1501,17 @@ async function connectDFU() {
       serial: dfuDevice.device_.serialNumber || 'Unknown',
     });
   } catch (err) {
-    if (!err.message.includes('Timeout opening USB device')) {
-      logError(`DFU Connection failed: ${err.message}`);
+    const isUserCancel =
+      err.name === 'NotFoundError' &&
+      (err.message.includes('No device selected') || err.message.includes('requestDevice'));
+    if (isUserCancel) {
+      logWarning('No device selected.');
+    } else {
+      if (!err.message.includes('Timeout opening USB device')) {
+        logError(`DFU Connection failed: ${err.message}`);
+      }
+      trackException(err, { module: 'dfu', action: 'connect_dfu' });
     }
-    trackException(err, { module: 'dfu', action: 'connect_dfu' });
     disconnectDFU();
     if (btn) {
       btn.textContent = 'Connect AIOC for Update';
