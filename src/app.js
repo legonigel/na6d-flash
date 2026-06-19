@@ -1,6 +1,16 @@
 // AIOC Configuration & Flashing App
 // Core logic utilizing WebHID for configuration and WebUSB for DFU flashing
 
+class HidDeviceError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'HidDeviceError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+}
+
 // Constants matching AIOC hardware
 const Register = {
   MAGIC: 0x00,
@@ -653,7 +663,7 @@ async function readRegister(device, address) {
   // - 6-byte response: [cmd, addr, v0, v1, v2, v3] -> value starts at offset 2
   // - 7-byte response: [reportId, cmd, addr, v0, v1, v2, v3] -> value starts at offset 3
   if (response.byteLength < 6) {
-    throw new Error(`Short feature report received: ${response.byteLength} bytes`);
+    throw new HidDeviceError(`Short feature report received: ${response.byteLength} bytes`);
   }
   const offset = response.byteLength >= 7 ? 3 : 2;
   return response.getUint32(offset, true);
@@ -1327,7 +1337,7 @@ async function connectDFU() {
       });
       const interfaces = dfu.findDeviceDfuInterfaces(rawUsbDevice);
       if (interfaces.length === 0) {
-        throw new Error('Selected device does not support USB DFU.');
+        throw new dfu.DfuDeviceError('Selected device does not support USB DFU.');
       }
       // Use first interface
       selected_device = new dfu.Device(rawUsbDevice, interfaces[0]);

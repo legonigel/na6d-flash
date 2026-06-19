@@ -72,7 +72,7 @@ var dfuse = {};
   dfuse.parseMemoryDescriptor = function (desc) {
     const nameEndIndex = desc.indexOf('/');
     if (!desc.startsWith('@') || nameEndIndex == -1) {
-      throw `Not a DfuSe memory descriptor: "${desc}"`;
+      throw new dfu.DfuDeviceError(`Not a DfuSe memory descriptor: "${desc}"`);
     }
 
     const name = desc.substring(1, nameEndIndex).trim();
@@ -134,24 +134,30 @@ var dfuse = {};
     } else if (len == 4) {
       view.setUint32(1, param, true);
     } else {
-      throw "Don't know how to handle data of len " + len;
+      throw new dfu.DfuRangeError("Don't know how to handle data of len " + len);
     }
 
     try {
       await this.download(payload, 0);
     } catch (error) {
-      throw 'Error during special DfuSe command ' + commandNames[command] + ':' + error;
+      throw new dfu.DfuProtocolError(
+        `Error during special DfuSe command ${commandNames[command]}: ${error?.message || error}`
+      );
     }
 
     let status = await this.poll_until((state) => state != dfu.dfuDNBUSY);
     if (status.status != dfu.STATUS_OK) {
-      throw 'Special DfuSe command ' + commandNames[command] + ' failed';
+      throw new dfu.DfuProtocolError(
+        `Special DfuSe command ${commandNames[command]} failed`,
+        status.state,
+        status.status
+      );
     }
   };
 
   dfuse.Device.prototype.getSegment = function (addr) {
     if (!this.memoryInfo || !this.memoryInfo.segments) {
-      throw 'No memory map information available';
+      throw new dfu.DfuDeviceError('No memory map information available');
     }
 
     for (let segment of this.memoryInfo.segments) {
@@ -169,7 +175,7 @@ var dfuse = {};
     }
 
     if (!segment) {
-      throw `Address ${addr.toString(16)} outside of memory map`;
+      throw new dfu.DfuRangeError(`Address 0x${addr.toString(16)} outside of memory map`);
     }
 
     const sectorIndex = Math.floor((addr - segment.start) / segment.sectorSize);
@@ -182,7 +188,7 @@ var dfuse = {};
     }
 
     if (!segment) {
-      throw `Address ${addr.toString(16)} outside of memory map`;
+      throw new dfu.DfuRangeError(`Address 0x${addr.toString(16)} outside of memory map`);
     }
 
     const sectorIndex = Math.floor((addr - segment.start) / segment.sectorSize);
@@ -191,7 +197,7 @@ var dfuse = {};
 
   dfuse.Device.prototype.getFirstWritableSegment = function () {
     if (!this.memoryInfo || !this.memoryInfo.segments) {
-      throw 'No memory map information available';
+      throw new dfu.DfuDeviceError('No memory map information available');
     }
 
     for (let segment of this.memoryInfo.segments) {
@@ -205,7 +211,7 @@ var dfuse = {};
 
   dfuse.Device.prototype.getMaxReadSize = function (startAddr) {
     if (!this.memoryInfo || !this.memoryInfo.segments) {
-      throw 'No memory map information available';
+      throw new dfu.DfuDeviceError('No memory map information available');
     }
 
     let numBytes = 0;
@@ -264,7 +270,7 @@ var dfuse = {};
 
   dfuse.Device.prototype.do_download = async function (xfer_size, data, manifestationTolerant) {
     if (!this.memoryInfo || !this.memoryInfo.segments) {
-      throw 'No memory map available';
+      throw new dfu.DfuDeviceError('No memory map available');
     }
 
     this.logInfo('Erasing DFU device memory');
@@ -298,11 +304,11 @@ var dfuse = {};
         dfu_status = await this.poll_until_idle(dfu.dfuDNLOAD_IDLE);
         address += chunk_size;
       } catch (error) {
-        throw 'Error during DfuSe download: ' + error;
+        throw new dfu.DfuProtocolError('Error during DfuSe download: ' + (error?.message || error));
       }
 
       if (dfu_status.status != dfu.STATUS_OK) {
-        throw `DFU DOWNLOAD failed state=${dfu_status.state}, status=${dfu_status.status}`;
+        throw new dfu.DfuProtocolError('DFU DOWNLOAD failed', dfu_status.state, dfu_status.status);
       }
 
       this.logDebug('Wrote ' + bytes_written + ' bytes');
@@ -317,7 +323,9 @@ var dfuse = {};
       await this.dfuseCommand(dfuse.SET_ADDRESS, startAddress, 4);
       await this.download(new ArrayBuffer(), 0);
     } catch (error) {
-      throw 'Error during DfuSe manifestation: ' + error;
+      throw new dfu.DfuProtocolError(
+        'Error during DfuSe manifestation: ' + (error?.message || error)
+      );
     }
 
     try {
@@ -339,7 +347,9 @@ var dfuse = {};
       ) {
         this.logDebug('Ignored reset error: ' + errStr);
       } else {
-        throw 'Error during reset for manifestation: ' + error;
+        throw new dfu.DfuProtocolError(
+          'Error during reset for manifestation: ' + (error?.message || error)
+        );
       }
     }
   };

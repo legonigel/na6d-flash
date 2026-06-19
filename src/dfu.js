@@ -21,6 +21,39 @@ var dfu = {};
 (function () {
   'use strict';
 
+  dfu.DfuError = class DfuError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'DfuError';
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor);
+      }
+    }
+  };
+
+  dfu.DfuRangeError = class DfuRangeError extends dfu.DfuError {
+    constructor(message) {
+      super(message);
+      this.name = 'DfuRangeError';
+    }
+  };
+
+  dfu.DfuDeviceError = class DfuDeviceError extends dfu.DfuError {
+    constructor(message) {
+      super(message);
+      this.name = 'DfuDeviceError';
+    }
+  };
+
+  dfu.DfuProtocolError = class DfuProtocolError extends dfu.DfuError {
+    constructor(message, state = null, status = null) {
+      super(message);
+      this.name = 'DfuProtocolError';
+      this.state = state;
+      this.status = status;
+    }
+  };
+
   dfu.DETACH = 0x00;
   dfu.DNLOAD = 0x01;
   dfu.UPLOAD = 0x02;
@@ -134,9 +167,10 @@ var dfu = {};
       try {
         await this.device_.selectAlternateInterface(intfNumber, altSetting);
       } catch (error) {
+        const errMsg = error?.message || String(error);
         if (
           intf.alternate.alternateSetting == altSetting &&
-          error.endsWith('Unable to set device interface.')
+          errMsg.includes('Unable to set device interface.')
         ) {
           this.logWarning(
             `Redundant SET_INTERFACE request to select altSetting ${altSetting} failed`
@@ -221,7 +255,7 @@ var dfu = {};
       }
     }
 
-    throw `Failed to read string descriptor ${index}: ${result.status}`;
+    throw new dfu.DfuProtocolError(`Failed to read string descriptor ${index}: ${result.status}`);
   };
 
   dfu.Device.prototype.readInterfaceNames = async function () {
@@ -353,7 +387,7 @@ var dfu = {};
 
     let config = this.device_.configurations[index];
     if (!config) {
-      throw new RangeError(`Configuration index ${index} out of range`);
+      throw new dfu.DfuRangeError(`Configuration index ${index} out of range`);
     }
 
     let chunks = [];
@@ -489,11 +523,15 @@ var dfu = {};
           if (result.status == 'ok') {
             return Promise.resolve(result.bytesWritten);
           } else {
-            return Promise.reject(result.status);
+            return Promise.reject(
+              new dfu.DfuProtocolError(`ControlTransferOut status: ${result.status}`)
+            );
           }
         },
         (error) => {
-          return Promise.reject('ControlTransferOut failed: ' + error);
+          return Promise.reject(
+            new dfu.DfuProtocolError(`ControlTransferOut failed: ${error?.message || error}`)
+          );
         }
       );
   };
@@ -515,11 +553,15 @@ var dfu = {};
           if (result.status == 'ok') {
             return Promise.resolve(result.data);
           } else {
-            return Promise.reject(result.status);
+            return Promise.reject(
+              new dfu.DfuProtocolError(`ControlTransferIn status: ${result.status}`)
+            );
           }
         },
         (error) => {
-          return Promise.reject('ControlTransferIn failed: ' + error);
+          return Promise.reject(
+            new dfu.DfuProtocolError(`ControlTransferIn failed: ${error?.message || error}`)
+          );
         }
       );
   };
@@ -537,7 +579,7 @@ var dfu = {};
         function onTimeout() {
           navigator.usb.removeEventListener('disconnect', onDisconnect);
           if (device.disconnected !== true) {
-            reject('Disconnect timeout expired');
+            reject(new dfu.DfuProtocolError('Disconnect timeout expired'));
           }
         }
         timeoutID = setTimeout(onTimeout, timeout);
@@ -588,14 +630,16 @@ var dfu = {};
           pollTimeout: data.getUint32(1, true) & 0xffffff,
           state: data.getUint8(4),
         }),
-      (error) => Promise.reject('DFU GETSTATUS failed: ' + error)
+      (error) =>
+        Promise.reject(new dfu.DfuProtocolError(`DFU GETSTATUS failed: ${error?.message || error}`))
     );
   };
 
   dfu.Device.prototype.getState = function () {
     return this.requestIn(dfu.GETSTATE, 1).then(
       (data) => Promise.resolve(data.getUint8(0)),
-      (error) => Promise.reject('DFU GETSTATE failed: ' + error)
+      (error) =>
+        Promise.reject(new dfu.DfuProtocolError(`DFU GETSTATE failed: ${error?.message || error}`))
     );
   };
 
@@ -611,7 +655,7 @@ var dfu = {};
       state = await this.getState();
     }
     if (state != dfu.dfuIDLE) {
-      throw 'Failed to return to idle state after abort: state ' + state.state;
+      throw new dfu.DfuProtocolError('Failed to return to idle state after abort', state);
     }
   };
 
@@ -701,11 +745,11 @@ var dfu = {};
         this.logDebug('Sent ' + bytes_written + ' bytes');
         dfu_status = await this.poll_until_idle(dfu.dfuDNLOAD_IDLE);
       } catch (error) {
-        throw 'Error during DFU download: ' + error;
+        throw new dfu.DfuProtocolError('Error during DFU download: ' + (error?.message || error));
       }
 
       if (dfu_status.status != dfu.STATUS_OK) {
-        throw `DFU DOWNLOAD failed state=${dfu_status.state}, status=${dfu_status.status}`;
+        throw new dfu.DfuProtocolError('DFU DOWNLOAD failed', dfu_status.state, dfu_status.status);
       }
 
       this.logDebug('Wrote ' + bytes_written + ' bytes');
@@ -718,7 +762,9 @@ var dfu = {};
     try {
       await this.download(new ArrayBuffer([]), transaction++);
     } catch (error) {
-      throw 'Error during final DFU download: ' + error;
+      throw new dfu.DfuProtocolError(
+        'Error during final DFU download: ' + (error?.message || error)
+      );
     }
 
     this.logInfo('Wrote ' + bytes_sent + ' bytes');
@@ -739,16 +785,21 @@ var dfu = {};
           );
         }
         if (dfu_status.status != dfu.STATUS_OK) {
-          throw `DFU MANIFEST failed state=${dfu_status.state}, status=${dfu_status.status}`;
+          throw new dfu.DfuProtocolError(
+            'DFU MANIFEST failed',
+            dfu_status.state,
+            dfu_status.status
+          );
         }
       } catch (error) {
+        const errMsg = error?.message || String(error);
         if (
-          error.endsWith('ControlTransferIn failed: NotFoundError: Device unavailable.') ||
-          error.endsWith('ControlTransferIn failed: NotFoundError: The device was disconnected.')
+          errMsg.includes('ControlTransferIn failed: NotFoundError: Device unavailable.') ||
+          errMsg.includes('ControlTransferIn failed: NotFoundError: The device was disconnected.')
         ) {
           this.logWarning('Unable to poll final manifestation status');
         } else {
-          throw 'Error during DFU manifest: ' + error;
+          throw new dfu.DfuProtocolError('Error during DFU manifest: ' + errMsg);
         }
       }
     } else {
@@ -776,7 +827,9 @@ var dfu = {};
       ) {
         this.logDebug('Ignored reset error: ' + errStr);
       } else {
-        throw 'Error during reset for manifestation: ' + error;
+        throw new dfu.DfuProtocolError(
+          'Error during reset for manifestation: ' + (error?.message || error)
+        );
       }
     }
 
