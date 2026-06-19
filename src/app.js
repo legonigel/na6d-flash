@@ -1842,6 +1842,15 @@ async function leaveDFUMode() {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Log and register version/commit info
+  const versionMeta = document.querySelector('meta[name="version"]');
+  const commitHash = versionMeta ? versionMeta.content : 'unknown';
+  console.log(`[Version] NA6D Flash Web App loaded. Git commit: ${commitHash}`);
+
+  if (typeof posthog !== 'undefined' && typeof posthog.register === 'function') {
+    posthog.register({ app_version: commitHash });
+  }
+
   // 1. Browser capability checks
   const webusbSupported = typeof navigator.usb !== 'undefined';
   const webhidSupported = typeof navigator.hid !== 'undefined';
@@ -1849,6 +1858,7 @@ document.addEventListener('DOMContentLoaded', () => {
   trackPostHog('app_load', {
     webusb_supported: webusbSupported,
     webhid_supported: webhidSupported,
+    app_version: commitHash,
   });
 
   if (!webusbSupported) {

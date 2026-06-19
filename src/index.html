@@ -69,6 +69,7 @@
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="version" content="%%COMMIT_HASH%%" />
     <title>NA6D AIOC Web Flasher & Configurator</title>
     <meta
       name="description"
@@ -1465,7 +1466,22 @@
             >Contact Support</a
           >
         </div>
-        <p class="footer-copyright">&copy; 2025-2026 Nigel Armstrong. All rights reserved.</p>
+        <p class="footer-copyright">
+          &copy; 2025-2026 Nigel Armstrong. All rights reserved.
+          <span
+            class="footer-version"
+            style="display: block; opacity: 0.5; font-size: 0.85rem; margin-top: 0.25rem"
+          >
+            Version:
+            <a
+              href="https://github.com/legonigel/na6d-flash/commit/%%COMMIT_HASH%%"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >%%COMMIT_HASH%%</a
+            >
+          </span>
+        </p>
         <details class="footer-license-details">
           <summary>Open Source Licenses & Credits</summary>
           <p>

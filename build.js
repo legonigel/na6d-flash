@@ -32,7 +32,16 @@ async function runBuild() {
     fs.mkdirSync('dist', { recursive: true });
   }
 
-  // 2. Copy static files
+  // 2. Retrieve git commit hash
+  let commitHash = 'dev';
+  try {
+    const { execSync } = require('child_process');
+    commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+  } catch (e) {
+    console.warn('Could not get git commit hash, defaulting to "dev":', e.message);
+  }
+
+  // Copy static files
   const staticFiles = [
     'index.html',
     'favicon.png',
@@ -48,7 +57,13 @@ async function runBuild() {
   staticFiles.forEach((file) => {
     const srcPath = path.join('src', file);
     if (fs.existsSync(srcPath)) {
-      fs.copyFileSync(srcPath, path.join('dist', file));
+      if (file === 'index.html') {
+        let content = fs.readFileSync(srcPath, 'utf8');
+        content = content.replace(/%%COMMIT_HASH%%/g, commitHash);
+        fs.writeFileSync(path.join('dist', file), content, 'utf8');
+      } else {
+        fs.copyFileSync(srcPath, path.join('dist', file));
+      }
     }
   });
 
