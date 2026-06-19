@@ -57,11 +57,20 @@ async function runBuild() {
     copyRecursiveSync(firmwareDir, path.join('dist', 'firmware'));
   }
 
+  const isDev =
+    process.env.WRANGLER_COMMAND === 'dev' ||
+    process.argv.includes('--dev') ||
+    process.env.NODE_ENV === 'development';
+  if (isDev) {
+    console.log('Running in development mode: Minification disabled, source maps enabled.');
+  }
+
   // 3. Minify JS and CSS using esbuild (without bundling to preserve individual global scopes)
   await esbuild.build({
     entryPoints: ['src/app.js', 'src/dfu.js', 'src/dfuse.js', 'src/FileSaver.js', 'src/index.css'],
     bundle: false,
-    minify: true,
+    minify: !isDev,
+    sourcemap: true,
     outdir: 'dist',
     logLevel: 'info',
   });
