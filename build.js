@@ -93,6 +93,48 @@ async function runBuild() {
   // 4. Generate sitemap.xml and robots.txt
   generateSitemapAndRobots();
 
+  // 5. PostHog Source Map Injection and Upload (only during wrangler deploy)
+  if (process.env.WRANGLER_COMMAND === 'deploy') {
+    // Try to load .env variables if they exist
+    if (fs.existsSync('.env')) {
+      const envContent = fs.readFileSync('.env', 'utf8');
+      envContent.split('\n').forEach((line) => {
+        const parts = line.trim().split('=');
+        if (parts.length >= 2) {
+          const key = parts[0].trim();
+          const val = parts
+            .slice(1)
+            .join('=')
+            .trim()
+            .replace(/^['"]|['"]$/g, '');
+          if (!process.env[key]) {
+            process.env[key] = val;
+          }
+        }
+      });
+    }
+
+    const apiKey = process.env.POSTHOG_CLI_API_KEY;
+    const projectId = process.env.POSTHOG_CLI_PROJECT_ID;
+
+    if (apiKey && projectId) {
+      try {
+        const { execSync } = require('child_process');
+        console.log('Injecting PostHog release metadata...');
+        execSync('npx @posthog/cli sourcemap inject --directory dist', { stdio: 'inherit' });
+
+        console.log('Uploading source maps to PostHog...');
+        execSync('npx @posthog/cli sourcemap upload --directory dist', { stdio: 'inherit' });
+      } catch (err) {
+        console.error('PostHog source map integration failed:', err.message);
+      }
+    } else {
+      console.log(
+        'PostHog source maps upload skipped: POSTHOG_CLI_API_KEY or POSTHOG_CLI_PROJECT_ID not set in build environment.'
+      );
+    }
+  }
+
   console.log('Build completed successfully!');
 }
 
