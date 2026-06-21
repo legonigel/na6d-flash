@@ -6,11 +6,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "na6d-flash",
   "compatibility_date": "2026-06-07",
-  "main": "src/worker.js",
   "assets": {
     // The path to the directory containing the `index.html` file to be served at `/`
     "directory": "./dist",
-    "binding": "ASSETS",
   },
   "build": {
     "command": "npm run build",

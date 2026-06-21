@@ -54,7 +54,7 @@
           }
         } catch (e) {}
 
-        // If no stored state exists, check country code to auto-accept non-EU/UK users immediately in the head
+        // If no stored state exists, but we have the country cookie, we can run the check immediately in the head
         if (!na6dConsentState) {
           var countryMatch = document.cookie.match(/(^|;)\s*na6d-country\s*=\s*([^;]+)/);
           var country = countryMatch ? decodeURIComponent(countryMatch[2].trim()) : null;
@@ -63,8 +63,12 @@
             location.hostname === '127.0.0.1' ||
             location.hostname.startsWith('192.168.');
 
-          var activeCountry = isDev ? 'GB' : country || 'US';
-          if (activeCountry && !EU_COUNTRIES.includes(activeCountry)) {
+          if (isDev) {
+            // Dev site must always show the most compliant version (EU banner)
+            country = 'GB';
+          }
+
+          if (country && !EU_COUNTRIES.includes(country)) {
             na6dConsentState = 'accepted';
             try {
               localStorage.setItem('na6d-cookies-consent', 'accepted');
@@ -1676,6 +1680,20 @@
           }
         }
 
+        function handleCountryCheck(countryCode) {
+          const banner = document.getElementById('consent-banner');
+          if (countryCode && !EU_COUNTRIES.includes(countryCode)) {
+            // Visitor is not in EU/UK, auto-accept and trigger tracking immediately
+            localStorage.setItem('na6d-cookies-consent', 'accepted');
+            setCookie('na6d_analytics_consent', 'accepted', 365);
+            activateTracking();
+            if (banner) banner.style.display = 'none';
+          } else {
+            // Visitor is in EU/UK (or unknown), display the consent banner
+            if (banner) banner.style.display = 'flex';
+          }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
           const banner = document.getElementById('consent-banner');
           const btnAccept = document.getElementById('consent-btn-accept');
@@ -1699,17 +1717,30 @@
               location.hostname === '127.0.0.1' ||
               location.hostname.startsWith('192.168.');
 
-            const activeCountry = isDev ? 'GB' : country || 'US';
-
-            if (activeCountry && !EU_COUNTRIES.includes(activeCountry)) {
-              // Visitor is not in EU/UK, auto-accept and trigger tracking immediately
-              localStorage.setItem('na6d-cookies-consent', 'accepted');
-              setCookie('na6d_analytics_consent', 'accepted', 365);
-              activateTracking();
-              if (banner) banner.style.display = 'none';
+            if (isDev) {
+              // Dev site must always show the most compliant version (EU banner)
+              handleCountryCheck('GB');
+            } else if (country) {
+              handleCountryCheck(country);
             } else {
-              // Visitor is in EU/UK (or unknown), display the consent banner
-              if (banner) banner.style.display = 'flex';
+              // Fetch country asynchronously from a free geo IP API
+              fetch('https://ipapi.co/country/')
+                .then(function (res) {
+                  return res.text();
+                })
+                .then(function (text) {
+                  const detectedCountry = (text || '').trim().toUpperCase();
+                  if (detectedCountry) {
+                    setCookie('na6d-country', detectedCountry, 1); // Cache for 1 day
+                    handleCountryCheck(detectedCountry);
+                  } else {
+                    handleCountryCheck('GB'); // Fallback to safe EU behavior
+                  }
+                })
+                .catch(function (err) {
+                  console.warn('Geolocation check failed, defaulting to opt-in:', err);
+                  handleCountryCheck('GB'); // Fallback to safe EU behavior
+                });
             }
           }
 

@@ -32,13 +32,4 @@ module.exports = [
       'no-prototype-builtins': 'off',
     },
   },
-  {
-    files: ['src/worker.js'],
-    languageOptions: {
-      sourceType: 'module',
-      globals: {
-        ...globals.serviceworker,
-      },
-    },
-  },
 ];
