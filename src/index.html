@@ -2,6 +2,105 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Consent Initialization & State Check -->
+    <script>
+      var na6dConsentState = null;
+      var na6dIsAccepted = false;
+      // Expose globally so it is defined once and shared with the footer handler
+      var EU_COUNTRIES = [
+        'AT',
+        'BE',
+        'BG',
+        'HR',
+        'CY',
+        'CZ',
+        'DK',
+        'EE',
+        'FI',
+        'FR',
+        'DE',
+        'GR',
+        'HU',
+        'IE',
+        'IT',
+        'LV',
+        'LT',
+        'LU',
+        'MT',
+        'NL',
+        'PL',
+        'PT',
+        'RO',
+        'SK',
+        'SI',
+        'ES',
+        'SE',
+        'GB',
+        'IS',
+        'LI',
+        'NO',
+        'CH',
+      ];
+
+      (function () {
+        try {
+          na6dConsentState = localStorage.getItem('na6d-cookies-consent');
+          if (!na6dConsentState) {
+            var match = document.cookie.match(/(^|;)\s*na6d_analytics_consent\s*=\s*([^;]+)/);
+            if (match) {
+              na6dConsentState = decodeURIComponent(match[2].trim());
+              localStorage.setItem('na6d-cookies-consent', na6dConsentState);
+            }
+          }
+        } catch (e) {}
+
+        // If no stored state exists, check country code to auto-accept non-EU/UK users immediately in the head
+        if (!na6dConsentState) {
+          var countryMatch = document.cookie.match(/(^|;)\s*na6d-country\s*=\s*([^;]+)/);
+          var country = countryMatch ? decodeURIComponent(countryMatch[2].trim()) : null;
+          var isDev =
+            location.hostname === 'localhost' ||
+            location.hostname === '127.0.0.1' ||
+            location.hostname.startsWith('192.168.');
+
+          var activeCountry = isDev ? 'GB' : country || 'US';
+          if (activeCountry && !EU_COUNTRIES.includes(activeCountry)) {
+            na6dConsentState = 'accepted';
+            try {
+              localStorage.setItem('na6d-cookies-consent', 'accepted');
+              var maxAge = 365 * 24 * 60 * 60;
+              var domainAttr = location.hostname.endsWith('na6d.com') ? '; Domain=.na6d.com' : '';
+              document.cookie =
+                'na6d_analytics_consent=accepted' +
+                domainAttr +
+                '; Path=/; Max-Age=' +
+                maxAge +
+                '; SameSite=Lax; Secure';
+            } catch (e) {}
+          }
+        }
+
+        na6dIsAccepted = na6dConsentState === 'accepted';
+      })();
+    </script>
+
+    <!-- Google tag (gtag.js) Consent Mode Default -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      // Default tracking consent based on stored preference, otherwise default to denied
+      gtag('consent', 'default', {
+        analytics_storage: na6dIsAccepted ? 'granted' : 'denied',
+      });
+
+      gtag('js', new Date());
+      gtag('config', 'G-LQ6XFZ8938');
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQ6XFZ8938"></script>
+
     <!-- PostHog Analytics -->
     <script>
       !(function (t, e) {
@@ -48,25 +147,17 @@
           }),
           (e.__SV = 1));
       })(document, window.posthog || []);
+
       posthog.init('phc_tqu8XZaHtWoESx4FjZpmHXWeD8QoQ78JRQWwuM5pwsdS', {
         api_host: 'https://d.na6d.com',
         ui_host: 'https://us.posthog.com',
         defaults: '2026-05-30',
         person_profiles: 'identified_only',
         serviceVersion: '%%COMMIT_HASH%%',
+        cookieless_mode: 'on_reject',
+        // GDPR Compliance: If consent not accepted, start opted-out by default
+        opt_out_capturing_by_default: !na6dIsAccepted,
       });
-    </script>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQ6XFZ8938"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-
-      gtag('config', 'G-LQ6XFZ8938');
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1466,6 +1557,22 @@
           <a href="https://na6d.com/pages/contact" target="_blank" rel="noopener noreferrer"
             >Contact Support</a
           >
+          <span class="footer-separator">•</span>
+          <a
+            href="https://na6d.com/policies/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Privacy Policy</a
+          >
+          <span class="footer-separator">•</span>
+          <a
+            href="https://na6d.com/policies/terms-of-service"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Terms of Service</a
+          >
+          <span class="footer-separator">•</span>
+          <a href="#" id="open-cookie-settings">Cookie Settings</a>
         </div>
         <p class="footer-copyright">
           &copy; 2025-2026 Nigel Armstrong. All rights reserved.
@@ -1502,5 +1609,138 @@
         </details>
       </footer>
     </div>
+
+    <!-- Cookie Consent Banner (Brutalist style) -->
+    <div id="consent-banner" class="consent-banner" style="display: none">
+      <div class="consent-banner-header">Telemetry & Cookies</div>
+      <div class="consent-banner-body">
+        We use analytics cookies to understand how people use the web flasher. Read our
+        <a href="https://na6d.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer"
+          >Privacy Policy</a
+        >
+        and
+        <a
+          href="https://na6d.com/policies/terms-of-service"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Terms of Service</a
+        >
+        for details.
+      </div>
+      <div class="consent-banner-actions">
+        <button id="consent-btn-decline" class="btn btn-secondary">Decline</button>
+        <button id="consent-btn-accept" class="btn btn-primary">Accept</button>
+      </div>
+    </div>
+
+    <!-- Cookie Consent Handler -->
+    <script>
+      (function () {
+        function getCookie(name) {
+          const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
+          return match ? decodeURIComponent(match[2].trim()) : null;
+        }
+
+        function setCookie(name, value, days) {
+          const maxAge = days * 24 * 60 * 60;
+          // Set cookie on wildcard .na6d.com domain only if we are on that domain or a subdomain
+          let domainAttr = '';
+          if (location.hostname.endsWith('na6d.com')) {
+            domainAttr = '; Domain=.na6d.com';
+          }
+          document.cookie =
+            name +
+            '=' +
+            value +
+            domainAttr +
+            '; Path=/; Max-Age=' +
+            maxAge +
+            '; SameSite=Lax; Secure';
+        }
+
+        function activateTracking() {
+          gtag('consent', 'update', {
+            analytics_storage: 'granted',
+          });
+          if (window.posthog) {
+            posthog.opt_in_capturing();
+          }
+        }
+
+        function deactivateTracking() {
+          gtag('consent', 'update', {
+            analytics_storage: 'denied',
+          });
+          if (window.posthog) {
+            posthog.opt_out_capturing();
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const banner = document.getElementById('consent-banner');
+          const btnAccept = document.getElementById('consent-btn-accept');
+          const btnDecline = document.getElementById('consent-btn-decline');
+          const btnCookieSettings = document.getElementById('open-cookie-settings');
+
+          // Read the early-initialized consent state
+          const consent = na6dConsentState;
+
+          if (consent === 'accepted') {
+            activateTracking();
+            if (banner) banner.style.display = 'none';
+          } else if (consent === 'rejected') {
+            deactivateTracking();
+            if (banner) banner.style.display = 'none';
+          } else {
+            // No saved consent preference, check country code cookie
+            const country = getCookie('na6d-country');
+            const isDev =
+              location.hostname === 'localhost' ||
+              location.hostname === '127.0.0.1' ||
+              location.hostname.startsWith('192.168.');
+
+            const activeCountry = isDev ? 'GB' : country || 'US';
+
+            if (activeCountry && !EU_COUNTRIES.includes(activeCountry)) {
+              // Visitor is not in EU/UK, auto-accept and trigger tracking immediately
+              localStorage.setItem('na6d-cookies-consent', 'accepted');
+              setCookie('na6d_analytics_consent', 'accepted', 365);
+              activateTracking();
+              if (banner) banner.style.display = 'none';
+            } else {
+              // Visitor is in EU/UK (or unknown), display the consent banner
+              if (banner) banner.style.display = 'flex';
+            }
+          }
+
+          if (btnAccept) {
+            btnAccept.addEventListener('click', function () {
+              localStorage.setItem('na6d-cookies-consent', 'accepted');
+              setCookie('na6d_analytics_consent', 'accepted', 365);
+              activateTracking();
+              if (banner) banner.style.display = 'none';
+            });
+          }
+
+          if (btnDecline) {
+            btnDecline.addEventListener('click', function () {
+              localStorage.setItem('na6d-cookies-consent', 'rejected');
+              setCookie('na6d_analytics_consent', 'rejected', 365);
+              deactivateTracking();
+              if (banner) banner.style.display = 'none';
+            });
+          }
+
+          if (btnCookieSettings) {
+            btnCookieSettings.addEventListener('click', function (e) {
+              e.preventDefault();
+              if (banner) {
+                banner.style.display = banner.style.display === 'flex' ? 'none' : 'flex';
+              }
+            });
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

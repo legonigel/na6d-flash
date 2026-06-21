@@ -1157,3 +1157,76 @@ select:focus-visible {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+/* Cookie/Telemetry Consent Banner (Brutalist theme matching na6d.com) */
+.consent-banner {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  max-width: 450px;
+  background-color: var(--bg-card);
+  border: var(--border-width-thick) solid var(--color-charcoal);
+  padding: 1.5rem;
+  box-shadow: 6px 6px 0px var(--color-charcoal);
+  z-index: 10000;
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.consent-banner-header {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-charcoal);
+  padding-bottom: 0.5rem;
+}
+
+.consent-banner-body {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.consent-banner-body a {
+  color: var(--color-orange);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.consent-banner-body a:hover {
+  color: var(--color-blue);
+}
+
+.consent-banner-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.consent-banner .btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  box-shadow: 3px 3px 0px var(--color-charcoal);
+}
+
+.consent-banner .btn:active {
+  box-shadow: 0px 0px 0px var(--color-charcoal);
+  transform: translate(3px, 3px);
+}
+
+/* Responsiveness for Consent Banner */
+@media (max-width: 576px) {
+  .consent-banner {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+    box-shadow: 4px 4px 0px var(--color-charcoal);
+  }
+}
