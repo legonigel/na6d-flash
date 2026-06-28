@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Consent Initialization & State Check -->
+    <script>
+      var na6dConsentState = null;
+      var na6dIsAccepted = false;
+      // Expose globally so it is defined once and shared with the footer handler
+      var EU_COUNTRIES = [
+        'AT',
+        'BE',
+        'BG',
+        'HR',
+        'CY',
+        'CZ',
+        'DK',
+        'EE',
+        'FI',
+        'FR',
+        'DE',
+        'GR',
+        'HU',
+        'IE',
+        'IT',
+        'LV',
+        'LT',
+        'LU',
+        'MT',
+        'NL',
+        'PL',
+        'PT',
+        'RO',
+        'SK',
+        'SI',
+        'ES',
+        'SE',
+        'GB',
+        'IS',
+        'LI',
+        'NO',
+        'CH',
+      ];
+
+      (function () {
+        try {
+          na6dConsentState = localStorage.getItem('na6d-cookies-consent');
+          if (!na6dConsentState) {
+            var match = document.cookie.match(/(^|;)\s*na6d_analytics_consent\s*=\s*([^;]+)/);
+            if (match) {
+              na6dConsentState = decodeURIComponent(match[2].trim());
+              localStorage.setItem('na6d-cookies-consent', na6dConsentState);
+            }
+          }
+        } catch (e) {}
+
+        // If no stored state exists, but we have the country cookie, we can run the check immediately in the head
+        if (!na6dConsentState) {
+          var countryMatch = document.cookie.match(/(^|;)\s*na6d-country\s*=\s*([^;]+)/);
+          var country = countryMatch ? decodeURIComponent(countryMatch[2].trim()) : null;
+          var isDev =
+            location.hostname === 'localhost' ||
+            location.hostname === '127.0.0.1' ||
+            location.hostname.startsWith('192.168.');
+
+          if (isDev) {
+            // Dev site must always show the most compliant version (EU banner)
+            country = 'GB';
+          }
+
+          if (country && !EU_COUNTRIES.includes(country)) {
+            na6dConsentState = 'accepted';
+            try {
+              localStorage.setItem('na6d-cookies-consent', 'accepted');
+              var maxAge = 365 * 24 * 60 * 60;
+              var domainAttr = location.hostname.endsWith('na6d.com') ? '; Domain=.na6d.com' : '';
+              document.cookie =
+                'na6d_analytics_consent=accepted' +
+                domainAttr +
+                '; Path=/; Max-Age=' +
+                maxAge +
+                '; SameSite=Lax; Secure';
+            } catch (e) {}
+          }
+        }
+
+        na6dIsAccepted = na6dConsentState === 'accepted';
+      })();
+    </script>
+
+    <!-- Google tag (gtag.js) Consent Mode Default -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      // Default tracking consent based on stored preference, otherwise default to denied
+      gtag('consent', 'default', {
+        analytics_storage: na6dIsAccepted ? 'granted' : 'denied',
+      });
+
+      gtag('js', new Date());
+      gtag('config', 'G-LQ6XFZ8938');
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LQ6XFZ8938"></script>
+
+    <!-- PostHog Analytics -->
+    <script>
+      !(function (t, e) {
+        var o, n, p, r;
+        e.__SV ||
+          (window.posthog && window.posthog.__loaded) ||
+          ((window.posthog = e),
+          (e._i = []),
+          (e.init = function (i, s, a) {
+            function g(t, e) {
+              var o = e.split('.');
+              (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                (t[e] = function () {
+                  t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+                }));
+            }
+            (((p = t.createElement('script')).type = 'text/javascript'),
+              (p.crossOrigin = 'anonymous'),
+              (p.async = !0),
+              (p.src =
+                s.api_host.replace('.i.posthog.com', '-assets.i.posthog.com') + '/static/array.js'),
+              (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r));
+            var u = e;
+            for (
+              void 0 !== a ? (u = e[a] = []) : (a = 'posthog'),
+                u.people = u.people || [],
+                u.toString = function (t) {
+                  var e = 'posthog';
+                  return ('posthog' !== a && (e += '.' + a), t || (e += ' (stub)'), e);
+                },
+                u.people.toString = function () {
+                  return u.toString(1) + '.people (stub)';
+                },
+                o =
+                  'rn sn init kn Qr wn Cn yn capture calculateEventProperties Rn register register_once register_for_session unregister unregister_for_session An getFeatureFlag getFeatureFlagPayload getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync Fn identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty On En createPersonProfile setInternalOrTestUser Ln gn $n opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing In debug Kr Pn getPageViewId captureTraceFeedback captureTraceMetric vn'.split(
+                    ' '
+                  ),
+                n = 0;
+              n < o.length;
+              n++
+            )
+              g(u, o[n]);
+            e._i.push([i, s, a]);
+          }),
+          (e.__SV = 1));
+      })(document, window.posthog || []);
+
+      posthog.init('phc_tqu8XZaHtWoESx4FjZpmHXWeD8QoQ78JRQWwuM5pwsdS', {
+        api_host: 'https://d.na6d.com',
+        ui_host: 'https://us.posthog.com',
+        defaults: '2026-05-30',
+        person_profiles: 'identified_only',
+        serviceVersion: '%%COMMIT_HASH%%',
+        cookieless_mode: 'on_reject',
+        // GDPR Compliance: If consent not accepted, start opted-out by default
+        opt_out_capturing_by_default: !na6dIsAccepted,
+      });
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="version" content="%%COMMIT_HASH%%" />
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}" />
+    <link rel="canonical" href="{{canonical}}" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="NA6D" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Google Fonts (Non-blocking Asynchronous Load) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Roboto+Mono:wght@400;500&display=swap"
+      />
+    </noscript>
+
+    <!-- Critical CSS Inlined (Above-the-Fold Styles) -->
+    <style>
+      :root {
+        --bg-base: #fff8e7;
+        --bg-card: #ffffff;
+        --bg-input: #ffffff;
+        --bg-terminal: #fffdf9;
+        --color-charcoal: #2a2b2a;
+        --color-blue: #4b9ad2;
+        --color-orange: #ff430a;
+        --color-shadow: #625f55;
+        --text-primary: #2a2b2a;
+        --text-secondary: #575857;
+        --text-muted: #808180;
+        --status-success: #10b981;
+        --status-warning: #f59e0b;
+        --status-error: #ef4444;
+        --border-color: #2a2b2a;
+        --border-width-thick: 3px;
+        --border-width-thin: 2px;
+        --font-sans: 'Jost', sans-serif;
+        --font-mono: 'Roboto Mono', monospace;
+        --transition-fast: 0.15s ease;
+        --transition-normal: 0.25s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem 1.5rem 3rem 1.5rem;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .warning-banner {
+        background: #fee2e2;
+        border: var(--border-width-thick) solid var(--color-charcoal);
+        color: var(--color-charcoal);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 4px 4px 0px var(--color-charcoal);
+      }
+
+      .site-header {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 1.5rem 0 2rem 0;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(42, 43, 42, 0.08);
+      }
+
+      .header-center {
+        display: flex;
+        justify-content: center;
+      }
+
+      .header-logo-link {
+        display: block;
+      }
+
+      .header-logo {
+        display: block;
+        height: auto;
+        width: 300px;
+        max-width: 100%;
+        border: none !important;
+        background: transparent !important;
+      }
+
+      .page-title-section {
+        text-align: left;
+        margin-bottom: 2.5rem;
+        border-bottom: var(--border-width-thin) solid var(--color-charcoal);
+        padding-bottom: 1.5rem;
+      }
+
+      .page-title {
+        font-family: var(--font-sans);
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      @media (max-width: 768px) {
+        .page-title {
+          font-size: 2rem;
+        }
+      }
+
+      .tab-nav {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .tab-btn {
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.8rem 1.8rem;
+        background: #ffffff;
+        border: var(--border-width-thick) solid var(--color-charcoal);
+        color: var(--text-primary);
+        border-radius: 0px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        box-shadow: 4px 4px 0px var(--color-charcoal);
+      }
+
+      .tab-btn:hover {
+        background: var(--color-blue);
+        color: #ffffff;
+      }
+
+      .tab-btn:active {
+        background: var(--color-orange);
+        color: #ffffff;
+      }
+
+      .tab-btn.active {
+        background: var(--color-orange);
+        color: #ffffff;
+      }
+
+      .layout-grid {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .panel {
+        display: none;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .panel.active {
+        display: flex;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: var(--border-width-thick) solid var(--color-charcoal);
+        border-radius: 0px;
+        padding: 2rem;
+        box-shadow: 6px 6px 0px var(--color-charcoal);
+        transition: var(--transition-normal);
+      }
+
+      .card-title {
+        margin-top: 0;
+        margin-bottom: 1.75rem;
+        font-size: 1.35rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: var(--border-width-thick) solid var(--color-charcoal);
+        padding-bottom: 1rem;
+        color: var(--text-primary);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 0.35rem 0.8rem;
+        border: var(--border-width-thin) solid var(--color-charcoal);
+        border-radius: 0px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .status-pill::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: currentColor;
+        border: 1px solid var(--color-charcoal);
+      }
+
+      .status-disconnected {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .status-connected {
+        background: #d1fae5;
+        color: #047857;
+      }
+
+      .stepper-step {
+        border: var(--border-width-thin) solid var(--color-charcoal);
+        background: var(--bg-card);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: opacity var(--transition-normal);
+      }
+
+      .stepper-step.inactive {
+        opacity: 0.35;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .stepper-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1rem;
+        border-bottom: var(--border-width-thin) solid var(--color-charcoal);
+        padding-bottom: 0.5rem;
+      }
+
+      .stepper-badge {
+        background: var(--color-orange);
+        color: #ffffff;
+        font-weight: 700;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: var(--border-width-thin) solid var(--color-charcoal);
+        box-shadow: 2px 2px 0px var(--color-charcoal);
+        font-size: 0.95rem;
+      }
+
+      .stepper-step.inactive .stepper-badge {
+        background: #e2e8f0;
+        color: var(--text-muted);
+      }
+
+      .stepper-title {
+        font-family: var(--font-sans);
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-primary);
+        margin: 0;
+      }
+
+      .btn {
+        font-family: var(--font-sans);
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.9rem 1.2rem;
+        border-radius: 0px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        border: var(--border-width-thick) solid var(--color-charcoal);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 4px 4px 0px var(--color-charcoal);
+      }
+
+      .btn-primary {
+        background-color: var(--color-blue);
+        color: #ffffff;
+      }
+
+      .device-info-box {
+        background: rgba(255, 248, 231, 0.5);
+        border: var(--border-width-thin) solid var(--color-charcoal);
+        border-radius: 0px;
+        padding: 1.25rem;
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--text-primary);
+        white-space: pre-wrap;
+        margin-bottom: 2rem;
+        box-shadow: 3px 3px 0px var(--color-charcoal);
+      }
+
+      .form-section {
+        margin-bottom: 2rem;
+        border-bottom: var(--border-width-thin) dashed rgba(42, 43, 42, 0.15);
+        padding-bottom: 1.5rem;
+      }
+
+      .form-section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.25rem;
+      }
+
+      @media (max-width: 640px) {
+        .form-row {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+
+      .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    </style>
+
+    {{head}}
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="site-header">
+        <div class="header-center">
+          <a href="https://na6d.com/" class="header-logo-link">
+            <img
+              src="logo.svg"
+              alt="NA6D Logo"
+              width="300"
+              height="126.89906347554631"
+              loading="eager"
+              fetchpriority="high"
+              class="header-logo"
+            />
+          </a>
+        </div>
+      </header>
+
+      {{content}}
+
+      <!-- Site Footer -->
+      <footer class="site-footer">
+        <div class="footer-links">
+          <span
+            >⚙️ Built by
+            <a href="https://na6d.com" target="_blank" rel="noopener noreferrer">NA6D</a></span
+          >
+          <span class="footer-separator">•</span>
+          <a href="https://na6d.com" target="_blank" rel="noopener noreferrer">Shop Hardware</a>
+          <span class="footer-separator">•</span>
+          <a
+            href="https://na6d.com/collections/accessories"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Accessories</a
+          >
+          <span class="footer-separator">•</span>
+          <a href="https://na6d.com/pages/contact" target="_blank" rel="noopener noreferrer"
+            >Contact Support</a
+          >
+          <span class="footer-separator">•</span>
+          <a
+            href="https://na6d.com/policies/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Privacy Policy</a
+          >
+          <span class="footer-separator">•</span>
+          <a
+            href="https://na6d.com/policies/terms-of-service"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Terms of Service</a
+          >
+          <span class="footer-separator">•</span>
+          <a href="#" id="open-cookie-settings">Cookie Settings</a>
+        </div>
+        <p class="footer-copyright">
+          &copy; 2025-2026 Nigel Armstrong. All rights reserved.
+          <span
+            class="footer-version"
+            style="display: block; opacity: 0.5; font-size: 0.85rem; margin-top: 0.25rem"
+          >
+            Version:
+            <a
+              href="https://github.com/legonigel/na6d-flash/commit/%%COMMIT_HASH%%"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >%%COMMIT_HASH%%</a
+            >
+          </span>
+        </p>
+        <details class="footer-license-details">
+          <summary>Open Source Licenses & Credits</summary>
+          <p>
+            This application utilizes the open-source
+            <a href="https://github.com/devanlai/webdfu" target="_blank" rel="noopener noreferrer"
+              >webdfu</a
+            >
+            library (ISC License) and
+            <a
+              href="https://github.com/eligrey/FileSaver.js"
+              target="_blank"
+              rel="noopener noreferrer"
+              >FileSaver.js</a
+            >
+            (MIT License).
+          </p>
+        </details>
+      </footer>
+    </div>
+
+    <!-- Cookie Consent Banner (Brutalist style) -->
+    <div id="consent-banner" class="consent-banner" style="display: none">
+      <div class="consent-banner-header">Telemetry & Cookies</div>
+      <div class="consent-banner-body">
+        We use analytics cookies to understand how people use the web flasher. Read our
+        <a href="https://na6d.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer"
+          >Privacy Policy</a
+        >
+        and
+        <a
+          href="https://na6d.com/policies/terms-of-service"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Terms of Service</a
+        >
+        for details.
+      </div>
+      <div class="consent-banner-actions">
+        <button id="consent-btn-decline" class="btn btn-secondary">Decline</button>
+        <button id="consent-btn-accept" class="btn btn-primary">Accept</button>
+      </div>
+    </div>
+
+    <!-- Cookie Consent Handler -->
+    <script>
+      (function () {
+        function getCookie(name) {
+          const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'));
+          return match ? decodeURIComponent(match[2].trim()) : null;
+        }
+
+        function setCookie(name, value, days) {
+          const maxAge = days * 24 * 60 * 60;
+          // Set cookie on wildcard .na6d.com domain only if we are on that domain or a subdomain
+          let domainAttr = '';
+          if (location.hostname.endsWith('na6d.com')) {
+            domainAttr = '; Domain=.na6d.com';
+          }
+          document.cookie =
+            name +
+            '=' +
+            value +
+            domainAttr +
+            '; Path=/; Max-Age=' +
+            maxAge +
+            '; SameSite=Lax; Secure';
+        }
+
+        function activateTracking() {
+          gtag('consent', 'update', {
+            analytics_storage: 'granted',
+          });
+          if (window.posthog) {
+            posthog.opt_in_capturing();
+          }
+        }
+
+        function deactivateTracking() {
+          gtag('consent', 'update', {
+            analytics_storage: 'denied',
+          });
+          if (window.posthog) {
+            posthog.opt_out_capturing();
+          }
+        }
+
+        function handleCountryCheck(countryCode) {
+          const banner = document.getElementById('consent-banner');
+          if (countryCode && !EU_COUNTRIES.includes(countryCode)) {
+            // Visitor is not in EU/UK, auto-accept and trigger tracking immediately
+            localStorage.setItem('na6d-cookies-consent', 'accepted');
+            setCookie('na6d_analytics_consent', 'accepted', 365);
+            activateTracking();
+            if (banner) banner.style.display = 'none';
+          } else {
+            // Visitor is in EU/UK (or unknown), display the consent banner
+            if (banner) banner.style.display = 'flex';
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const banner = document.getElementById('consent-banner');
+          const btnAccept = document.getElementById('consent-btn-accept');
+          const btnDecline = document.getElementById('consent-btn-decline');
+          const btnCookieSettings = document.getElementById('open-cookie-settings');
+
+          // Read the early-initialized consent state
+          const consent = na6dConsentState;
+
+          if (consent === 'accepted') {
+            activateTracking();
+            if (banner) banner.style.display = 'none';
+          } else if (consent === 'rejected') {
+            deactivateTracking();
+            if (banner) banner.style.display = 'none';
+          } else {
+            // No saved consent preference, check country code cookie
+            const country = getCookie('na6d-country');
+            const isDev =
+              location.hostname === 'localhost' ||
+              location.hostname === '127.0.0.1' ||
+              location.hostname.startsWith('192.168.');
+
+            if (isDev) {
+              // Dev site must always show the most compliant version (EU banner)
+              handleCountryCheck('GB');
+            } else if (country) {
+              handleCountryCheck(country);
+            } else {
+              // Fetch country asynchronously from a free geo IP API
+              fetch('https://ipapi.co/country/')
+                .then(function (res) {
+                  return res.text();
+                })
+                .then(function (text) {
+                  const detectedCountry = (text || '').trim().toUpperCase();
+                  if (detectedCountry) {
+                    setCookie('na6d-country', detectedCountry, 1); // Cache for 1 day
+                    handleCountryCheck(detectedCountry);
+                  } else {
+                    handleCountryCheck('GB'); // Fallback to safe EU behavior
+                  }
+                })
+                .catch(function (err) {
+                  console.warn('Geolocation check failed, defaulting to opt-in:', err);
+                  handleCountryCheck('GB'); // Fallback to safe EU behavior
+                });
+            }
+          }
+
+          if (btnAccept) {
+            btnAccept.addEventListener('click', function () {
+              localStorage.setItem('na6d-cookies-consent', 'accepted');
+              setCookie('na6d_analytics_consent', 'accepted', 365);
+              activateTracking();
+              if (banner) banner.style.display = 'none';
+            });
+          }
+
+          if (btnDecline) {
+            btnDecline.addEventListener('click', function () {
+              localStorage.setItem('na6d-cookies-consent', 'rejected');
+              setCookie('na6d_analytics_consent', 'rejected', 365);
+              deactivateTracking();
+              if (banner) banner.style.display = 'none';
+            });
+          }
+
+          if (btnCookieSettings) {
+            btnCookieSettings.addEventListener('click', function (e) {
+              e.preventDefault();
+              if (banner) {
+                banner.style.display = banner.style.display === 'flex' ? 'none' : 'flex';
+              }
+            });
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

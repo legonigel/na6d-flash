@@ -41,9 +41,66 @@ async function runBuild() {
     console.warn('Could not get git commit hash, defaulting to "dev":', e.message);
   }
 
-  // Copy static files
+  // 3. Assemble HTML pages from layouts and templates
+  const layoutPath = path.join('src', 'templates', 'layout.html');
+  const pagesDir = path.join('src', 'pages');
+
+  if (fs.existsSync(layoutPath) && fs.existsSync(pagesDir)) {
+    const layoutTemplate = fs.readFileSync(layoutPath, 'utf8');
+    const pageFiles = fs.readdirSync(pagesDir).filter((file) => file.endsWith('.html'));
+
+    pageFiles.forEach((file) => {
+      const pagePath = path.join(pagesDir, file);
+      const pageRawContent = fs.readFileSync(pagePath, 'utf8');
+
+      // Parse frontmatter and templates
+      let meta = {};
+      let body = pageRawContent;
+      const frontmatterMatch = pageRawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+      if (frontmatterMatch) {
+        const yamlStr = frontmatterMatch[1];
+        body = frontmatterMatch[2];
+        yamlStr.split(/\r?\n/).forEach((line) => {
+          const parts = line.split(':');
+          if (parts.length >= 2) {
+            const key = parts[0].trim();
+            const val = parts
+              .slice(1)
+              .join(':')
+              .trim()
+              .replace(/^['"]|['"]$/g, '');
+            meta[key] = val;
+          }
+        });
+      }
+
+      const headMatch = body.match(/<template\s+id="head">([\s\S]*?)<\/template>/i);
+      const contentMatch = body.match(/<template\s+id="content">([\s\S]*?)<\/template>/i);
+
+      const head = headMatch ? headMatch[1].trim() : '';
+      const pageContent = contentMatch ? contentMatch[1].trim() : '';
+
+      // Assemble page
+      let pageHtml = layoutTemplate;
+      pageHtml = pageHtml.replace(/\{\{title\}\}/g, meta.title || 'NA6D');
+      pageHtml = pageHtml.replace(/\{\{description\}\}/g, meta.description || '');
+      pageHtml = pageHtml.replace(/\{\{canonical\}\}/g, meta.canonical || '');
+      pageHtml = pageHtml.replace(/\{\{head\}\}/g, head || '');
+      pageHtml = pageHtml.replace(/\{\{content\}\}/g, pageContent || '');
+
+      // Replace version commit hash
+      pageHtml = pageHtml.replace(/%%COMMIT_HASH%%/g, commitHash);
+
+      // Write to dist/
+      fs.writeFileSync(path.join('dist', file), pageHtml, 'utf8');
+      console.log(`Assembled page: ${file}`);
+    });
+  } else {
+    console.warn('Layout template or pages directory not found, skipping HTML assembly.');
+  }
+
+  // Copy other static assets
   const staticFiles = [
-    'index.html',
     'favicon.png',
     'logo.svg',
     'favicon-96x96.png',
@@ -57,13 +114,7 @@ async function runBuild() {
   staticFiles.forEach((file) => {
     const srcPath = path.join('src', file);
     if (fs.existsSync(srcPath)) {
-      if (file === 'index.html') {
-        let content = fs.readFileSync(srcPath, 'utf8');
-        content = content.replace(/%%COMMIT_HASH%%/g, commitHash);
-        fs.writeFileSync(path.join('dist', file), content, 'utf8');
-      } else {
-        fs.copyFileSync(srcPath, path.join('dist', file));
-      }
+      fs.copyFileSync(srcPath, path.join('dist', file));
     }
   });
 
@@ -143,21 +194,20 @@ async function runBuild() {
 
 function generateSitemapAndRobots() {
   const baseUrl = 'https://flash.na6d.com';
-  const srcDir = 'src';
   const distDir = 'dist';
 
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
   }
 
-  // Find all .html files in src/
-  const files = fs.readdirSync(srcDir);
+  // Find all .html files in dist/
+  const files = fs.readdirSync(distDir);
   const htmlFiles = files.filter((file) => file.endsWith('.html'));
 
   let sitemapEntries = '';
 
   htmlFiles.forEach((file) => {
-    const filePath = path.join(srcDir, file);
+    const filePath = path.join(distDir, file);
     const stats = fs.statSync(filePath);
     const lastmod = stats.mtime.toISOString().split('T')[0];
 
